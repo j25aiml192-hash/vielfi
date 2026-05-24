@@ -24,33 +24,33 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? 'bg-bg/90 backdrop-blur-xl border-b border-border shadow-card'
-          : 'bg-transparent'
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-[#0A0B1A] border-b border-[#0A0B1A] shadow-md`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
           {/* Logo */}
           <NavLink to="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-gold to-yellow-500 flex items-center justify-center shadow-gold">
-              <span className="text-bg font-display font-bold text-sm">V</span>
+            <div className="w-6 h-6 rounded bg-white flex items-center justify-center">
+              <span className="text-[#0A0B1A] font-display font-bold text-xs">V</span>
             </div>
-            <span className="font-display font-bold text-lg text-white">
-              Veil<span className="text-gradient-gold">Fi</span>
+            <span className="font-display font-bold text-[17px] text-white tracking-wide" style={{ fontFamily: "'Playfair Display', serif" }}>
+              VeilFi
             </span>
           </NavLink>
 
-          {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-1">
+          {/* Desktop Links - Pill style */}
+          <div className="hidden md:flex items-center gap-2">
             {LINKS.map(({ to, label }) => (
               <NavLink
                 key={to}
                 to={to}
                 className={({ isActive }) =>
-                  `nav-link px-4 py-2 rounded-lg ${isActive ? 'text-gold bg-gold/5' : ''}`
+                  `text-xs font-bold px-4 py-1.5 rounded-full transition-all ${
+                    isActive
+                      ? 'bg-[#E39D37] text-[#1A1A1A] border border-[#E39D37]'
+                      : 'border border-[#E39D37] text-[#E39D37] hover:bg-[#E39D37]/10'
+                  }`
                 }
               >
                 {label}
@@ -58,18 +58,20 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Right: Wallet + Profile */}
-          <div className="hidden md:flex items-center gap-3">
-            <NavLink to="/profile" className="nav-link hover:text-gold">
+          {/* Right: Profile + Wallet */}
+          <div className="hidden md:flex items-center gap-4">
+            <NavLink to="/profile" className="text-[11px] uppercase tracking-wider font-bold text-white hover:text-[#E39D37] transition-colors">
               Profile
             </NavLink>
-            <WalletButton />
+            <div className="scale-90 origin-right">
+              <WalletButton />
+            </div>
           </div>
 
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen((p) => !p)}
-            className="md:hidden p-2 rounded-lg text-grey hover:text-white transition-colors"
+            className="md:hidden p-2 rounded-lg text-white hover:text-[#E39D37] transition-colors"
             aria-label="Toggle menu"
           >
             {mobileOpen ? (
@@ -87,25 +89,27 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-card border-b border-border animate-slide-up">
-          <div className="px-4 py-4 space-y-1">
+        <div className="md:hidden bg-[#0A0B1A] border-t border-white/10 animate-slide-up">
+          <div className="px-4 py-4 space-y-2 flex flex-col">
             {LINKS.map(({ to, label }) => (
               <NavLink
                 key={to}
                 to={to}
                 className={({ isActive }) =>
-                  `block px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                    isActive ? 'text-gold bg-gold/5' : 'text-grey hover:text-white hover:bg-white/5'
+                  `px-4 py-2 rounded-lg text-sm font-bold transition-colors inline-block text-center ${
+                    isActive
+                      ? 'bg-[#E39D37] text-[#1A1A1A] border border-[#E39D37]'
+                      : 'border border-[#E39D37] text-[#E39D37] hover:bg-[#E39D37]/10'
                   }`
                 }
               >
                 {label}
               </NavLink>
             ))}
-            <NavLink to="/profile" className="block px-4 py-3 rounded-xl text-sm font-medium text-grey hover:text-white hover:bg-white/5 transition-colors">
+            <NavLink to="/profile" className="block text-center px-4 py-2 rounded-lg text-sm font-bold text-white hover:text-[#E39D37] hover:bg-white/5 transition-colors">
               Profile
             </NavLink>
-            <div className="pt-2">
+            <div className="pt-2 flex justify-center">
               <WalletButton />
             </div>
           </div>
