@@ -1,0 +1,293 @@
+/* ============================================================
+   VeilFi Design Tokens + Global Styles
+   ============================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design Tokens ── */
+:root {
+  --bg:     #0A0A1A;
+  --card:   #111827;
+  --gold:   #D4AF37;
+  --indigo: #6366F1;
+  --teal:   #14F4C9;
+  --white:  #F8FAFC;
+  --grey:   #6B7280;
+  --border: #1F2937;
+}
+
+/* ── Base Reset ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--bg);
+  color: var(--white);
+  min-height: 100vh;
+}
+
+/* ── Typography ── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  line-height: 1.2;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--grey); }
+
+/* ── Selection ── */
+::selection { background: rgba(212,175,55,0.3); color: var(--white); }
+
+/* ============================================================
+   Component Layer
+   ============================================================ */
+
+@layer components {
+
+  /* ── Buttons ── */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm
+           bg-gold text-bg transition-all duration-200
+           hover:shadow-gold hover:scale-105 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm
+           border border-border text-white bg-transparent transition-all duration-200
+           hover:border-gold hover:text-gold hover:bg-gold/5 active:scale-95;
+  }
+
+  .btn-indigo {
+    @apply inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm
+           bg-indigo text-white transition-all duration-200
+           hover:shadow-indigo hover:scale-105 active:scale-95;
+  }
+
+  .btn-teal {
+    @apply inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm
+           bg-teal text-bg transition-all duration-200
+           hover:shadow-teal hover:scale-105 active:scale-95;
+  }
+
+  /* ── Cards ── */
+  .card {
+    @apply bg-card rounded-2xl border border-border p-6 shadow-card;
+  }
+
+  .card-hover {
+    @apply card transition-all duration-300
+           hover:border-gold/30 hover:shadow-gold hover:-translate-y-1;
+  }
+
+  .card-glass {
+    @apply rounded-2xl border border-white/10 p-6
+           bg-white/5 backdrop-blur-md shadow-card;
+  }
+
+  /* ── Inputs ── */
+  .input {
+    @apply w-full px-4 py-3 rounded-xl bg-card border border-border text-white
+           placeholder-grey text-sm transition-all duration-200
+           focus:outline-none focus:border-indigo focus:ring-1 focus:ring-indigo/30;
+  }
+
+  .select {
+    @apply input appearance-none cursor-pointer;
+  }
+
+  /* ── Badges ── */
+  .badge {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold;
+  }
+
+  .badge-gold   { @apply badge bg-gold/15 text-gold border border-gold/30; }
+  .badge-indigo { @apply badge bg-indigo/15 text-indigo border border-indigo/30; }
+  .badge-teal   { @apply badge bg-teal/15 text-teal border border-teal/30; }
+  .badge-grey   { @apply badge bg-grey/15 text-grey border border-grey/30; }
+
+  /* ── Section Headers ── */
+  .section-label {
+    @apply text-xs font-semibold tracking-widest text-gold uppercase;
+  }
+
+  .section-title {
+    @apply font-display text-3xl md:text-4xl font-bold text-white;
+  }
+
+  /* ── Dividers ── */
+  .divider {
+    @apply border-0 border-t border-border my-6;
+  }
+
+  /* ── Progress Bar ── */
+  .progress-track {
+    @apply w-full h-2 rounded-full bg-border overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-full rounded-full transition-all duration-700 ease-out;
+    background: linear-gradient(90deg, var(--gold), #f0c040);
+  }
+
+  .progress-fill-indigo {
+    @apply h-full rounded-full transition-all duration-700 ease-out;
+    background: linear-gradient(90deg, var(--indigo), #818CF8);
+  }
+
+  .progress-fill-teal {
+    @apply h-full rounded-full transition-all duration-700 ease-out;
+    background: linear-gradient(90deg, var(--teal), #5EEAD4);
+  }
+
+  /* ── Stat Cards ── */
+  .stat-card {
+    @apply card text-center;
+  }
+
+  .stat-value {
+    @apply font-display text-3xl font-bold text-gold;
+  }
+
+  .stat-label {
+    @apply text-sm text-grey mt-1;
+  }
+
+  /* ── Navigation ── */
+  .nav-link {
+    @apply text-grey text-sm font-medium transition-colors duration-200
+           hover:text-white relative;
+  }
+
+  .nav-link.active {
+    @apply text-gold;
+  }
+
+  /* ── Gradient Text ── */
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #D4AF37 0%, #F0C040 50%, #D4AF37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-indigo {
+    background: linear-gradient(135deg, #6366F1 0%, #A5B4FC 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-teal {
+    background: linear-gradient(135deg, #14F4C9 0%, #5EEAD4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Glow backgrounds ── */
+  .bg-indigo-glow {
+    background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99,102,241,0.25) 0%, transparent 70%);
+  }
+
+  .bg-gold-glow {
+    background: radial-gradient(ellipse 60% 40% at 50% 50%, rgba(212,175,55,0.1) 0%, transparent 70%);
+  }
+
+  /* ── Typewriter cursor ── */
+  .typewriter-cursor::after {
+    content: '|';
+    animation: blink 0.8s step-end infinite;
+    color: var(--teal);
+  }
+
+  /* ── Tab buttons ── */
+  .tab-btn {
+    @apply px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-grey;
+  }
+  .tab-btn.active {
+    @apply bg-card text-white border border-border shadow-card;
+  }
+  .tab-btn:not(.active) {
+    @apply hover:text-white;
+  }
+}
+
+/* ============================================================
+   Utility Animations
+   ============================================================ */
+
+@layer utilities {
+
+  .animate-fade-in    { animation: fadeIn 0.5s ease-out both; }
+  .animate-slide-up   { animation: slideUp 0.6s ease-out both; }
+  .animate-slide-right{ animation: slideRight 0.5s ease-out both; }
+  .animate-pulse-gold { animation: pulseGold 2s ease-in-out infinite; }
+  .animate-glow       { animation: glow 2s ease-in-out infinite alternate; }
+  .animate-shimmer    { animation: shimmer 2s linear infinite; }
+
+  .delay-100  { animation-delay: 100ms; }
+  .delay-200  { animation-delay: 200ms; }
+  .delay-300  { animation-delay: 300ms; }
+  .delay-400  { animation-delay: 400ms; }
+  .delay-500  { animation-delay: 500ms; }
+  .delay-700  { animation-delay: 700ms; }
+  .delay-1000 { animation-delay: 1000ms; }
+}
+
+/* ============================================================
+   Keyframes
+   ============================================================ */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulseGold {
+  0%, 100% { box-shadow: 0 0 20px rgba(212,175,55,0.3); }
+  50%       { box-shadow: 0 0 40px rgba(212,175,55,0.6); }
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 10px rgba(212,175,55,0.5); }
+  to   { text-shadow: 0 0 20px rgba(212,175,55,1), 0 0 40px rgba(212,175,55,0.5); }
+}
+
+@keyframes shimmer {
+  from { background-position: -200% center; }
+  to   { background-position:  200% center; }
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+@keyframes progressFill {
+  from { width: 0%; }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
