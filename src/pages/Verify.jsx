@@ -63,7 +63,12 @@ export default function Verify() {
     <div style={{ fontFamily: 'Inter, sans-serif', background: C.canvas, color: C.ink, minHeight: '100vh' }}>
       <main style={{ flex: 1, padding: '56px 64px', maxWidth: 1040, margin: '0 auto' }}>
 
-
+          <h1 style={{ fontSize: 40, fontWeight: 700, letterSpacing: '-0.04em', margin: '0 0 12px' }}>
+            Identity Verification
+          </h1>
+          <p style={{ fontSize: 16, color: C.secondary, lineHeight: 1.6, margin: '0 0 48px', maxWidth: 600 }}>
+            To comply with financial regulations and unlock full marketplace access, please complete your identity verification.
+          </p>
 
           {/* Step indicator */}
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 0, marginBottom: 56, position: 'relative' }}>
