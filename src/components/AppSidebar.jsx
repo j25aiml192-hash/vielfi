@@ -1,6 +1,7 @@
-﻿import { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { useNavigate, NavLink } from 'react-router-dom'
 import { useWallet } from '../context/WalletContext.jsx'
+import { useSidebar } from '../context/SidebarContext.jsx'
 
 /* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
    NAV SECTIONS  (NitiSetu-style)
@@ -98,7 +99,7 @@ const SECTIONS = [
    APP SIDEBAR  ΓÇö NitiSetu-inspired
 ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 export default function AppSidebar() {
-  const [expanded, setExpanded] = useState(false)
+  const { expanded, setExpanded } = useSidebar()
   const [filter,   setFilter]   = useState('')
   const { isConnected, shortAddress, disconnect, userRole } = useWallet()
   const navigate = useNavigate()
@@ -119,7 +120,7 @@ export default function AppSidebar() {
   return (
     <aside style={{
       width: W,
-      minHeight: '100vh',
+      height: '100vh',
       background: '#fff',
       borderRight: '1px solid #e8e6e2',
       display: 'flex',
@@ -127,9 +128,10 @@ export default function AppSidebar() {
       flexShrink: 0,
       transition: 'width 0.28s cubic-bezier(0.4,0,0.2,1)',
       overflow: 'hidden',
-      position: 'sticky',
-      top: 56,          /* below Navbar */
-      zIndex: 20,
+      position: 'fixed',
+      left: 0,
+      top: 0,
+      zIndex: 40,          /* above navbar (z-30) */
       fontFamily: 'Inter, sans-serif',
     }}>
 

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { WalletProvider } from './context/WalletContext.jsx'
 import { useWallet } from './context/WalletContext.jsx'
+import { SidebarProvider, useSidebar } from './context/SidebarContext.jsx'
 import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
 import AppSidebar from './components/AppSidebar.jsx'
@@ -83,20 +84,28 @@ function BackBtn() {
   return <button onClick={() => navigate(-1)} className="btn-secondary flex-1 justify-center">Go Back</button>
 }
 
-/* ΓöÇΓöÇ Layout that conditionally shows the sidebar ΓöÇΓöÇ */
+/* ── Layout that conditionally shows the sidebar ── */
 function AppLayout({ children }) {
-  const location = useLocation()
+  const location    = useLocation()
   const showSidebar = !NO_SIDEBAR.includes(location.pathname)
+  const { expanded } = useSidebar()
+
+  const SIDEBAR_W = expanded ? 264 : 60
+  const TRANSITION = 'padding-left 0.28s cubic-bezier(0.4,0,0.2,1)'
 
   return (
-    <div style={{ display:'flex', minHeight:'100vh' }}>
-      {/* NitiSetu-style sidebar ΓÇö hidden on Landing & Onboarding */}
+    <div style={{ minHeight:'100vh' }}>
+      {/* Fixed sidebar — sits outside flow so it doesn’t push content */}
       {showSidebar && <AppSidebar />}
 
-      {/* Main content column */}
-      <div style={{ flex:1, display:'flex', flexDirection:'column', minWidth:0 }}>
+      {/* Main column — shifts right via paddingLeft to stay clear of sidebar */}
+      <div style={{
+        paddingLeft: showSidebar ? SIDEBAR_W : 0,
+        transition: showSidebar ? TRANSITION : 'none',
+        display: 'flex', flexDirection: 'column', minHeight: '100vh',
+      }}>
         <Navbar />
-        <main style={{ flex:1 }}>
+        <main style={{ flex: 1 }}>
           {children}
         </main>
         <Footer />
@@ -109,7 +118,8 @@ function AppLayout({ children }) {
 export default function App() {
   return (
     <WalletProvider>
-      <BrowserRouter>
+      <SidebarProvider>
+        <BrowserRouter>
         <RoleWatcher />
         <AppLayout>
           <Routes>
@@ -133,7 +143,8 @@ export default function App() {
             <Route path="*"           element={<Navigate to="/" replace />} />
           </Routes>
         </AppLayout>
-      </BrowserRouter>
+        </BrowserRouter>
+      </SidebarProvider>
     </WalletProvider>
   )
 }

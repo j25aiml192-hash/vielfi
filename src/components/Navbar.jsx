@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import WalletButton from './WalletButton.jsx'
 import { useWallet } from '../context/WalletContext.jsx'
+import { useSidebar } from '../context/SidebarContext.jsx'
 
 /* ΓöÇΓöÇ Nav items for the slide-in drawer ΓöÇΓöÇ */
 const NAV_ITEMS = [
@@ -160,6 +161,12 @@ export default function Navbar() {
   const location = useLocation()
   const navigate = useNavigate()
   const { isConnected } = useWallet()
+  const { expanded } = useSidebar()
+
+  // Sidebar widths — must match AppSidebar constants
+  const SIDEBAR_COLLAPSED = 60
+  const SIDEBAR_EXPANDED  = 264
+  const sidebarW = expanded ? SIDEBAR_EXPANDED : SIDEBAR_COLLAPSED
 
   useEffect(() => setDrawerOpen(false), [location])
 
@@ -167,7 +174,11 @@ export default function Navbar() {
     <>
       <NavDrawer open={drawerOpen} onClose={()=>setDrawerOpen(false)} />
 
-      <nav style={{ position:'sticky',top:0,zIndex:30,background:'#fff',borderBottom:'1px solid #f0ede8',fontFamily:'Inter,sans-serif' }}>
+      <nav style={{
+        position:'sticky', top:0, zIndex:30,
+        background:'#fff', borderBottom:'1px solid #f0ede8',
+        fontFamily:'Inter,sans-serif',
+      }}>
         <div style={{ height:56,maxWidth:1440,margin:'0 auto',padding:'0 24px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:16 }}>
 
           {/* Left: Hamburger + Logo */}
