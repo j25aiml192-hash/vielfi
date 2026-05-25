@@ -188,7 +188,7 @@ export default function Navbar() {
           )}
 
           {/* Right: List a Loan + Notifications + Profile + Wallet */}
-          <div style={{ display:'flex',alignItems:'center',gap:14 }}>
+          <div style={{ display:'flex',alignItems:'center',gap:14,marginLeft:'auto' }}>
 
             {/* + List a Loan — visible when wallet connected */}
             {isConnected && (
