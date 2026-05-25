@@ -123,83 +123,151 @@ export default function ChatBot({ address }) {
       {open && (
         <div style={{
           position: 'fixed', bottom: 96, right: 28, zIndex: 9998,
-          width: 380, height: 520, borderRadius: 16,
-          background: '#fff', boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
+          width: 390, height: 560, borderRadius: 20,
+          background: '#fff',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.22), 0 0 0 1px rgba(201,149,42,0.12)',
           display: 'flex', flexDirection: 'column', overflow: 'hidden',
-          border: '1px solid #E5E7EB',
+          border: '1px solid rgba(201,149,42,0.18)',
+          animation: 'chatSlideIn 0.28s cubic-bezier(0.16,1,0.3,1)',
         }}>
-          {/* Header */}
+
+          {/* ── Header ── */}
           <div style={{
-            background: 'linear-gradient(135deg, #1A1A2E 0%, #16213E 60%, #0F3460 100%)',
-            padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 10,
+            background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+            padding: '16px 18px',
+            display: 'flex', alignItems: 'center', gap: 12,
+            borderBottom: '1px solid rgba(201,149,42,0.2)',
           }}>
+            {/* V logo */}
             <div style={{
-              width: 36, height: 36, borderRadius: 10,
+              width: 40, height: 40, borderRadius: 12, flexShrink: 0,
               background: 'linear-gradient(135deg, #c9952a, #e8c05a)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(201,149,42,0.4)',
+              boxShadow: '0 4px 12px rgba(201,149,42,0.45)',
             }}>
               <span style={{
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: 900, fontSize: 18,
-                color: '#fff', letterSpacing: '-0.04em',
+                fontFamily: 'Inter, sans-serif', fontWeight: 900,
+                fontSize: 20, color: '#fff', letterSpacing: '-0.04em',
                 lineHeight: 1, userSelect: 'none',
               }}>V</span>
             </div>
+
             <div style={{ flex: 1 }}>
-              <div style={{ color: '#fff', fontWeight: 700, fontSize: 14 }}>VeilFi AI</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
-                <span style={{ color: '#A0AEC0', fontSize: 11 }}>Online</span>
+              <div style={{ color: '#fff', fontWeight: 700, fontSize: 15, letterSpacing: '-0.02em' }}>VeilFi AI</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
+                <span style={{
+                  width: 7, height: 7, borderRadius: '50%',
+                  background: '#10B981', display: 'inline-block',
+                  boxShadow: '0 0 6px #10B981',
+                }} />
+                <span style={{ color: '#888', fontSize: 11 }}>Online · ZK Credit Intelligence</span>
               </div>
             </div>
+
             <button onClick={() => setOpen(false)} style={{
-              background: 'none', border: 'none', cursor: 'pointer', padding: 4,
-            }}>
-              <X size={16} color="#A0AEC0" />
+              width: 30, height: 30, borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.06)', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background 0.15s',
+            }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.14)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
+            >
+              <X size={14} color="#aaa" />
             </button>
           </div>
 
-          {/* Messages */}
+          {/* ── Messages area with doodle bg ── */}
           <div style={{
-            flex: 1, overflowY: 'auto', padding: '12px 14px',
-            display: 'flex', flexDirection: 'column', gap: 10,
-            background: '#F9FAFB',
+            flex: 1, overflowY: 'auto', padding: '16px 14px',
+            display: 'flex', flexDirection: 'column', gap: 12,
+            backgroundImage: 'url(/chat_doodle_bg.png)',
+            backgroundSize: '420px auto',
+            backgroundRepeat: 'repeat',
+            backgroundColor: '#fefefe',
+            backgroundBlendMode: 'multiply',
           }}>
             {messages.map((m, i) => (
               <div key={i} style={{
                 display: 'flex', flexDirection: 'column',
                 alignItems: m.role === 'user' ? 'flex-end' : 'flex-start',
               }}>
+                {/* Avatar row */}
                 <div style={{
-                  maxWidth: '82%', padding: '10px 13px', borderRadius: 12,
-                  fontSize: 13, lineHeight: 1.5, whiteSpace: 'pre-wrap',
-                  ...(m.role === 'user'
-                    ? { background: 'linear-gradient(135deg,#D4AF37,#B8960C)', color: '#fff',
-                        borderBottomRightRadius: 4 }
-                    : { background: '#fff', color: '#111827', border: '1px solid #E5E7EB',
-                        borderBottomLeftRadius: 4, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-                  ),
+                  display: 'flex', alignItems: 'flex-end', gap: 8,
+                  flexDirection: m.role === 'user' ? 'row-reverse' : 'row',
                 }}>
-                  {m.content}
+                  {/* Avatar */}
+                  <div style={{
+                    width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
+                    background: m.role === 'user'
+                      ? 'linear-gradient(135deg,#0a0a0a,#333)'
+                      : 'linear-gradient(135deg,#c9952a,#e8c05a)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 11, fontWeight: 800, color: '#fff',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                  }}>
+                    {m.role === 'user' ? 'U' : 'V'}
+                  </div>
+
+                  {/* Bubble */}
+                  <div style={{
+                    maxWidth: '76%', padding: '10px 14px', borderRadius: 14,
+                    fontSize: 13, lineHeight: 1.55, whiteSpace: 'pre-wrap',
+                    fontFamily: 'Inter, sans-serif',
+                    ...(m.role === 'user'
+                      ? {
+                          background: '#0a0a0a',
+                          color: '#fff',
+                          borderBottomRightRadius: 4,
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.22)',
+                        }
+                      : {
+                          background: 'rgba(255,255,255,0.88)',
+                          backdropFilter: 'blur(8px)',
+                          WebkitBackdropFilter: 'blur(8px)',
+                          color: '#111',
+                          border: '1px solid rgba(201,149,42,0.18)',
+                          borderBottomLeftRadius: 4,
+                          boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+                        }
+                    ),
+                  }}>
+                    {m.content}
+                  </div>
                 </div>
-                <span style={{ fontSize: 10, color: '#9CA3AF', marginTop: 3, paddingInline: 4 }}>
+
+                <span style={{
+                  fontSize: 10, color: '#aaa', marginTop: 4,
+                  paddingInline: 36,
+                }}>
                   {fmt(m.ts)}
                 </span>
               </div>
             ))}
 
+            {/* Typing indicator */}
             {loading && (
-              <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
                 <div style={{
-                  background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12,
-                  borderBottomLeftRadius: 4, padding: '10px 14px',
+                  width: 26, height: 26, borderRadius: '50%',
+                  background: 'linear-gradient(135deg,#c9952a,#e8c05a)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 11, fontWeight: 800, color: '#fff',
+                }}>V</div>
+                <div style={{
+                  background: 'rgba(255,255,255,0.9)',
+                  border: '1px solid rgba(201,149,42,0.2)',
+                  borderRadius: 14, borderBottomLeftRadius: 4,
+                  padding: '12px 16px',
                   display: 'flex', gap: 5, alignItems: 'center',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                 }}>
                   {[0,1,2].map(d => (
                     <span key={d} style={{
-                      width: 7, height: 7, borderRadius: '50%', background: '#D4AF37',
-                      animation: `bounce 1s ease-in-out ${d * 0.2}s infinite`,
+                      width: 7, height: 7, borderRadius: '50%',
+                      background: '#c9952a',
+                      animation: `bounce 1s ease-in-out ${d * 0.18}s infinite`,
                     }} />
                   ))}
                 </div>
@@ -208,30 +276,38 @@ export default function ChatBot({ address }) {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick replies */}
+          {/* ── Suggestion chips ── */}
           {suggestions.length > 0 && !loading && (
             <div style={{
-              padding: '6px 12px', background: '#F9FAFB',
+              padding: '8px 12px',
+              background: 'rgba(255,250,240,0.95)',
+              backdropFilter: 'blur(8px)',
               overflowX: 'auto', display: 'flex', gap: 6, flexWrap: 'nowrap',
-              borderTop: '1px solid #F3F4F6',
+              borderTop: '1px solid rgba(201,149,42,0.15)',
             }}>
               {suggestions.map((s, i) => (
                 <button key={i} onClick={() => send(s)} style={{
-                  whiteSpace: 'nowrap', padding: '5px 11px', borderRadius: 20,
-                  border: '1px solid #D4AF37', background: '#FEFCE8',
-                  color: '#92400E', fontSize: 11, fontWeight: 500, cursor: 'pointer',
-                  flexShrink: 0,
-                }}>
+                  whiteSpace: 'nowrap', padding: '6px 13px', borderRadius: 999,
+                  border: '1px solid rgba(201,149,42,0.4)',
+                  background: 'rgba(255,255,255,0.8)',
+                  color: '#7a5000', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                  flexShrink: 0, transition: 'background 0.15s, border-color 0.15s',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#fdf5e0'; e.currentTarget.style.borderColor = '#c9952a' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.8)'; e.currentTarget.style.borderColor = 'rgba(201,149,42,0.4)' }}
+                >
                   {s}
                 </button>
               ))}
             </div>
           )}
 
-          {/* Input */}
+          {/* ── Input bar ── */}
           <div style={{
-            padding: '10px 12px', display: 'flex', gap: 8, background: '#fff',
-            borderTop: '1px solid #E5E7EB',
+            padding: '12px 14px', display: 'flex', gap: 8,
+            background: '#fff',
+            borderTop: '1px solid rgba(201,149,42,0.12)',
+            boxShadow: '0 -2px 12px rgba(0,0,0,0.04)',
           }}>
             <input
               value={input}
@@ -239,25 +315,32 @@ export default function ChatBot({ address }) {
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
               placeholder="Ask VeilFi AI..."
               style={{
-                flex: 1, padding: '9px 13px', borderRadius: 10,
-                border: '1px solid #E5E7EB', fontSize: 13, outline: 'none',
-                background: '#F9FAFB',
+                flex: 1, padding: '10px 14px', borderRadius: 12,
+                border: '1px solid #e8e8e8', fontSize: 13, outline: 'none',
+                background: '#f9f9f9', fontFamily: 'Inter, sans-serif',
+                transition: 'border-color 0.15s',
               }}
+              onFocus={e => e.target.style.borderColor = '#c9952a'}
+              onBlur={e => e.target.style.borderColor = '#e8e8e8'}
             />
             <button
               onClick={() => send()}
               disabled={!input.trim() || loading}
               style={{
-                width: 38, height: 38, borderRadius: 10, border: 'none',
-                background: input.trim() && !loading ? 'linear-gradient(135deg,#D4AF37,#B8960C)' : '#E5E7EB',
+                width: 40, height: 40, borderRadius: 12, border: 'none',
+                background: input.trim() && !loading ? '#0a0a0a' : '#e8e8e8',
                 cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'background 0.2s',
+                transition: 'background 0.2s, transform 0.15s',
+                flexShrink: 0,
               }}
+              onMouseEnter={e => { if (input.trim() && !loading) e.currentTarget.style.transform = 'scale(1.06)' }}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             >
               {loading ? <Loader size={16} color="#9CA3AF" /> : <Send size={16} color={input.trim() ? '#fff' : '#9CA3AF'} />}
             </button>
           </div>
+
         </div>
       )}
 
@@ -270,6 +353,10 @@ export default function ChatBot({ address }) {
           0%   { box-shadow: 0 0 0 0 rgba(201,149,42,0.55); }
           70%  { box-shadow: 0 0 0 18px rgba(201,149,42,0); }
           100% { box-shadow: 0 0 0 0 rgba(201,149,42,0); }
+        }
+        @keyframes chatSlideIn {
+          from { opacity: 0; transform: translateY(16px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
         }
       `}</style>
     </>
