@@ -4,11 +4,7 @@ import WalletButton from './WalletButton.jsx'
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [profileOpen, setProfileOpen] = useState(false)
-  const profileRef = useRef(null)
-  const location   = useLocation()
-  const navigate   = useNavigate()
-  const { userRole, clearRole, isConnected, shortAddress } = useWallet()
+  const location = useLocation()
 
   useEffect(() => setMobileOpen(false), [location])
 
@@ -26,7 +22,7 @@ export default function Navbar() {
           </span>
         </NavLink>
 
-        {/* Right: Profile + Wallet */}
+        {/* Right: Profile + Wallet (desktop) */}
         <div className="hidden md:flex items-center gap-md">
           <NavLink
             to="/profile"
@@ -39,7 +35,7 @@ export default function Navbar() {
 
         {/* Mobile hamburger */}
         <button
-          onClick={() => setMobileOpen((p) => !p)}
+          onClick={() => setMobileOpen(p => !p)}
           className="md:hidden p-2 rounded-lg text-secondary hover:text-primary transition-colors"
           aria-label="Toggle menu"
         >
@@ -55,7 +51,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu — Profile + Wallet only */}
       {mobileOpen && (
         <div className="md:hidden bg-canvas border-t border-hairline animate-slide-up">
           <div className="px-lg py-md space-y-xs flex flex-col max-w-[1440px] mx-auto">

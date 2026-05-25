@@ -271,9 +271,9 @@ export default function Landing() {
                 <VeilFiCard width={Math.min(500, typeof window !== 'undefined' ? window.innerWidth * 0.8 : 460)} />
                 {/* Floating chips */}
                 {[
-                  { label: 'Credit Score', val: '762',       color: '#c9952a', top: '-12%', right: '-16%', left: 'auto', delay: '0s' },
-                  { label: 'TVL',          val: '₹100Cr+',   color: '#0a0a0a', top: '72%',  left: '-16%',  right: 'auto', delay: '1s' },
-                  { label: 'ZK Proof',     val: '✓ Live',    color: '#1ea64a', top: '42%',  right: '-20%', left: 'auto', delay: '0.5s' },
+                  { label: 'Credit Score', val: '762',              color: '#c9952a', top: '-12%', right: '-16%', left: 'auto', delay: '0s' },
+                  { label: 'TVL',          val: '\u20b9100Cr+',      color: '#0a0a0a', top: '72%',  left: '-16%',  right: 'auto', delay: '1s' },
+                  { label: 'ZK Proof',     val: '\u2713 Live',       color: '#1ea64a', top: '42%',  right: '-20%', left: 'auto', delay: '0.5s' },
                 ].map(({ label, val, color, top, right, left, delay }) => (
                   <div key={label} style={{
                     position: 'absolute', top, right, left,
@@ -313,9 +313,9 @@ export default function Landing() {
         opacity: tickerVis ? 1 : 0, transform: tickerVis ? 'none' : 'translateY(16px)',
       }}>
         <div style={{ display: 'inline-flex', gap: '3rem', alignItems: 'center', padding: '13px 0', animation: 'marquee 22s linear infinite' }}>
-          {['SECURE · TRANSPARENT · DECENTRALIZED','₹100CR+ TVL','AUDITED BY CERTIK','ZERO KNOWLEDGE PROOFS',
+          {['SECURE · TRANSPARENT · DECENTRALIZED','\u20B9100CR+ TVL','AUDITED BY CERTIK','ZERO KNOWLEDGE PROOFS',
             '300M+ UNDERBANKED INDIANS','ZK CREDIT IDENTITY','SECURE · TRANSPARENT · DECENTRALIZED',
-            '₹100CR+ TVL','AUDITED BY CERTIK','ZERO KNOWLEDGE PROOFS','300M+ UNDERBANKED INDIANS','ZK CREDIT IDENTITY',
+            '\u20B9100CR+ TVL','AUDITED BY CERTIK','ZERO KNOWLEDGE PROOFS','300M+ UNDERBANKED INDIANS','ZK CREDIT IDENTITY',
           ].map((t, i) => (
             <span key={i} style={{ fontFamily: 'JetBrains Mono', fontSize: '0.7rem', letterSpacing: '0.18em',
               color: i % 3 === 1 ? '#e8c05a' : 'rgba(255,255,255,0.62)', flexShrink: 0 }}>{t}</span>
