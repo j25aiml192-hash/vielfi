@@ -1,21 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
-import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import WalletButton from './WalletButton.jsx'
-import { useWallet } from '../context/WalletContext.jsx'
-
-const LINKS = [
-  { to: '/feed',      label: 'Markets' },
-  { to: '/verify',    label: 'Lending' },
-  { to: '/circles',   label: 'Borrowing' },
-  { to: '/dashboard', label: 'Governance' },
-]
-
-/* ── Role badge config ── */
-const ROLE_META = {
-  borrower: { icon: '🏦', label: 'Borrower', cls: 'badge-gold' },
-  lender:   { icon: '💰', label: 'Lender',   cls: 'badge-teal' },
-  both:     { icon: '🔄', label: 'Both',      cls: 'badge-indigo' },
-}
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -40,25 +25,6 @@ export default function Navbar() {
             VeilFi
           </span>
         </NavLink>
-
-        {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-lg">
-          {LINKS.map(({ to, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `text-sm font-medium transition-opacity ${
-                  isActive
-                    ? 'text-primary'
-                    : 'text-secondary hover:opacity-70'
-                }`
-              }
-            >
-              {label}
-            </NavLink>
-          ))}
-        </div>
 
         {/* Right: Profile + Wallet */}
         <div className="hidden md:flex items-center gap-md">
@@ -93,21 +59,6 @@ export default function Navbar() {
       {mobileOpen && (
         <div className="md:hidden bg-canvas border-t border-hairline animate-slide-up">
           <div className="px-lg py-md space-y-xs flex flex-col max-w-[1440px] mx-auto">
-            {LINKS.map(({ to, label }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) =>
-                  `px-md py-sm rounded-lg text-sm font-medium transition-colors inline-block ${
-                    isActive
-                      ? 'bg-primary text-on-primary'
-                      : 'text-secondary hover:text-primary hover:bg-surface-container-low'
-                  }`
-                }
-              >
-                {label}
-              </NavLink>
-            ))}
             <NavLink
               to="/profile"
               className="px-md py-sm rounded-lg text-sm font-medium text-secondary hover:text-primary hover:bg-surface-container-low transition-colors"
