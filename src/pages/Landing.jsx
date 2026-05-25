@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+﻿import { useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWallet } from '../context/WalletContext.jsx'
 
-/* ── Scroll-reveal hook ── */
+/* ΓöÇΓöÇ Scroll-reveal hook ΓöÇΓöÇ */
 function useScrollReveal(threshold = 0.12) {
   const ref = useRef(null)
   const [visible, setVisible] = useState(false)
@@ -15,7 +15,7 @@ function useScrollReveal(threshold = 0.12) {
   return [ref, visible]
 }
 
-/* ── Animated counter ── */
+/* ΓöÇΓöÇ Animated counter ΓöÇΓöÇ */
 function CountUp({ end, prefix = '', suffix = '', duration = 2000 }) {
   const [val, setVal] = useState(0)
   const ref     = useRef(null)
@@ -39,7 +39,7 @@ function CountUp({ end, prefix = '', suffix = '', duration = 2000 }) {
   return <span ref={ref}>{prefix}{val.toLocaleString('en-IN')}{suffix}</span>
 }
 
-/* ── Premium VeilFi Card ── */
+/* ΓöÇΓöÇ Premium VeilFi Card ΓöÇΓöÇ */
 function VeilFiCard({ width = 500, tiltX = 0, tiltY = -6 }) {
   return (
     <div style={{
@@ -86,7 +86,7 @@ function VeilFiCard({ width = 500, tiltX = 0, tiltY = -6 }) {
   )
 }
 
-/* ── Neon Network SVG ── */
+/* ΓöÇΓöÇ Neon Network SVG ΓöÇΓöÇ */
 function NetworkViz() {
   const lines = [
     [190,142,80,60],[190,142,310,55],[190,142,50,180],[190,142,330,190],
@@ -129,9 +129,9 @@ function NetworkViz() {
   )
 }
 
-/* ════════════════════════════════════════════
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
    LANDING PAGE
-════════════════════════════════════════════ */
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 export default function Landing() {
   const navigate = useNavigate()
   const { isConnected, userRole, connect } = useWallet()
@@ -179,9 +179,9 @@ export default function Landing() {
   return (
     <div style={{ overflowX: 'hidden', background: '#fff', fontFamily: 'Inter, sans-serif' }}>
 
-      {/* ══════════════════════════════════════
-          HERO — golden ratio layout
-      ══════════════════════════════════════ */}
+      {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+          HERO ΓÇö golden ratio layout
+      ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
       <section
         ref={heroRef}
         onMouseMove={handleMouseMove}
@@ -201,7 +201,7 @@ export default function Landing() {
         }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 48 }}>
 
-            {/* Left — 38.2% */}
+            {/* Left ΓÇö 38.2% */}
             <div style={{ flex: '0 1 380px', display: 'flex', flexDirection: 'column', gap: 20, textAlign: 'left' }}>
               <p className="animate-fade-in" style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.68rem', fontWeight: 500,
                 letterSpacing: '0.26em', textTransform: 'uppercase', color: '#b8913b', animationFillMode: 'both' }}>
@@ -260,7 +260,7 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* Right — 61.8% card */}
+            {/* Right ΓÇö 61.8% card */}
             <div style={{ flex: '1 1 320px', display: 'flex', alignItems: 'center', justifyContent: 'center', perspective: '1000px' }}>
               <div style={{ position: 'relative', transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
                 transformStyle: 'preserve-3d', transition: 'transform 0.18s ease-out' }}>
@@ -303,9 +303,9 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
+      {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
           MARQUEE TICKER
-      ══════════════════════════════════════ */}
+      ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
       <div ref={tickerRef} style={{
         background: '#100c04', overflow: 'hidden', whiteSpace: 'nowrap',
         borderTop: '1px solid rgba(212,175,55,0.18)', borderBottom: '1px solid rgba(212,175,55,0.18)',
@@ -323,9 +323,9 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* ══════════════════════════════════════
-          HOW VEILFI WORKS — Lilac block
-      ══════════════════════════════════════ */}
+      {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+          HOW VEILFI WORKS ΓÇö Lilac block
+      ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
       <section ref={howRef} style={{
         padding: '40px 24px 0', maxWidth: 1200, margin: '0 auto',
         transition: 'opacity 1s, transform 1s',
@@ -340,9 +340,9 @@ export default function Landing() {
           {/* 3 step cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
             {[
-              { n: '01', title: 'Verify Identity',  body: 'Connect your digital identity and traditional financial records securely. We use Zero-Knowledge proofs to ensure your raw data never leaves your device.', icon: '🔐' },
-              { n: '02', title: 'Generate Score',    body: 'Our decentralised credit network aggregates your on-chain and off-chain data to generate a verifiable VeilFi Credit Score, recognised across DeFi protocols.', icon: '📊' },
-              { n: '03', title: 'Access Liquidity',  body: 'Use your credit score to access undercollateralised loans from liquidity pools. Better scores unlock higher limits and lower interest rates instantly.', icon: '⚡' },
+              { n: '01', title: 'Verify Identity',  body: 'Connect your digital identity and traditional financial records securely. We use Zero-Knowledge proofs to ensure your raw data never leaves your device.', icon: '≡ƒöÉ' },
+              { n: '02', title: 'Generate Score',    body: 'Our decentralised credit network aggregates your on-chain and off-chain data to generate a verifiable VeilFi Credit Score, recognised across DeFi protocols.', icon: '≡ƒôè' },
+              { n: '03', title: 'Access Liquidity',  body: 'Use your credit score to access undercollateralised loans from liquidity pools. Better scores unlock higher limits and lower interest rates instantly.', icon: 'ΓÜí' },
             ].map(({ n, title, body, icon }, i) => (
               <div key={n} style={{ background: '#fff', borderRadius: 16, padding: '24px 22px', border: '1px solid rgba(0,0,0,0.05)',
                 display: 'flex', flexDirection: 'column', gap: 12, transition: 'transform 0.25s, box-shadow 0.25s', cursor: 'default' }}
@@ -360,16 +360,16 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          INDIA'S CREDIT GAP — Lime block
-      ══════════════════════════════════════ */}
+      {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+          INDIA'S CREDIT GAP ΓÇö Lime block
+      ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
       <section ref={gapRef} style={{
         padding: '32px 24px 0', maxWidth: 1200, margin: '0 auto',
         transition: 'opacity 1s, transform 1s',
         opacity: gapVis ? 1 : 0, transform: gapVis ? 'none' : 'translateY(60px)',
       }}>
         <div style={{ background: '#d6ebb0', borderRadius: 24, padding: 'clamp(28px, 4vw, 48px)', display: 'flex', flexWrap: 'wrap', gap: 40, alignItems: 'center' }}>
-          {/* Left — text */}
+          {/* Left ΓÇö text */}
           <div style={{ flex: '1 1 280px', display: 'flex', flexDirection: 'column', gap: 16 }}>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '0.62rem', fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(0,50,0,0.45)', margin: 0 }}>India's Credit Gap</p>
             <p style={{ fontSize: 'clamp(0.9rem, 1.8vw, 1.05rem)', color: 'rgba(0,40,0,0.70)', lineHeight: 1.72, margin: 0 }}>
@@ -387,16 +387,16 @@ export default function Landing() {
               <svg width={14} height={14} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
             </button>
           </div>
-          {/* Right — neon network */}
+          {/* Right ΓÇö neon network */}
           <div style={{ flex: '1 1 260px', display: 'flex', justifyContent: 'center' }}>
             <NetworkViz />
           </div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          CTA — magenta button (matches screenshot)
-      ══════════════════════════════════════ */}
+      {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+          CTA ΓÇö magenta button (matches screenshot)
+      ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
       <section ref={ctaRef} style={{
         padding: '72px 24px 80px', maxWidth: 1200, margin: '0 auto', textAlign: 'center',
         borderTop: '1px solid #ececec', marginTop: 40,
