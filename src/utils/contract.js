@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+﻿import { ethers } from 'ethers'
 
 export const SEPOLIA_CHAIN_ID = 11155111
 export const SEPOLIA_CHAIN_ID_HEX = '0xaa36a7'
@@ -351,4 +351,3 @@ export const parseEth = (eth) => ethers.parseEther(String(eth || '0'))
 
 export const shortAddr = (addr) =>
   addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : ''
-

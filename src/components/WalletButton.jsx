@@ -1,4 +1,4 @@
-import { useWallet } from '../context/WalletContext.jsx'
+﻿import { useWallet } from '../context/WalletContext.jsx'
 
 export default function WalletButton({ size = 'md' }) {
   const { address, shortAddress, connecting, error, connect, disconnect, isConnected } = useWallet()

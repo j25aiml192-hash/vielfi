@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import ProgressBar from '../components/ProgressBar.jsx'
 import TierBadge from '../components/TierBadge.jsx'
@@ -9,7 +9,7 @@ import { useWallet } from '../context/WalletContext.jsx'
 const formatINR = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
 
-/* ── Mock loans by ID ── */
+/* ΓöÇΓöÇ Mock loans by ID ΓöÇΓöÇ */
 const LOANS = {
   '1': {
     id: '1',
@@ -25,7 +25,7 @@ const LOANS = {
     daysLeft: 5,
     story: `Rahul has been running street food stalls in Delhi's Chandni Chowk for 8 years. Starting with a single cart, he now operates 3 stalls employing 6 people from his village.
 
-The ₹2L he's requesting will help him open a 4th stall near Connaught Place—an area with 3x the foot traffic. His monthly UPI collections average ₹2.1L across stalls, and he's never missed a payment in his financial history.
+The Γé╣2L he's requesting will help him open a 4th stall near Connaught PlaceΓÇöan area with 3x the foot traffic. His monthly UPI collections average Γé╣2.1L across stalls, and he's never missed a payment in his financial history.
 
 "I have a waiting list of hungry customers but no space. This loan will create 2 more jobs and let me serve 200 more people daily."`,
     sbt: {
@@ -55,9 +55,9 @@ The ₹2L he's requesting will help him open a 4th stall near Connaught Place—
     interestRate: 9,
     lenders: 14,
     daysLeft: 12,
-    story: `Priya is a UI/UX designer working with international clients in the US, UK, and Singapore. She's been freelancing for 5 years and earned ₹42L last year through Toptal and direct contracts.
+    story: `Priya is a UI/UX designer working with international clients in the US, UK, and Singapore. She's been freelancing for 5 years and earned Γé╣42L last year through Toptal and direct contracts.
 
-The ₹3.5L she needs will upgrade her MacBook Pro and Wacom Cintiq—essential tools that directly impact client deliverables. Her rental payments in Koramangala have been perfect for 4 years.
+The Γé╣3.5L she needs will upgrade her MacBook Pro and Wacom CintiqΓÇöessential tools that directly impact client deliverables. Her rental payments in Koramangala have been perfect for 4 years.
 
 "My old laptop crashes during large Figma files. Better tools = better output = higher rates. This is the most obvious ROI I can show."`,
     sbt: {
@@ -95,8 +95,8 @@ export default function LoanDetail() {
     e.preventDefault()
     if (!isConnected) { connect(); return }
     const amt = Number(amount)
-    if (!amt || amt < 1000) { setError('Minimum ₹1,000'); return }
-    if (amt > remaining)    { setError(`Maximum ₹${remaining.toLocaleString('en-IN')}`); return }
+    if (!amt || amt < 1000) { setError('Minimum Γé╣1,000'); return }
+    if (amt > remaining)    { setError(`Maximum Γé╣${remaining.toLocaleString('en-IN')}`); return }
     setError('')
     setLoading(true)
     try {
@@ -116,7 +116,7 @@ export default function LoanDetail() {
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-secondary mb-8">
           <button onClick={() => navigate('/feed')} className="hover:text-primary transition-colors">
-            ← Marketplace
+            ΓåÉ Marketplace
           </button>
           <span>/</span>
           <span className="text-primary">{loan.borrowerName}</span>
@@ -137,10 +137,10 @@ export default function LoanDetail() {
                 <span className="badge badge-indigo">{loan.purpose}</span>
               </div>
               <div className="flex flex-wrap gap-4 text-sm text-secondary">
-                <span>📅 {loan.daysLeft} days remaining</span>
-                <span>👥 {loan.lenders} lenders</span>
-                <span>📈 {loan.interestRate}% APR</span>
-                <span>📆 {loan.duration} months</span>
+                <span>≡ƒôà {loan.daysLeft} days remaining</span>
+                <span>≡ƒæÑ {loan.lenders} lenders</span>
+                <span>≡ƒôê {loan.interestRate}% APR</span>
+                <span>≡ƒôå {loan.duration} months</span>
               </div>
             </div>
 
@@ -228,7 +228,7 @@ export default function LoanDetail() {
             {/* Fund form */}
             {success ? (
               <div className="card border border-semantic-success/40 bg-semantic-success/5 text-center py-8">
-                <div className="text-4xl mb-3">🎉</div>
+                <div className="text-4xl mb-3">≡ƒÄë</div>
                 <h3 className="font-display font-bold text-primary text-xl mb-2">Funded!</h3>
                 <p className="text-secondary text-sm mb-4">
                   Your {formatINR(Number(amount))} contribution was submitted to the Ethereum Sepolia network.
@@ -244,7 +244,7 @@ export default function LoanDetail() {
                 <div>
                   <label className="text-sm text-secondary mb-2 block">Amount (INR)</label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary font-semibold">₹</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary font-semibold">Γé╣</span>
                     <input
                       type="number"
                       placeholder="10,000"
@@ -303,12 +303,12 @@ export default function LoanDetail() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                       </svg>
-                      Processing…
+                      ProcessingΓÇª
                     </>
                   ) : isConnected ? 'Fund Now' : 'Connect & Fund'}
                 </button>
                 <p className="text-xs text-secondary text-center">
-                  Secured by Ethereum Sepolia smart contracts · Non-custodial
+                  Secured by Ethereum Sepolia smart contracts ┬╖ Non-custodial
                 </p>
               </form>
             )}

@@ -1,10 +1,10 @@
-import TierBadge from './TierBadge.jsx'
+﻿import TierBadge from './TierBadge.jsx'
 import ProgressBar from './ProgressBar.jsx'
 
 /**
- * SBTCard — Soul-Bound Token identity card
- * @prop {object} sbt — { name, tier, score, wallet, avatar, tagline, signals }
- * @prop {string} size — 'sm' | 'md' | 'lg'
+ * SBTCard ΓÇö Soul-Bound Token identity card
+ * @prop {object} sbt ΓÇö { name, tier, score, wallet, avatar, tagline, signals }
+ * @prop {string} size ΓÇö 'sm' | 'md' | 'lg'
  */
 
 const TIER_SCORES = {
@@ -100,7 +100,7 @@ export default function SBTCard({
                 key={signal}
                 className={`badge text-xs ${verified ? 'badge-teal' : 'badge-grey opacity-50'}`}
               >
-                {verified ? '✓' : '—'} {signal.toUpperCase()}
+                {verified ? 'Γ£ô' : 'ΓÇö'} {signal.toUpperCase()}
               </span>
             ))}
           </div>

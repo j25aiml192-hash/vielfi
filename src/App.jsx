@@ -13,12 +13,14 @@ import Profile from './pages/Profile.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import LoanDetail from './pages/LoanDetail.jsx'
 import Circles from './pages/Circles.jsx'
+import Settings from './pages/Settings.jsx'
+import ChatBot from './components/ChatBot.jsx'
 
-/* ── Pages that should NOT have the sidebar ── */
+/* ΓöÇΓöÇ Pages that should NOT have the sidebar ΓöÇΓöÇ */
 const NO_SIDEBAR = ['/', '/onboarding']
 
 /**
- * RoleWatcher — inside BrowserRouter so useNavigate works.
+ * RoleWatcher ΓÇö inside BrowserRouter so useNavigate works.
  */
 function RoleWatcher() {
   const { justConnected, clearJustConnected, userRole } = useWallet()
@@ -38,7 +40,7 @@ function RoleWatcher() {
   return null
 }
 
-/* ── Borrower guard ── */
+/* ΓöÇΓöÇ Borrower guard ΓöÇΓöÇ */
 function BorrowerGuard({ children }) {
   const { isConnected, userRole, isBorrower } = useWallet()
   const navigate = useNavigate()
@@ -48,7 +50,7 @@ function BorrowerGuard({ children }) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="card max-w-md text-center border border-amber-500/30 bg-amber-500/5">
-          <div className="text-4xl mb-4">🏦</div>
+          <div className="text-4xl mb-4">≡ƒÅª</div>
           <h2 className="font-display font-bold text-white text-xl mb-3">Borrower Mode Required</h2>
           <p className="text-grey text-sm mb-6">
             You're currently set as a <strong className="text-teal">Lender</strong>.
@@ -80,14 +82,14 @@ function BackBtn() {
   return <button onClick={() => navigate(-1)} className="btn-secondary flex-1 justify-center">Go Back</button>
 }
 
-/* ── Layout that conditionally shows the sidebar ── */
+/* ΓöÇΓöÇ Layout that conditionally shows the sidebar ΓöÇΓöÇ */
 function AppLayout({ children }) {
   const location = useLocation()
   const showSidebar = !NO_SIDEBAR.includes(location.pathname)
 
   return (
     <div style={{ display:'flex', minHeight:'100vh' }}>
-      {/* NitiSetu-style sidebar — hidden on Landing & Onboarding */}
+      {/* NitiSetu-style sidebar ΓÇö hidden on Landing & Onboarding */}
       {showSidebar && <AppSidebar />}
 
       {/* Main content column */}
@@ -97,6 +99,7 @@ function AppLayout({ children }) {
           {children}
         </main>
         <Footer />
+        <ChatBot />
       </div>
     </div>
   )
@@ -109,16 +112,17 @@ export default function App() {
         <RoleWatcher />
         <AppLayout>
           <Routes>
-            {/* Public — no sidebar */}
+            {/* Public ΓÇö no sidebar */}
             <Route path="/"           element={<Landing />} />
             <Route path="/onboarding" element={<Onboarding />} />
 
-            {/* App pages — with sidebar */}
+            {/* App pages ΓÇö with sidebar */}
             <Route path="/feed"       element={<Feed />} />
             <Route path="/loan/:id"   element={<LoanDetail />} />
             <Route path="/profile"    element={<Profile />} />
             <Route path="/circles"    element={<Circles />} />
             <Route path="/dashboard"  element={<Dashboard />} />
+            <Route path="/settings"   element={<Settings />} />
 
             {/* Borrower-guided */}
             <Route path="/verify"     element={<BorrowerGuard><Verify /></BorrowerGuard>} />

@@ -1,17 +1,17 @@
-import { useNavigate } from 'react-router-dom'
+﻿import { useNavigate } from 'react-router-dom'
 import { useWallet } from '../context/WalletContext.jsx'
 
-/* ── Role config ── */
+/* ΓöÇΓöÇ Role config ΓöÇΓöÇ */
 const ROLES = [
   {
     id:    'borrower',
-    icon:  '🏦',
+    icon:  '≡ƒÅª',
     title: 'I want to Borrow',
     desc:  'Get a credit identity from your UPI, GST, and rental history. List loan requests and get funded by the community.',
     benefits: [
       'No CIBIL required',
       'UPI history is enough',
-      '12–30% APR',
+      '12ΓÇô30% APR',
     ],
     cta:      'Start as Borrower',
     redirect: '/verify',
@@ -22,9 +22,9 @@ const ROLES = [
   },
   {
     id:    'lender',
-    icon:  '💰',
+    icon:  '≡ƒÆ░',
     title: 'I want to Lend',
-    desc:  'Browse verified borrowers and fund their loans directly. Earn returns of 12–30% APR. Track your portfolio.',
+    desc:  'Browse verified borrowers and fund their loans directly. Earn returns of 12ΓÇô30% APR. Track your portfolio.',
     benefits: [
       'All borrowers ZK verified',
       'Direct wallet to wallet',
@@ -116,7 +116,7 @@ export default function Onboarding() {
                 {role.benefits.map((b) => (
                   <li key={b} className="flex items-center gap-2 text-sm text-white/80">
                     <span className="w-5 h-5 rounded-full bg-teal/20 border border-teal/40 flex items-center justify-center text-teal text-xs flex-shrink-0">
-                      ✓
+                      Γ£ô
                     </span>
                     {b}
                   </li>
@@ -142,7 +142,7 @@ export default function Onboarding() {
             onClick={handleBoth}
             className="text-grey hover:text-white text-sm transition-colors underline underline-offset-4 decoration-grey/40 hover:decoration-white/60"
           >
-            I want to do Both →
+            I want to do Both ΓåÆ
           </button>
         </div>
 

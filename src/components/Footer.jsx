@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+﻿import { NavLink } from 'react-router-dom'
 
 export default function Footer() {
   return (
@@ -25,7 +25,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="font-eyebrow text-caption text-secondary">
-          © {new Date().getFullYear()} VeilFi. Technical Precision. Human Expression.
+          ┬⌐ {new Date().getFullYear()} VeilFi. Technical Precision. Human Expression.
         </div>
       </div>
     </footer>

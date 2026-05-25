@@ -1,10 +1,10 @@
-/**
- * ProgressBar — animated progress bar
- * @prop {number}  value   — 0-100
- * @prop {string}  variant — 'gold' | 'indigo' | 'teal'
- * @prop {string}  label   — optional left label
- * @prop {boolean} showPct — show percentage on right
- * @prop {string}  size    — 'sm' | 'md' | 'lg'
+﻿/**
+ * ProgressBar ΓÇö animated progress bar
+ * @prop {number}  value   ΓÇö 0-100
+ * @prop {string}  variant ΓÇö 'gold' | 'indigo' | 'teal'
+ * @prop {string}  label   ΓÇö optional left label
+ * @prop {boolean} showPct ΓÇö show percentage on right
+ * @prop {string}  size    ΓÇö 'sm' | 'md' | 'lg'
  */
 
 const FILL_CLASSES = {

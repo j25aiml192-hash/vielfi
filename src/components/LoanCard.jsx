@@ -1,12 +1,12 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import TierBadge from './TierBadge.jsx'
 import ProgressBar from './ProgressBar.jsx'
 
 /**
- * LoanCard — marketplace loan listing card
- * @prop {object} loan — loan data object
- * @prop {function} onFund — called with (loanId, amount)
+ * LoanCard ΓÇö marketplace loan listing card
+ * @prop {object} loan ΓÇö loan data object
+ * @prop {function} onFund ΓÇö called with (loanId, amount)
  */
 
 export default function LoanCard({ loan = {}, onFund }) {

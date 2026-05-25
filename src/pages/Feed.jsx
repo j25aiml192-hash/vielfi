@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { getMarketplaceFeed, fundLoan } from '../api/index.js'
 import { useNavigate } from 'react-router-dom'
 
 
-/* ══════════════════════════════════════════════════════
-   DESIGN TOKENS — Mutual colour system
-══════════════════════════════════════════════════════ */
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+   DESIGN TOKENS ΓÇö Mutual colour system
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 const C = {
   bg:      '#f4f2ef',
   surface: '#ffffff',
@@ -24,9 +24,9 @@ const C = {
   magenta: '#ff3d8b',
 }
 
-/* ══════════════════════════════════════
-   BORROWER PROFILES — real photos + data
-══════════════════════════════════════ */
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+   BORROWER PROFILES ΓÇö real photos + data
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 const PROFILES = {
   'Farida Shaikh':  { photo:'https://randomuser.me/api/portraits/women/44.jpg', gender:'F', job:'Senior Software Engineer, TCS', age:34, rating:4.9 },
   'Meera Pillai':   { photo:'https://randomuser.me/api/portraits/women/47.jpg', gender:'F', job:'HR Manager, Cognizant',          age:31, rating:4.7 },
@@ -38,16 +38,16 @@ const PROFILES = {
   'Suresh Yadav':   { photo:'https://randomuser.me/api/portraits/men/33.jpg',   gender:'M', job:'Government Employee, MSEB',      age:41, rating:4.4 },
 }
 
-/* ═══════════════════════
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
    CATEGORY CONFIG
-═══════════════════════ */
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 const CAT = {
-  Medical:     { color:'#059669', bg:'#ecfdf5', dark:'#047857', icon:'🏥' },
-  Education:   { color:'#4338ca', bg:'#eef2ff', dark:'#3730a3', icon:'🎓' },
-  Business:    { color:'#d97706', bg:'#fffbeb', dark:'#b45309', icon:'💼' },
-  Agriculture: { color:'#65a30d', bg:'#f7fee7', dark:'#4d7c0f', icon:'🌾' },
-  Equipment:   { color:'#0284c7', bg:'#f0f9ff', dark:'#0369a1', icon:'⚙️' },
-  Personal:    { color:'#7c3aed', bg:'#f5f3ff', dark:'#6d28d9', icon:'👤' },
+  Medical:     { color:'#059669', bg:'#ecfdf5', dark:'#047857', icon:'≡ƒÅÑ' },
+  Education:   { color:'#4338ca', bg:'#eef2ff', dark:'#3730a3', icon:'≡ƒÄô' },
+  Business:    { color:'#d97706', bg:'#fffbeb', dark:'#b45309', icon:'≡ƒÆ╝' },
+  Agriculture: { color:'#65a30d', bg:'#f7fee7', dark:'#4d7c0f', icon:'≡ƒî╛' },
+  Equipment:   { color:'#0284c7', bg:'#f0f9ff', dark:'#0369a1', icon:'ΓÜÖ∩╕Å' },
+  Personal:    { color:'#7c3aed', bg:'#f5f3ff', dark:'#6d28d9', icon:'≡ƒæñ' },
 }
 
 const TIER = {
@@ -57,13 +57,13 @@ const TIER = {
   Bronze:   { color:'#7c2d12', bg:'#fff7ed', border:'#fed7aa', label:'BRONZE'   },
 }
 
-/* ═══════════════════════
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
    MOCK DATA
-═══════════════════════ */
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 const MOCK_LOANS = [
   { id:'7',  borrowerName:'Farida Shaikh', tier:'Platinum', purpose:'Medical',
     city:'Hyderabad', featured:true, postedAgo:'2 hours ago',
-    story:'Bridge financing for elective surgery — insurance covers 70%, gap is \u20b984,000. 8-year employment at TCS, zero defaults, high repayment capacity.',
+    story:'Bridge financing for elective surgery ΓÇö insurance covers 70%, gap is \u20b984,000. 8-year employment at TCS, zero defaults, high repayment capacity.',
     amount:280000, funded:256000, duration:12, interestRate:9.5, lenders:18, daysLeft:3,
     tags:['ZK-Verified','Low Risk'], creditScore:851, monthlyIncome:120000, repaymentHistory:100 },
   { id:'5',  borrowerName:'Meera Pillai',  tier:'Gold', purpose:'Education',
@@ -83,7 +83,7 @@ const MOCK_LOANS = [
     tags:['UPI-Verified','GST-Filed'], creditScore:734, monthlyIncome:210000, repaymentHistory:100 },
   { id:'2',  borrowerName:'Priya Nair',    tier:'Platinum', purpose:'Equipment',
     city:'Bengaluru', featured:false, postedAgo:'6 hours ago',
-    story:'Upgrading professional design studio — MacBook Pro M3 and Wacom Cintiq. International clientele, 4 years unblemished repayment record.',
+    story:'Upgrading professional design studio ΓÇö MacBook Pro M3 and Wacom Cintiq. International clientele, 4 years unblemished repayment record.',
     amount:350000, funded:318000, duration:18, interestRate:9, lenders:14, daysLeft:12,
     tags:['ZK-Verified','Freelancer'], creditScore:851, monthlyIncome:350000, repaymentHistory:100 },
   { id:'3',  borrowerName:'Anita Meena',   tier:'Silver', purpose:'Business',
@@ -126,9 +126,9 @@ const adaptLoan = (l) => ({
   postedAgo:'Recently',
 })
 
-/* ═══════════════════════
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
    CREDIT SCORE METER
-═══════════════════════ */
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 function ScoreMeter({ score }) {
   const pct = ((score - 300) / (900 - 300)) * 100
   const col = score >= 750 ? C.green : score >= 650 ? C.amber : C.red
@@ -145,9 +145,9 @@ function ScoreMeter({ score }) {
   )
 }
 
-/* ═══════════════════════
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
    LOAN CARD
-═══════════════════════ */
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 function LoanCard({ loan, onFund, fundedId }) {
   const navigate = useNavigate()
   const [liked,    setLiked]    = useState(false)
@@ -185,10 +185,10 @@ function LoanCard({ loan, onFund, fundedId }) {
     onMouseLeave={e=>{ e.currentTarget.style.boxShadow='none'; e.currentTarget.style.borderColor=C.border }}
     >
 
-      {/* ── Category accent stripe ── */}
+      {/* ΓöÇΓöÇ Category accent stripe ΓöÇΓöÇ */}
       <div style={{ height:4, background:cat.color, width:'100%' }} />
 
-      {/* ── Card header ── */}
+      {/* ΓöÇΓöÇ Card header ΓöÇΓöÇ */}
       <div style={{ padding:'16px 20px 0', display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12 }}>
         {/* Left: photo + name */}
         <div style={{ display:'flex', alignItems:'center', gap:12 }}>
@@ -255,7 +255,7 @@ function LoanCard({ loan, onFund, fundedId }) {
         </div>
       </div>
 
-      {/* ── Rating + trust signals ── */}
+      {/* ΓöÇΓöÇ Rating + trust signals ΓöÇΓöÇ */}
       <div style={{ padding:'10px 20px 0', display:'flex', alignItems:'center', gap:12, flexWrap:'wrap' }}>
         {/* Star rating */}
         <div style={{ display:'flex', alignItems:'center', gap:3 }}>
@@ -283,12 +283,12 @@ function LoanCard({ loan, onFund, fundedId }) {
         </div>
       </div>
 
-      {/* ── Story ── */}
+      {/* ΓöÇΓöÇ Story ΓöÇΓöÇ */}
       <p style={{ margin:'12px 20px 0', fontSize:14, color:C.text, lineHeight:1.7, fontWeight:400 }}>
         {story}
       </p>
 
-      {/* ── Tags ── */}
+      {/* ΓöÇΓöÇ Tags ΓöÇΓöÇ */}
       {tags.length > 0 && (
         <div style={{ display:'flex', flexWrap:'wrap', gap:6, margin:'10px 20px 0' }}>
           {tags.map(tag => (
@@ -299,7 +299,7 @@ function LoanCard({ loan, onFund, fundedId }) {
         </div>
       )}
 
-      {/* ── Loan details box ── */}
+      {/* ΓöÇΓöÇ Loan details box ΓöÇΓöÇ */}
       <div style={{ margin:'14px 20px', background:'#f8f7f5', border:`1px solid ${C.border}`, borderRadius:12, overflow:'hidden' }}>
         {/* Amount + Rate header */}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:0 }}>
@@ -349,7 +349,7 @@ function LoanCard({ loan, onFund, fundedId }) {
         </div>
       </div>
 
-      {/* ── Expanded details ── */}
+      {/* ΓöÇΓöÇ Expanded details ΓöÇΓöÇ */}
       {expanded && (
         <div style={{ margin:'0 20px 14px', background:'#faf9f7', border:`1px solid ${C.border}`, borderRadius:12, padding:'16px', animation:'fadeIn 0.22s ease' }}>
           <div style={{ fontSize:10, fontWeight:700, color:C.muted, letterSpacing:'0.12em', textTransform:'uppercase', marginBottom:12, fontFamily:'JetBrains Mono, monospace' }}>
@@ -386,7 +386,7 @@ function LoanCard({ loan, onFund, fundedId }) {
         </div>
       )}
 
-      {/* ── Footer: social + fund ── */}
+      {/* ΓöÇΓöÇ Footer: social + fund ΓöÇΓöÇ */}
       <div style={{ borderTop:`1px solid ${C.border}`, padding:'12px 20px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
         <div style={{ display:'flex', alignItems:'center', gap:16 }}>
 
@@ -444,13 +444,13 @@ function LoanCard({ loan, onFund, fundedId }) {
   )
 }
 
-/* ═══════════════════════
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
    LEFT SIDEBAR
-═══════════════════════ */
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 
-/* ═══════════════════════
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
    SKELETON
-═══════════════════════ */
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 const Skeleton = () => (
   <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:14, overflow:'hidden' }}>
     <div style={{ height:4, background:'#e8e6e2' }} />
@@ -470,9 +470,9 @@ const Skeleton = () => (
   </div>
 )
 
-/* ═══════════════════════
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
    MAIN
-═══════════════════════ */
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 export default function Feed() {
   const [loans,         setLoans]         = useState(MOCK_LOANS)
   const [loading,       setLoading]       = useState(false)
@@ -603,7 +603,7 @@ export default function Feed() {
               : filtered.length===0
               ? (
                 <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:14, padding:'60px 24px', textAlign:'center' }}>
-                  <div style={{ fontSize:36, marginBottom:12 }}>🔍</div>
+                  <div style={{ fontSize:36, marginBottom:12 }}>≡ƒöì</div>
                   <div style={{ fontWeight:700, fontSize:15, color:C.text, marginBottom:6 }}>No results found</div>
                   <div style={{ fontSize:13, color:C.muted }}>Adjust your filters to find matching loans</div>
                 </div>

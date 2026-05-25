@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import ProgressBar from '../components/ProgressBar.jsx'
 import TierBadge from '../components/TierBadge.jsx'
 import { createCircle, joinCircle } from '../api/index.js'
@@ -7,7 +7,7 @@ import { useWallet } from '../context/WalletContext.jsx'
 const formatINR = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
 
-/* ── Mock circles ── */
+/* ΓöÇΓöÇ Mock circles ΓöÇΓöÇ */
 const MOCK_CIRCLES = [
   {
     id: 'c1',
@@ -60,7 +60,7 @@ const MOCK_CIRCLES = [
   },
 ]
 
-/* ── Circle Card ── */
+/* ΓöÇΓöÇ Circle Card ΓöÇΓöÇ */
 function CircleCard({ circle, onJoin }) {
   const [expanded, setExpanded] = useState(false)
   const fillPct = Math.round((circle.members / circle.maxMembers) * 100)
@@ -143,7 +143,7 @@ function CircleCard({ circle, onJoin }) {
   )
 }
 
-/* ── Create Circle Form ── */
+/* ΓöÇΓöÇ Create Circle Form ΓöÇΓöÇ */
 function CreateCircleForm({ onCreated }) {
   const [form, setForm] = useState({
     name: '',
@@ -171,7 +171,7 @@ function CreateCircleForm({ onCreated }) {
   if (success) {
     return (
       <div className="text-center py-8">
-        <div className="text-4xl mb-3">🎉</div>
+        <div className="text-4xl mb-3">≡ƒÄë</div>
         <h3 className="font-display font-bold text-primary text-xl mb-2">Circle Created!</h3>
         <p className="text-secondary text-sm">Your credit circle is now live on VeilFi.</p>
       </div>
@@ -192,7 +192,7 @@ function CreateCircleForm({ onCreated }) {
         <div>
           <label className="text-sm text-secondary mb-2 block">Purpose</label>
           <select className="select" value={form.purpose} onChange={set('purpose')}>
-            <option value="">Select…</option>
+            <option value="">SelectΓÇª</option>
             {['Working Capital', 'Equipment', 'Education', 'Agricultural', 'Health', 'Housing'].map((p) => (
               <option key={p}>{p}</option>
             ))}
@@ -206,12 +206,12 @@ function CreateCircleForm({ onCreated }) {
       <div>
         <label className="text-sm text-secondary mb-2 block">Target Pool (INR)</label>
         <div className="relative">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary">₹</span>
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary">Γé╣</span>
           <input type="number" className="input pl-8" placeholder="500000" value={form.targetPool} onChange={set('targetPool')} />
         </div>
       </div>
       <button type="submit" disabled={loading} className="btn-primary w-full justify-center py-3.5 disabled:opacity-60">
-        {loading ? 'Creating…' : 'Create Circle'}
+        {loading ? 'CreatingΓÇª' : 'Create Circle'}
       </button>
     </form>
   )
@@ -265,7 +265,7 @@ export default function Circles() {
               </p>
             </div>
             <div className="text-xs flex items-center gap-2 border border-border rounded-lg px-3 py-2 bg-card">
-              {apiOnline === null && <span className="text-grey animate-pulse">Checking backend…</span>}
+              {apiOnline === null && <span className="text-grey animate-pulse">Checking backendΓÇª</span>}
               {apiOnline === true  && <><span className="w-2 h-2 rounded-full bg-teal" /><span className="text-teal">Backend online</span></>}
               {apiOnline === false && <><span className="w-2 h-2 rounded-full bg-amber-400" /><span className="text-amber-400">Demo mode</span></>}
             </div>
@@ -277,7 +277,7 @@ export default function Circles() {
           {[
             { label: 'Active Circles', value: circles.length },
             { label: 'Total Members',  value: circles.reduce((a, c) => a + c.members, 0) },
-            { label: 'Total Pool',     value: '₹26.5L' },
+            { label: 'Total Pool',     value: 'Γé╣26.5L' },
           ].map(({ label, value }) => (
             <div key={label} className="stat-card">
               <div className="stat-value">{value}</div>
@@ -309,7 +309,7 @@ export default function Circles() {
           <div className="animate-fade-in">
             {joined.length === 0 ? (
               <div className="text-center py-20">
-                <div className="text-6xl mb-4">⭕</div>
+                <div className="text-6xl mb-4">Γ¡ò</div>
                 <h3 className="font-display font-bold text-primary text-xl mb-2">No circles yet</h3>
                 <p className="text-secondary mb-5">Browse and join a credit circle to get started</p>
                 <button onClick={() => setTab('browse')} className="btn-primary">Browse Circles</button>

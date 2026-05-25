@@ -1,10 +1,10 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useWallet } from '../context/WalletContext.jsx'
 
-/* ─────────────────────────────────
+/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
    NAV SECTIONS  (NitiSetu-style)
-───────────────────────────────── */
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 const SECTIONS = [
   {
     label: 'MARKETS',
@@ -94,9 +94,9 @@ const SECTIONS = [
   },
 ]
 
-/* ═══════════════════════════════════════════
-   APP SIDEBAR  — NitiSetu-inspired
-═══════════════════════════════════════════ */
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+   APP SIDEBAR  ΓÇö NitiSetu-inspired
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 export default function AppSidebar() {
   const [expanded, setExpanded] = useState(false)
   const [filter,   setFilter]   = useState('')
@@ -133,7 +133,7 @@ export default function AppSidebar() {
       fontFamily: 'Inter, sans-serif',
     }}>
 
-      {/* ── Logo + collapse toggle ── */}
+      {/* ΓöÇΓöÇ Logo + collapse toggle ΓöÇΓöÇ */}
       <div style={{
         height: 52,
         display: 'flex',
@@ -175,7 +175,7 @@ export default function AppSidebar() {
         </button>
       </div>
 
-      {/* ── Search filter (expanded only) ── */}
+      {/* ΓöÇΓöÇ Search filter (expanded only) ΓöÇΓöÇ */}
       {expanded && (
         <div style={{ padding: '10px 12px', borderBottom: '1px solid #f0ede8', flexShrink: 0 }}>
           <div style={{ position: 'relative' }}>
@@ -197,15 +197,15 @@ export default function AppSidebar() {
         </div>
       )}
 
-      {/* ── Live status (expanded only) ── */}
+      {/* ΓöÇΓöÇ Live status (expanded only) ΓöÇΓöÇ */}
       {expanded && (
         <div style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
           <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#1ea64a', boxShadow: '0 0 6px #1ea64a88' }} />
-          <span style={{ fontSize: 11, color: '#888', fontFamily: 'JetBrains Mono, monospace' }}>Live · synced now</span>
+          <span style={{ fontSize: 11, color: '#888', fontFamily: 'JetBrains Mono, monospace' }}>Live ┬╖ synced now</span>
         </div>
       )}
 
-      {/* ── Nav sections ── */}
+      {/* ΓöÇΓöÇ Nav sections ΓöÇΓöÇ */}
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: expanded ? '6px 0' : '8px 0', scrollbarWidth: 'none' }}>
         {filteredSections.map(sec => (
           <div key={sec.label}>
@@ -294,7 +294,7 @@ export default function AppSidebar() {
         ))}
       </div>
 
-      {/* ── User profile footer ── */}
+      {/* ΓöÇΓöÇ User profile footer ΓöÇΓöÇ */}
       <div style={{
         borderTop: '1px solid #f0ede8',
         padding: expanded ? '12px 14px' : '12px 0',

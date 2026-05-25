@@ -1,7 +1,7 @@
-/**
- * TierBadge — renders a colored tier pill
- * @prop {string} tier — 'Platinum' | 'Gold' | 'Silver' | 'Bronze'
- * @prop {string} size — 'sm' | 'md' | 'lg'
+﻿/**
+ * TierBadge ΓÇö renders a colored tier pill
+ * @prop {string} tier ΓÇö 'Platinum' | 'Gold' | 'Silver' | 'Bronze'
+ * @prop {string} size ΓÇö 'sm' | 'md' | 'lg'
  */
 
 const TIER_CONFIG = {

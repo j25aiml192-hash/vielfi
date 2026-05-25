@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SBTCard from '../components/SBTCard.jsx'
 import TierBadge from '../components/TierBadge.jsx'
 import ProgressBar from '../components/ProgressBar.jsx'
 import { verifyProfile } from '../api/index.js'
 
-/* ══════════════════════════════════════════════
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
    DEMO PROFILES (matches screenshot exactly)
-══════════════════════════════════════════════ */
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 const PROFILES = [
   {
     id: 'rahul',
@@ -55,7 +55,7 @@ const PROFILES = [
   },
 ]
 
-/* ── Typewriter hook ── */
+/* ΓöÇΓöÇ Typewriter hook ΓöÇΓöÇ */
 function useTypewriter(text, speed = 28, started = false) {
   const [displayed, setDisplayed] = useState('')
   const [done, setDone] = useState(false)
@@ -72,7 +72,7 @@ function useTypewriter(text, speed = 28, started = false) {
   return { displayed, done }
 }
 
-/* ── Animated progress bars ── */
+/* ΓöÇΓöÇ Animated progress bars ΓöÇΓöÇ */
 function useAnimatedProgress(trigger) {
   const [progress, setProgress] = useState({ upi: 0, gst: 0, rental: 0 })
   useEffect(() => {
@@ -94,9 +94,9 @@ function useAnimatedProgress(trigger) {
   return { progress, allDone }
 }
 
-/* ══════════════════════════════════════════════
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
    STEP INDICATOR
-══════════════════════════════════════════════ */
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 function StepIndicator({ current }) {
   const steps = ['Select Profile', 'Analyze Data', 'Generate Proof', 'Reveal Identity']
   return (
@@ -133,9 +133,9 @@ function StepIndicator({ current }) {
   )
 }
 
-/* ══════════════════════════════════════════════
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
    IDENTITY PORTAL CARD (matches screenshot right panel)
-══════════════════════════════════════════════ */
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 function IdentityPortal({ onStart }) {
   return (
     <div style={{
@@ -201,9 +201,9 @@ function IdentityPortal({ onStart }) {
   )
 }
 
-/* ══════════════════════════════════════════════
+/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
    MAIN VERIFY PAGE
-══════════════════════════════════════════════ */
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 export default function Verify() {
   const [step, setStep]               = useState(0) // 0 = landing, 1 = select, 2 = analyze, 3 = proof, 4 = reveal
   const [selected, setSelected]       = useState(null)
@@ -221,7 +221,7 @@ export default function Verify() {
   /* Start verification flow */
   const handleStart = () => setStep(1)
 
-  /* Select demo profile → step 2 */
+  /* Select demo profile ΓåÆ step 2 */
   const selectProfile = async (profile) => {
     setSelected(profile); setVerifyData(null); setApiError('')
     setStep(2); setAnalyzeStarted(true)
@@ -233,12 +233,12 @@ export default function Verify() {
     }
   }
 
-  /* Step 2 → 3 when progress bars complete */
+  /* Step 2 ΓåÆ 3 when progress bars complete */
   useEffect(() => {
     if (progressDone && step === 2) setTimeout(() => setStep(3), 600)
   }, [progressDone, step])
 
-  /* Step 3 → 4 when proof typed */
+  /* Step 3 ΓåÆ 4 when proof typed */
   useEffect(() => {
     if (proofDone && step === 3) {
       setTimeout(() => {
@@ -265,7 +265,7 @@ export default function Verify() {
     { key: 'rental', label: 'Rental History',    icon: '\ud83c\udfe0', detail: 'Verifying payment stream\u2026' },
   ]
 
-  /* ── STEP 0: Landing — matches screenshot exactly ── */
+  /* ΓöÇΓöÇ STEP 0: Landing ΓÇö matches screenshot exactly ΓöÇΓöÇ */
   if (step === 0) {
     return (
       <div style={{ minHeight: '100vh', background: '#fff', fontFamily: 'Inter, sans-serif' }}>
@@ -283,7 +283,7 @@ export default function Verify() {
           </p>
         </div>
 
-        {/* Lime block — The Process */}
+        {/* Lime block ΓÇö The Process */}
         <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 24px 48px' }}>
           <div style={{
             background: '#dceeb1', borderRadius: 24,
@@ -372,7 +372,7 @@ export default function Verify() {
     )
   }
 
-  /* ── STEPS 1–4: Verification flow ── */
+  /* ΓöÇΓöÇ STEPS 1ΓÇô4: Verification flow ΓöÇΓöÇ */
   return (
     <div style={{ minHeight: '100vh', background: '#fff', fontFamily: 'Inter, sans-serif', paddingTop: 80, paddingBottom: 64 }}>
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 24px' }}>
@@ -403,7 +403,7 @@ export default function Verify() {
 
         <StepIndicator current={step} />
 
-        {/* ── STEP 1: Profile Selection ── */}
+        {/* ΓöÇΓöÇ STEP 1: Profile Selection ΓöÇΓöÇ */}
         {step === 1 && (
           <div style={{ animation: 'fadeIn 0.4s ease' }}>
             <h2 style={{ textAlign: 'center', fontWeight: 700, fontSize: '1.2rem', color: '#0a0a0a', marginBottom: 24 }}>
@@ -439,7 +439,7 @@ export default function Verify() {
           </div>
         )}
 
-        {/* ── STEP 2: Analyzing ── */}
+        {/* ΓöÇΓöÇ STEP 2: Analyzing ΓöÇΓöÇ */}
         {step === 2 && selected && (
           <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #e8e4df', padding: 32, maxWidth: 520, margin: '0 auto', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', animation: 'fadeIn 0.4s ease' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 28 }}>
@@ -451,7 +451,7 @@ export default function Verify() {
             </div>
             {apiError && (
               <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 10, background: '#fff8f0', border: '1px solid #ffd0a0', fontSize: '0.8rem', color: '#b86000' }}>
-                API offline — running demo mode
+                API offline ΓÇö running demo mode
               </div>
             )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -485,7 +485,7 @@ export default function Verify() {
           </div>
         )}
 
-        {/* ── STEP 3: ZK Proof ── */}
+        {/* ΓöÇΓöÇ STEP 3: ZK Proof ΓöÇΓöÇ */}
         {step === 3 && selected && (
           <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #e8e4df', padding: 32, maxWidth: 520, margin: '0 auto', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', animation: 'fadeIn 0.4s ease' }}>
             <div style={{ textAlign: 'center', marginBottom: 24 }}>
@@ -516,7 +516,7 @@ export default function Verify() {
           </div>
         )}
 
-        {/* ── STEP 4: SBT Reveal ── */}
+        {/* ΓöÇΓöÇ STEP 4: SBT Reveal ΓöÇΓöÇ */}
         {step === 4 && selected && (
           <div style={{ maxWidth: 460, margin: '0 auto', animation: 'fadeIn 0.5s ease' }}>
             <div style={{ textAlign: 'center', marginBottom: 24 }}>
