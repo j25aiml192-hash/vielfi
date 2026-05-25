@@ -1,0 +1,12 @@
+{
+  "network": "sepolia",
+  "chainId": 11155111,
+  "deployer": "0x398C0085b9c7CB562eC8e9CB2BFFEA0b4DE1a2d2",
+  "contracts": {
+    "VeilSBT": "0x3d4613bfFc15F8d46Df148F62C31B6d32575B002",
+    "CreditOracle": "0xb10E4A0573145551639C69C3e8bB9B7dC7c1D4F2",
+    "ReputationEngine": "0x742233D20014452537D9Dc1273E968db9cd05d2A",
+    "LoanMarketplace": "0x43CdD005E02aA2EBF78963B2E458182Dc5E5126f"
+  },
+  "deployedAt": "2026-05-24T07:33:24.812Z"
+}
