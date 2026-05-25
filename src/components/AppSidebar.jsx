@@ -82,7 +82,7 @@ const SECTIONS = [
         ),
       },
       {
-        to: '/dashboard',
+        to: '/settings',
         label: 'Settings',
         icon: (
           <svg width={18} height={18} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}>
