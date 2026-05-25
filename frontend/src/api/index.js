@@ -4,6 +4,13 @@ const getBaseURL = () => {
   let url = import.meta.env.VITE_API_URL || 'http://localhost:8000';
   url = url.trim();
   url = url.replace(/\/+$/, '');
+  
+  if (typeof window !== 'undefined' && window.location && window.location.protocol === 'https:') {
+    if (url.startsWith('http://') && !url.includes('localhost') && !url.includes('127.0.0.1')) {
+      url = url.replace('http://', 'https://');
+    }
+  }
+
   if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
     if (url.includes('localhost') || url.includes('127.0.0.1')) {
       url = 'http://' + url;
