@@ -170,7 +170,11 @@ export default function Navbar() {
 
       <nav style={{
         position:'sticky', top:0, zIndex:30,
-        background:'#fff', borderBottom:'1px solid #f0ede8',
+        background:'rgba(255,250,240,0.72)',
+        backdropFilter:'blur(18px)',
+        WebkitBackdropFilter:'blur(18px)',
+        borderBottom:'1px solid rgba(202,198,195,0.45)',
+        boxShadow:'0 1px 24px rgba(10,10,10,0.06), 0 0 0 0.5px rgba(201,149,42,0.10)',
         fontFamily:'Inter,sans-serif',
       }}>
         <div style={{ height:56,maxWidth:1440,margin:'0 auto',padding:'0 24px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:16 }}>
