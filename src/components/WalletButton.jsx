@@ -10,13 +10,13 @@ export default function WalletButton({ size = 'md' }) {
   if (isConnected) {
     return (
       <div className="flex items-center gap-2">
-        <div className={`flex items-center gap-2 ${sizeClasses} rounded-xl bg-card border border-gold/30 font-mono`}>
-          <span className="w-2 h-2 rounded-full bg-teal animate-pulse" />
-          <span className="text-white">{shortAddress}</span>
+        <div className={`flex items-center gap-2 ${sizeClasses} rounded-xl bg-surface-soft border border-hairline font-mono`}>
+          <span className="w-2 h-2 rounded-full bg-semantic-success animate-pulse" />
+          <span className="text-primary">{shortAddress}</span>
         </div>
         <button
           onClick={disconnect}
-          className={`${sizeClasses} rounded-xl border border-border text-grey hover:text-red-400 hover:border-red-400/30 transition-all duration-200 font-medium`}
+          className={`${sizeClasses} rounded-xl border border-hairline text-secondary hover:text-red-500 hover:border-red-400/30 transition-all duration-200 font-medium`}
           aria-label="Disconnect wallet"
         >
           Disconnect
@@ -51,7 +51,7 @@ export default function WalletButton({ size = 'md' }) {
         )}
       </button>
       {error && (
-        <p className="text-red-400 text-xs mt-1">{error}</p>
+        <p className="text-red-500 text-xs mt-1">{error}</p>
       )}
     </div>
   )

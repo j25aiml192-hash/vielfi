@@ -14,7 +14,7 @@ export default function App() {
   return (
     <WalletProvider>
       <BrowserRouter>
-        <div className="min-h-screen flex flex-col bg-bg text-white">
+        <div className="min-h-screen flex flex-col bg-canvas text-primary">
           <Navbar />
           <main className="flex-1">
             <Routes>

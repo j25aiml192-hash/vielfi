@@ -52,49 +52,49 @@ export default function LoanCard({ loan = {}, onFund }) {
       {/* Header */}
       <div className="flex items-start gap-3">
         {/* Avatar */}
-        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo to-purple-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+        <div className="w-11 h-11 rounded-xl bg-block-lilac/20 flex items-center justify-center text-block-lilac font-bold text-sm flex-shrink-0">
           {initials}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-semibold text-white text-sm truncate">{borrowerName}</h3>
+            <h3 className="font-semibold text-primary text-sm truncate">{borrowerName}</h3>
             <TierBadge tier={tier} size="sm" />
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <span className="badge badge-indigo text-xs">{purpose}</span>
-            <span className="text-xs text-grey">{duration}M</span>
+            <span className="text-xs text-secondary">{duration}M</span>
           </div>
         </div>
         <div className="text-right flex-shrink-0">
-          <div className="text-gold font-display font-bold">{formatINR(amount)}</div>
-          <div className="text-grey text-xs">{interestRate}% APR</div>
+          <div className="text-primary font-display font-bold">{formatINR(amount)}</div>
+          <div className="text-secondary text-xs">{interestRate}% APR</div>
         </div>
       </div>
 
       {/* Story */}
-      <p className="text-sm text-grey mt-3 leading-relaxed line-clamp-2">
+      <p className="text-sm text-secondary mt-3 leading-relaxed line-clamp-2">
         {story}
       </p>
 
       {/* Progress */}
       <div className="mt-4">
         <div className="flex justify-between text-xs mb-1.5">
-          <span className="text-grey">
-            <span className="text-teal font-semibold">{formatINR(funded)}</span> raised
+          <span className="text-secondary">
+            <span className="text-semantic-success font-semibold">{formatINR(funded)}</span> raised
           </span>
-          <span className="text-grey">{fundedPct}% funded</span>
+          <span className="text-secondary">{fundedPct}% funded</span>
         </div>
         <ProgressBar value={fundedPct} variant="teal" size="sm" />
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-        <div className="flex items-center gap-4 text-xs text-grey">
+      <div className="flex items-center justify-between mt-4 pt-4 border-t border-hairline">
+        <div className="flex items-center gap-4 text-xs text-secondary">
           <span>
-            <span className="text-white font-medium">{lenders}</span> lenders
+            <span className="text-primary font-medium">{lenders}</span> lenders
           </span>
           <span>
-            <span className="text-white font-medium">{daysLeft}d</span> left
+            <span className="text-primary font-medium">{daysLeft}d</span> left
           </span>
           <span>EMI {formatINR(emi)}/mo</span>
         </div>

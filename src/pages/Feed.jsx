@@ -159,16 +159,16 @@ export default function Feed() {
           <p className="section-label mb-2">Live Listings</p>
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <h1 className="font-display font-black text-4xl text-white">
+              <h1 className="font-display font-black text-4xl text-primary">
                 Credit <span className="text-gradient-gold">Marketplace</span>
               </h1>
-              <p className="text-grey mt-2">
+              <p className="text-secondary mt-2">
                 {filtered.length} verified borrowers seeking community funding
               </p>
             </div>
             {/* Search */}
             <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-grey" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input
@@ -186,15 +186,15 @@ export default function Feed() {
         <div className="card mb-8 flex flex-wrap gap-4 items-center">
           {/* Tier */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-grey font-medium">Tier:</span>
+            <span className="text-xs text-secondary font-medium">Tier:</span>
             {TIERS.map((t) => (
               <button
                 key={t}
                 onClick={() => setTier(t)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
                   tierFilter === t
-                    ? 'bg-gold text-bg'
-                    : 'text-grey hover:text-white border border-border hover:border-gold/30'
+                    ? 'bg-primary text-on-primary'
+                    : 'text-secondary hover:text-primary border border-hairline hover:border-primary/20'
                 }`}
               >
                 {t}
@@ -202,11 +202,11 @@ export default function Feed() {
             ))}
           </div>
 
-          <div className="h-6 w-px bg-border hidden sm:block" />
+          <div className="h-6 w-px bg-hairline hidden sm:block" />
 
           {/* Purpose */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-grey font-medium">Purpose:</span>
+            <span className="text-xs text-secondary font-medium">Purpose:</span>
             <select
               value={purposeFilter}
               onChange={(e) => setPurpose(e.target.value)}
@@ -216,11 +216,11 @@ export default function Feed() {
             </select>
           </div>
 
-          <div className="h-6 w-px bg-border hidden sm:block" />
+          <div className="h-6 w-px bg-hairline hidden sm:block" />
 
           {/* Sort */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-grey font-medium">Sort:</span>
+            <span className="text-xs text-secondary font-medium">Sort:</span>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
@@ -233,11 +233,11 @@ export default function Feed() {
 
         {/* Success toast */}
         {fundSuccess && (
-          <div className="fixed bottom-6 right-6 z-50 card border border-teal/40 bg-teal/10 text-teal flex items-center gap-3 animate-slide-up shadow-teal">
+          <div className="fixed bottom-6 right-6 z-50 card border border-semantic-success/40 bg-semantic-success/10 text-semantic-success flex items-center gap-3 animate-slide-up shadow-card">
             <span className="text-xl">✓</span>
             <div>
               <p className="font-semibold text-sm">Funding Initiated!</p>
-              <p className="text-xs text-teal/70">Transaction submitted to Ethereum Sepolia</p>
+              <p className="text-xs text-semantic-success/70">Transaction submitted to Ethereum Sepolia</p>
             </div>
           </div>
         )}
@@ -248,25 +248,25 @@ export default function Feed() {
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="card animate-pulse">
                 <div className="flex gap-3 mb-4">
-                  <div className="w-11 h-11 rounded-xl bg-border" />
+                  <div className="w-11 h-11 rounded-xl bg-hairline" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-border rounded w-1/2" />
-                    <div className="h-3 bg-border rounded w-1/3" />
+                    <div className="h-4 bg-hairline rounded w-1/2" />
+                    <div className="h-3 bg-hairline rounded w-1/3" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="h-3 bg-border rounded" />
-                  <div className="h-3 bg-border rounded w-4/5" />
+                  <div className="h-3 bg-hairline rounded" />
+                  <div className="h-3 bg-hairline rounded w-4/5" />
                 </div>
-                <div className="h-2 bg-border rounded mt-4" />
+                <div className="h-2 bg-hairline rounded mt-4" />
               </div>
             ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-24">
             <div className="text-6xl mb-4">🔍</div>
-            <h3 className="font-display font-bold text-white text-xl mb-2">No loans found</h3>
-            <p className="text-grey">Try adjusting your filters</p>
+            <h3 className="font-display font-bold text-primary text-xl mb-2">No loans found</h3>
+            <p className="text-secondary">Try adjusting your filters</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

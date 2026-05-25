@@ -17,7 +17,7 @@ const PROFILES = [
     tagline: 'UPI & GST Verified Business Owner',
     signals: { upi: true, gst: true, rental: false },
     story: 'Rahul processes ₹2.1L monthly through UPI across 3 food stalls. Never missed a payment.',
-    color: 'border-gold/40 bg-gradient-to-br from-yellow-900/20 to-card',
+    color: 'border-hairline bg-surface-soft',
   },
   {
     id: 'priya',
@@ -29,7 +29,7 @@ const PROFILES = [
     tagline: 'Top Rated Creative Professional',
     signals: { upi: true, gst: false, rental: true },
     story: 'Priya earns ₹3.5L/mo from international clients. Consistent rental payments for 4 years.',
-    color: 'border-slate-400/30 bg-gradient-to-br from-slate-800/20 to-card',
+    color: 'border-hairline bg-surface-soft',
   },
   {
     id: 'anita',
@@ -41,7 +41,7 @@ const PROFILES = [
     tagline: 'Registered SME with GST History',
     signals: { upi: true, gst: true, rental: false },
     story: 'Anita has operated her store for 6 years with consistent GST filings and UPI transactions.',
-    color: 'border-grey/30 bg-gradient-to-br from-slate-700/20 to-card',
+    color: 'border-hairline bg-surface-soft',
   },
   {
     id: 'vikram',
@@ -53,7 +53,7 @@ const PROFILES = [
     tagline: 'Ola/Uber Verified Driver Partner',
     signals: { upi: true, gst: false, rental: true },
     story: 'Vikram has driven 8,000+ trips with 4.8 rating. Consistent rental payments in Dharavi.',
-    color: 'border-orange-700/30 bg-gradient-to-br from-orange-900/20 to-card',
+    color: 'border-hairline bg-surface-soft',
   },
 ]
 
@@ -80,18 +80,18 @@ function StepIndicator({ current }) {
             <div className="flex flex-col items-center">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
-                  ${done   ? 'bg-teal text-bg' :
-                    active  ? 'bg-gold text-bg ring-4 ring-gold/20' :
-                              'bg-border text-grey'}`}
+                  ${done   ? 'bg-semantic-success text-on-primary' :
+                    active  ? 'bg-primary text-on-primary ring-4 ring-primary/20' :
+                              'bg-hairline text-secondary'}`}
               >
                 {done ? '✓' : idx}
               </div>
-              <span className={`text-xs mt-1 hidden sm:block ${active ? 'text-gold' : done ? 'text-teal' : 'text-grey'}`}>
+              <span className={`text-xs mt-1 hidden sm:block ${active ? 'text-primary' : done ? 'text-semantic-success' : 'text-secondary'}`}>
                 {label}
               </span>
             </div>
             {i < steps.length - 1 && (
-              <div className={`w-12 sm:w-20 h-px mx-2 transition-all duration-500 ${done ? 'bg-teal' : 'bg-border'}`} />
+              <div className={`w-12 sm:w-20 h-px mx-2 transition-all duration-500 ${done ? 'bg-semantic-success' : 'bg-hairline'}`} />
             )}
           </div>
         )
@@ -195,10 +195,10 @@ export default function Verify() {
         {/* Header */}
         <div className="text-center mb-10">
           <p className="section-label mb-3">Identity Protocol</p>
-          <h1 className="font-display font-black text-4xl md:text-5xl text-white">
+          <h1 className="font-display font-black text-4xl md:text-5xl text-primary">
             Get Your <span className="text-gradient-gold">Credit SBT</span>
           </h1>
-          <p className="text-grey mt-3 text-lg">
+          <p className="text-secondary mt-3 text-lg">
             ZK-verified credit identity in 4 steps. No data exposure.
           </p>
         </div>
@@ -208,7 +208,7 @@ export default function Verify() {
         {/* ── STEP 1: Profile Selection ── */}
         {step === 1 && (
           <div className="animate-fade-in">
-            <h2 className="text-center font-display text-xl text-white mb-6">
+            <h2 className="text-center font-display text-xl text-primary mb-6">
               Choose a demo borrower profile
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -216,19 +216,19 @@ export default function Verify() {
                 <button
                   key={p.id}
                   onClick={() => selectProfile(p)}
-                  className={`text-left card border ${p.color} hover:scale-[1.02] hover:shadow-gold transition-all duration-200 active:scale-95`}
+                  className={`text-left card border ${p.color} hover:scale-[1.02] hover:shadow-card-hover transition-all duration-200 active:scale-95`}
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center text-3xl">
+                    <div className="w-14 h-14 rounded-2xl bg-surface-soft border border-hairline flex items-center justify-center text-3xl">
                       {p.emoji}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-display font-bold text-white">{p.name}</span>
+                        <span className="font-display font-bold text-primary">{p.name}</span>
                         <TierBadge tier={p.tier} size="sm" />
                       </div>
-                      <p className="text-grey text-xs">{p.role}</p>
-                      <p className="text-sm text-white/70 mt-2 leading-relaxed line-clamp-2">{p.story}</p>
+                      <p className="text-secondary text-xs">{p.role}</p>
+                      <p className="text-sm text-on-surface/70 mt-2 leading-relaxed line-clamp-2">{p.story}</p>
                     </div>
                   </div>
                 </button>
@@ -241,12 +241,12 @@ export default function Verify() {
         {step === 2 && selected && (
           <div className="card max-w-xl mx-auto animate-slide-up">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-card border border-border flex items-center justify-center text-2xl">
+              <div className="w-12 h-12 rounded-xl bg-surface-soft border border-hairline flex items-center justify-center text-2xl">
                 {selected.emoji}
               </div>
               <div>
-                <h2 className="font-display font-bold text-white">{selected.name}</h2>
-                <p className="text-grey text-sm">{selected.role}</p>
+                <h2 className="font-display font-bold text-primary">{selected.name}</h2>
+                <p className="text-secondary text-sm">{selected.role}</p>
               </div>
             </div>
 
@@ -256,15 +256,15 @@ export default function Verify() {
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2">
                       <span>{icon}</span>
-                      <span className="text-sm font-medium text-white">{label}</span>
+                      <span className="text-sm font-medium text-primary">{label}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       {progress[key] < 100 ? (
-                        <span className="text-xs text-grey animate-pulse">{detail}</span>
+                        <span className="text-xs text-secondary animate-pulse">{detail}</span>
                       ) : (
                         <span className="badge badge-teal text-xs">Verified ✓</span>
                       )}
-                      <span className="text-sm font-bold text-gold w-10 text-right">
+                      <span className="text-sm font-bold text-primary w-10 text-right">
                         {progress[key]}%
                       </span>
                     </div>
@@ -278,9 +278,9 @@ export default function Verify() {
               ))}
             </div>
 
-            <div className="mt-6 pt-5 border-t border-border text-center">
-              <div className="flex items-center justify-center gap-2 text-grey text-sm">
-                <svg className="w-4 h-4 animate-spin text-indigo" fill="none" viewBox="0 0 24 24">
+            <div className="mt-6 pt-5 border-t border-hairline text-center">
+              <div className="flex items-center justify-center gap-2 text-secondary text-sm">
+                <svg className="w-4 h-4 animate-spin text-block-lilac" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                 </svg>
@@ -294,16 +294,16 @@ export default function Verify() {
         {step === 3 && selected && (
           <div className="card max-w-xl mx-auto animate-slide-up">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 rounded-2xl bg-indigo/20 border border-indigo/40 flex items-center justify-center text-3xl mx-auto mb-4">
+              <div className="w-16 h-16 rounded-2xl bg-block-lilac/20 border border-block-lilac/40 flex items-center justify-center text-3xl mx-auto mb-4">
                 🔐
               </div>
-              <h2 className="font-display font-bold text-white text-xl">ZK Proof Generated</h2>
-              <p className="text-grey text-sm mt-2">Your credit signals proved. No data revealed.</p>
+              <h2 className="font-display font-bold text-primary text-xl">ZK Proof Generated</h2>
+              <p className="text-secondary text-sm mt-2">Your credit signals proved. No data revealed.</p>
             </div>
 
-            <div className="bg-bg rounded-xl p-5 border border-border font-mono">
-              <p className="text-xs text-grey mb-2">Groth16 Proof Hash:</p>
-              <p className="text-teal text-sm break-all leading-relaxed typewriter-cursor">
+            <div className="bg-surface-soft rounded-xl p-5 border border-hairline font-mono">
+              <p className="text-xs text-secondary mb-2">Groth16 Proof Hash:</p>
+              <p className="text-semantic-success text-sm break-all leading-relaxed typewriter-cursor">
                 {typedProof}
               </p>
             </div>
@@ -315,14 +315,14 @@ export default function Verify() {
                 { label: 'Signals',    value: '3 verified' },
                 { label: 'Gas Used',   value: '~0.001 ETH' },
               ].map(({ label, value }) => (
-                <div key={label} className="bg-bg rounded-lg p-3 border border-border">
-                  <p className="text-xs text-grey">{label}</p>
-                  <p className="text-sm text-white font-medium mt-0.5">{value}</p>
+                <div key={label} className="bg-surface-soft rounded-lg p-3 border border-hairline">
+                  <p className="text-xs text-secondary">{label}</p>
+                  <p className="text-sm text-primary font-medium mt-0.5">{value}</p>
                 </div>
               ))}
             </div>
 
-            <p className="text-center text-grey text-xs mt-4 animate-pulse">
+            <p className="text-center text-secondary text-xs mt-4 animate-pulse">
               Minting your SBT on-chain…
             </p>
           </div>
@@ -333,8 +333,8 @@ export default function Verify() {
           <div className="animate-slide-up max-w-md mx-auto">
             <div className="text-center mb-6">
               <div className="text-4xl mb-2 animate-bounce">🎉</div>
-              <h2 className="font-display font-bold text-white text-2xl">Identity Verified!</h2>
-              <p className="text-grey text-sm mt-2">Your Soul-Bound Token is live on Ethereum Sepolia</p>
+              <h2 className="font-display font-bold text-primary text-2xl">Identity Verified!</h2>
+              <p className="text-secondary text-sm mt-2">Your Soul-Bound Token is live on Ethereum Sepolia</p>
             </div>
 
             <SBTCard
@@ -354,8 +354,7 @@ export default function Verify() {
               href={SBT_CONTRACT_URL}
               target="_blank"
               rel="noreferrer"
-              className="mt-3 block text-center text-[12px] hover:underline"
-              style={{ color: '#D4AF37' }}
+              className="mt-3 block text-center text-[12px] text-primary hover:underline"
             >
               View contract on Etherscan ↗
             </a>

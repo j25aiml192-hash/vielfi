@@ -114,12 +114,12 @@ export default function LoanDetail() {
       <div className="max-w-6xl mx-auto">
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-grey mb-8">
-          <button onClick={() => navigate('/feed')} className="hover:text-gold transition-colors">
+        <div className="flex items-center gap-2 text-sm text-secondary mb-8">
+          <button onClick={() => navigate('/feed')} className="hover:text-primary transition-colors">
             ← Marketplace
           </button>
           <span>/</span>
-          <span className="text-white">{loan.borrowerName}</span>
+          <span className="text-primary">{loan.borrowerName}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -130,13 +130,13 @@ export default function LoanDetail() {
             {/* Header */}
             <div>
               <div className="flex flex-wrap items-center gap-3 mb-3">
-                <h1 className="font-display font-black text-3xl md:text-4xl text-white">
+                <h1 className="font-display font-black text-3xl md:text-4xl text-primary">
                   {loan.borrowerName}
                 </h1>
                 <TierBadge tier={loan.tier} size="md" />
                 <span className="badge badge-indigo">{loan.purpose}</span>
               </div>
-              <div className="flex flex-wrap gap-4 text-sm text-grey">
+              <div className="flex flex-wrap gap-4 text-sm text-secondary">
                 <span>📅 {loan.daysLeft} days remaining</span>
                 <span>👥 {loan.lenders} lenders</span>
                 <span>📈 {loan.interestRate}% APR</span>
@@ -146,37 +146,37 @@ export default function LoanDetail() {
 
             {/* Story */}
             <div className="card">
-              <h2 className="font-display font-bold text-white text-xl mb-4">The Story</h2>
+              <h2 className="font-display font-bold text-primary text-xl mb-4">The Story</h2>
               <div className="space-y-4">
                 {loan.story.split('\n\n').map((para, i) => (
-                  <p key={i} className="text-grey leading-relaxed">{para.trim()}</p>
+                  <p key={i} className="text-secondary leading-relaxed">{para.trim()}</p>
                 ))}
               </div>
             </div>
 
             {/* SBT Identity */}
             <div className="card">
-              <h2 className="font-display font-bold text-white text-xl mb-4">Verified Identity</h2>
+              <h2 className="font-display font-bold text-primary text-xl mb-4">Verified Identity</h2>
               <SBTCard sbt={loan.sbt} size="md" />
             </div>
 
             {/* Lenders list */}
             <div className="card">
-              <h2 className="font-display font-bold text-white text-xl mb-5">
+              <h2 className="font-display font-bold text-primary text-xl mb-5">
                 Lenders ({loan.lendersList.length})
               </h2>
               <div className="space-y-3">
                 {loan.lendersList.map((l, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                  <div key={i} className="flex items-center justify-between py-2 border-b border-hairline/50 last:border-0">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo to-purple-700 flex items-center justify-center text-white text-xs font-bold">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-block-lilac to-accent-magenta flex items-center justify-center text-on-primary text-xs font-bold">
                         {i + 1}
                       </div>
-                      <span className="text-sm font-mono text-grey">{l.address}</span>
+                      <span className="text-sm font-mono text-secondary">{l.address}</span>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm font-semibold text-white">{formatINR(l.amount)}</div>
-                      <div className="text-xs text-grey">{l.date}</div>
+                      <div className="text-sm font-semibold text-primary">{formatINR(l.amount)}</div>
+                      <div className="text-xs text-secondary">{l.date}</div>
                     </div>
                   </div>
                 ))}
@@ -188,63 +188,63 @@ export default function LoanDetail() {
           <div className="space-y-5">
 
             {/* Progress card */}
-            <div className="card border border-gold/20">
+            <div className="card border border-primary/10">
               <div className="flex items-end justify-between mb-2">
                 <div>
-                  <div className="text-3xl font-display font-black text-white">{formatINR(loan.funded)}</div>
-                  <div className="text-grey text-sm mt-0.5">of {formatINR(loan.amount)} goal</div>
+                  <div className="text-3xl font-display font-black text-primary">{formatINR(loan.funded)}</div>
+                  <div className="text-secondary text-sm mt-0.5">of {formatINR(loan.amount)} goal</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-display font-bold text-gradient-gold">{fundedPct}%</div>
-                  <div className="text-grey text-xs">funded</div>
+                  <div className="text-2xl font-display font-bold text-primary">{fundedPct}%</div>
+                  <div className="text-secondary text-xs">funded</div>
                 </div>
               </div>
               <ProgressBar value={fundedPct} variant="gold" size="lg" />
-              <div className="mt-3 text-sm text-grey">
-                <span className="text-teal font-medium">{formatINR(remaining)}</span> still needed
+              <div className="mt-3 text-sm text-secondary">
+                <span className="text-semantic-success font-medium">{formatINR(remaining)}</span> still needed
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-border">
+              <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-hairline">
                 <div className="text-center">
-                  <div className="font-bold text-white">{loan.lenders}</div>
-                  <div className="text-xs text-grey">Lenders</div>
+                  <div className="font-bold text-primary">{loan.lenders}</div>
+                  <div className="text-xs text-secondary">Lenders</div>
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-white">{loan.daysLeft}d</div>
-                  <div className="text-xs text-grey">Left</div>
+                  <div className="font-bold text-primary">{loan.daysLeft}d</div>
+                  <div className="text-xs text-secondary">Left</div>
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-white">{formatINR(loan.emi)}</div>
-                  <div className="text-xs text-grey">Monthly EMI</div>
+                  <div className="font-bold text-primary">{formatINR(loan.emi)}</div>
+                  <div className="text-xs text-secondary">Monthly EMI</div>
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-white">{loan.interestRate}%</div>
-                  <div className="text-xs text-grey">APR</div>
+                  <div className="font-bold text-primary">{loan.interestRate}%</div>
+                  <div className="text-xs text-secondary">APR</div>
                 </div>
               </div>
             </div>
 
             {/* Fund form */}
             {success ? (
-              <div className="card border border-teal/40 bg-teal/5 text-center py-8">
+              <div className="card border border-semantic-success/40 bg-semantic-success/5 text-center py-8">
                 <div className="text-4xl mb-3">🎉</div>
-                <h3 className="font-display font-bold text-white text-xl mb-2">Funded!</h3>
-                <p className="text-grey text-sm mb-4">
+                <h3 className="font-display font-bold text-primary text-xl mb-2">Funded!</h3>
+                <p className="text-secondary text-sm mb-4">
                   Your {formatINR(Number(amount))} contribution was submitted to the Ethereum Sepolia network.
                 </p>
-                <button onClick={() => navigate('/dashboard')} className="btn-teal w-full justify-center">
+                <button onClick={() => navigate('/dashboard')} className="btn-primary w-full justify-center">
                   View in Dashboard
                 </button>
               </div>
             ) : (
               <form onSubmit={handleFund} className="card space-y-4">
-                <h3 className="font-display font-bold text-white text-lg">Fund This Loan</h3>
+                <h3 className="font-display font-bold text-primary text-lg">Fund This Loan</h3>
 
                 <div>
-                  <label className="text-sm text-grey mb-2 block">Amount (INR)</label>
+                  <label className="text-sm text-secondary mb-2 block">Amount (INR)</label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-grey font-semibold">₹</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary font-semibold">₹</span>
                     <input
                       type="number"
                       placeholder="10,000"
@@ -255,7 +255,7 @@ export default function LoanDetail() {
                       max={remaining}
                     />
                   </div>
-                  {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+                  {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
                 </div>
 
                 {/* Quick amounts */}
@@ -267,8 +267,8 @@ export default function LoanDetail() {
                       onClick={() => setAmount(q)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-200 ${
                         Number(amount) === q
-                          ? 'bg-gold text-bg border-gold'
-                          : 'border-border text-grey hover:border-gold/40 hover:text-white'
+                          ? 'bg-primary text-on-primary border-primary'
+                          : 'border-hairline text-secondary hover:border-primary/20 hover:text-primary'
                       }`}
                     >
                       {formatINR(q)}
@@ -278,14 +278,14 @@ export default function LoanDetail() {
 
                 {/* Expected return */}
                 {amount && Number(amount) >= 1000 && (
-                  <div className="rounded-xl bg-bg border border-border p-3 text-sm">
-                    <div className="flex justify-between text-grey mb-1">
+                  <div className="rounded-xl bg-surface-soft border border-hairline p-3 text-sm">
+                    <div className="flex justify-between text-secondary mb-1">
                       <span>Your investment</span>
-                      <span className="text-white">{formatINR(Number(amount))}</span>
+                      <span className="text-primary">{formatINR(Number(amount))}</span>
                     </div>
-                    <div className="flex justify-between text-grey">
+                    <div className="flex justify-between text-secondary">
                       <span>Expected return ({loan.interestRate}% APR)</span>
-                      <span className="text-teal font-semibold">
+                      <span className="text-semantic-success font-semibold">
                         {formatINR(Math.round(Number(amount) * (1 + loan.interestRate / 100 * loan.duration / 12)))}
                       </span>
                     </div>
@@ -307,27 +307,27 @@ export default function LoanDetail() {
                     </>
                   ) : isConnected ? 'Fund Now' : 'Connect & Fund'}
                 </button>
-                <p className="text-xs text-grey text-center">
+                <p className="text-xs text-secondary text-center">
                   Secured by Ethereum Sepolia smart contracts · Non-custodial
                 </p>
               </form>
             )}
 
             {/* Risk info */}
-            <div className="card border border-border text-sm space-y-3">
-              <h4 className="font-semibold text-white">Risk Info</h4>
-              <div className="space-y-2 text-grey">
+            <div className="card border border-hairline text-sm space-y-3">
+              <h4 className="font-semibold text-primary">Risk Info</h4>
+              <div className="space-y-2 text-secondary">
                 <div className="flex justify-between">
                   <span>Credit Tier</span>
                   <TierBadge tier={loan.tier} size="sm" />
                 </div>
                 <div className="flex justify-between">
                   <span>Verification</span>
-                  <span className="text-teal">ZK Verified</span>
+                  <span className="text-semantic-success">ZK Verified</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Smart Contract</span>
-                  <span className="text-white">Audited v2</span>
+                  <span className="text-primary">Audited v2</span>
                 </div>
               </div>
             </div>

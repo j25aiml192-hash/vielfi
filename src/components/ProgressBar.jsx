@@ -35,11 +35,11 @@ export default function ProgressBar({
     <div className="w-full">
       {(label || showPct) && (
         <div className="flex items-center justify-between mb-1.5">
-          {label && <span className="text-xs text-grey">{label}</span>}
+          {label && <span className="text-xs text-secondary">{label}</span>}
           {showPct && (
             <span className={`text-xs font-semibold ${
-              variant === 'gold' ? 'text-gold' :
-              variant === 'teal' ? 'text-teal' : 'text-indigo'
+              variant === 'gold' ? 'text-primary' :
+              variant === 'teal' ? 'text-semantic-success' : 'text-block-lilac'
             }`}>
               {clamped}%
             </span>

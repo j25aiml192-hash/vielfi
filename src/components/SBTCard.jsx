@@ -17,11 +17,11 @@ const TIER_SCORES = {
 const AVATAR_INITIALS = (name = '') =>
   name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
 
-const TIER_GRADIENTS = {
-  Platinum: 'from-slate-700 via-slate-500 to-slate-400',
-  Gold:     'from-yellow-900 via-yellow-700 to-gold',
-  Silver:   'from-slate-800 via-slate-600 to-slate-500',
-  Bronze:   'from-orange-900 via-orange-700 to-orange-500',
+const TIER_AVATAR_BG = {
+  Platinum: 'bg-surface-container-high text-primary',
+  Gold:     'bg-block-cream text-primary',
+  Silver:   'bg-surface-container text-secondary',
+  Bronze:   'bg-block-coral/30 text-primary',
 }
 
 export default function SBTCard({
@@ -41,43 +41,35 @@ export default function SBTCard({
 
   const maxScore     = TIER_SCORES[tier] || 800
   const scorePct     = Math.round((score / 900) * 100)
-  const gradient     = TIER_GRADIENTS[tier] || TIER_GRADIENTS.Silver
+  const avatarStyle  = TIER_AVATAR_BG[tier] || TIER_AVATAR_BG.Silver
   const isLarge      = size === 'lg'
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border transition-all duration-300 animate-pulse-gold
+      className={`relative overflow-hidden rounded-2xl border border-hairline bg-surface-soft shadow-card transition-all duration-300 hover:shadow-card-hover
         ${isLarge ? 'p-8' : 'p-5'}
-        ${tier === 'Gold' ? 'border-gold/40 shadow-gold' :
-          tier === 'Platinum' ? 'border-slate-400/30 shadow-[0_0_30px_rgba(203,213,225,0.2)]' :
-          'border-border'
-        }
       `}
-      style={{
-        background: `linear-gradient(135deg, #111827 60%, #1a1a2e 100%)`,
-      }}
     >
-      {/* Holographic sheen */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-[0.07] pointer-events-none`} />
-      <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-gradient-to-bl from-gold/10 to-transparent pointer-events-none" />
+      {/* Subtle decorative accent */}
+      <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-primary/[0.02] pointer-events-none" />
 
       {/* Header row */}
       <div className="relative flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           {/* Avatar */}
           <div
-            className={`rounded-2xl flex items-center justify-center font-display font-bold text-white
-              bg-gradient-to-br ${gradient}
+            className={`rounded-2xl flex items-center justify-center font-display font-bold
+              ${avatarStyle}
               ${isLarge ? 'w-16 h-16 text-2xl' : 'w-12 h-12 text-lg'}
             `}
           >
             {AVATAR_INITIALS(name)}
           </div>
           <div>
-            <h3 className={`font-display font-bold text-white ${isLarge ? 'text-2xl' : 'text-lg'}`}>
+            <h3 className={`font-display font-bold text-primary ${isLarge ? 'text-2xl' : 'text-lg'}`}>
               {name}
             </h3>
-            <p className="text-grey text-xs mt-0.5">{tagline}</p>
+            <p className="text-secondary text-xs mt-0.5">{tagline}</p>
           </div>
         </div>
         <TierBadge tier={tier} size={isLarge ? 'md' : 'sm'} />
@@ -86,13 +78,13 @@ export default function SBTCard({
       {/* Score */}
       <div className={`relative ${isLarge ? 'mt-8' : 'mt-5'}`}>
         <div className="flex items-end justify-between mb-2">
-          <span className="text-xs text-grey uppercase tracking-wider">Credit Score</span>
-          <span className={`font-display font-bold text-gradient-gold ${isLarge ? 'text-4xl' : 'text-2xl'}`}>
+          <span className="text-xs text-secondary uppercase tracking-wider font-mono">Credit Score</span>
+          <span className={`font-display font-bold text-primary ${isLarge ? 'text-4xl' : 'text-2xl'}`}>
             {score}
           </span>
         </div>
         <ProgressBar value={scorePct} variant="gold" size={isLarge ? 'lg' : 'md'} />
-        <div className="flex justify-between text-xs text-grey mt-1">
+        <div className="flex justify-between text-xs text-secondary mt-1">
           <span>300</span>
           <span>900</span>
         </div>
@@ -101,7 +93,7 @@ export default function SBTCard({
       {/* Verified Signals */}
       {isLarge && (
         <div className="relative mt-6">
-          <p className="text-xs text-grey uppercase tracking-wider mb-3">Verified Signals</p>
+          <p className="text-xs text-secondary uppercase tracking-wider mb-3 font-mono">Verified Signals</p>
           <div className="flex flex-wrap gap-2">
             {Object.entries(signals).map(([signal, verified]) => (
               <span
@@ -116,10 +108,10 @@ export default function SBTCard({
       )}
 
       {/* Wallet + Proof hash */}
-      <div className="relative mt-5 pt-4 border-t border-border/50 flex items-center justify-between">
-        <span className="text-xs text-grey font-mono truncate max-w-[60%]">{wallet}</span>
+      <div className="relative mt-5 pt-4 border-t border-hairline flex items-center justify-between">
+        <span className="text-xs text-secondary font-mono truncate max-w-[60%]">{wallet}</span>
         {mintedAt && (
-          <span className="text-xs text-grey/60">
+          <span className="text-xs text-secondary/60">
             Minted {new Date(mintedAt).toLocaleDateString('en-IN')}
           </span>
         )}

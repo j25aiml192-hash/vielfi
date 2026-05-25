@@ -35,12 +35,12 @@ const LOAN_HISTORY = [
 ]
 
 const REPUTATION_TIMELINE = [
-  { date: 'Mar 2024', event: 'SBT Minted',          icon: '🏅', color: 'text-gold' },
-  { date: 'Mar 2024', event: 'ZK Proof Generated',   icon: '🔐', color: 'text-indigo' },
-  { date: 'Mar 2024', event: 'GST Data Linked',       icon: '📋', color: 'text-teal' },
-  { date: 'Feb 2024', event: 'UPI History Verified',  icon: '📱', color: 'text-teal' },
-  { date: 'Jan 2024', event: 'Loan #1 Repaid Early',  icon: '✓',  color: 'text-teal' },
-  { date: 'Jul 2023', event: 'Loan #2 Funded',        icon: '💰', color: 'text-gold' },
+  { date: 'Mar 2024', event: 'SBT Minted',          icon: '🏅', color: 'text-primary' },
+  { date: 'Mar 2024', event: 'ZK Proof Generated',   icon: '🔐', color: 'text-block-lilac' },
+  { date: 'Mar 2024', event: 'GST Data Linked',       icon: '📋', color: 'text-semantic-success' },
+  { date: 'Feb 2024', event: 'UPI History Verified',  icon: '📱', color: 'text-semantic-success' },
+  { date: 'Jan 2024', event: 'Loan #1 Repaid Early',  icon: '✓',  color: 'text-semantic-success' },
+  { date: 'Jul 2023', event: 'Loan #2 Funded',        icon: '💰', color: 'text-primary' },
 ]
 
 function ScoreChart({ history }) {
@@ -54,16 +54,16 @@ function ScoreChart({ history }) {
         const pct = ((score - min) / range) * 100
         return (
           <div key={month} className="flex-1 flex flex-col items-center gap-1 group">
-            <span className="text-xs text-gold font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-xs text-primary font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
               {score}
             </span>
             <div
-              className="w-full rounded-t-lg bg-gradient-to-t from-gold/40 to-gold/70 transition-all duration-700 relative overflow-hidden"
+              className="w-full rounded-t-lg bg-gradient-to-t from-primary/20 to-primary/40 transition-all duration-700 relative overflow-hidden"
               style={{ height: `${pct}%`, minHeight: '8px' }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent shimmer" />
             </div>
-            <span className="text-xs text-grey">{month}</span>
+            <span className="text-xs text-secondary">{month}</span>
           </div>
         )
       })}
@@ -88,12 +88,12 @@ export default function Profile() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <p className="section-label mb-2">Your Identity</p>
-            <h1 className="font-display font-black text-4xl text-white">
+            <h1 className="font-display font-black text-4xl text-primary">
               Credit <span className="text-gradient-gold">Profile</span>
             </h1>
           </div>
           {!isConnected && (
-            <div className="card border border-gold/30 bg-gold/5 text-sm text-gold py-3 px-4 max-w-xs">
+            <div className="card border border-primary/20 bg-primary/5 text-sm text-primary py-3 px-4 max-w-xs">
               Connect wallet to see your live profile
             </div>
           )}
@@ -114,8 +114,8 @@ export default function Profile() {
                 { label: 'Current Score',  value: profile.score },
               ].map(({ label, value }) => (
                 <div key={label} className="text-center">
-                  <div className="font-display font-bold text-xl text-white">{value}</div>
-                  <div className="text-xs text-grey mt-0.5">{label}</div>
+                  <div className="font-display font-bold text-xl text-primary">{value}</div>
+                  <div className="text-xs text-secondary mt-0.5">{label}</div>
                 </div>
               ))}
             </div>
@@ -125,7 +125,7 @@ export default function Profile() {
           <div className="lg:col-span-2 space-y-4">
 
             {/* Tab bar */}
-            <div className="flex gap-2 p-1 bg-card rounded-xl border border-border w-fit">
+            <div className="flex gap-2 p-1 bg-surface-container rounded-full border border-hairline w-fit">
               {['overview', 'loans', 'timeline'].map((t) => (
                 <button
                   key={t}
@@ -141,31 +141,31 @@ export default function Profile() {
             {tab === 'overview' && (
               <div className="card animate-fade-in">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="font-display font-bold text-white">Credit Score History</h2>
+                  <h2 className="font-display font-bold text-primary">Credit Score History</h2>
                   <div className="flex items-center gap-2">
                     <span className="text-2xl font-display font-bold text-gradient-gold">{profile.score}</span>
                     <span className="badge badge-teal text-xs">+14 this month</span>
                   </div>
                 </div>
                 <ScoreChart history={SCORE_HISTORY} />
-                <div className="mt-6 grid grid-cols-3 gap-4 pt-4 border-t border-border">
+                <div className="mt-6 grid grid-cols-3 gap-4 pt-4 border-t border-hairline">
                   <div className="text-center">
-                    <div className="text-sm font-semibold text-white">6 months</div>
-                    <div className="text-xs text-grey">Score period</div>
+                    <div className="text-sm font-semibold text-primary">6 months</div>
+                    <div className="text-xs text-secondary">Score period</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-sm font-semibold text-teal">+142</div>
-                    <div className="text-xs text-grey">Total gain</div>
+                    <div className="text-sm font-semibold text-semantic-success">+142</div>
+                    <div className="text-xs text-secondary">Total gain</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-sm font-semibold text-gold">Gold</div>
-                    <div className="text-xs text-grey">Current tier</div>
+                    <div className="text-sm font-semibold text-primary">Gold</div>
+                    <div className="text-xs text-secondary">Current tier</div>
                   </div>
                 </div>
 
                 {/* Signal breakdown */}
-                <div className="mt-6 space-y-4 pt-4 border-t border-border">
-                  <h3 className="text-sm font-semibold text-white">Signal Breakdown</h3>
+                <div className="mt-6 space-y-4 pt-4 border-t border-hairline">
+                  <h3 className="text-sm font-semibold text-primary">Signal Breakdown</h3>
                   <ProgressBar value={82} variant="indigo" label="UPI Transaction History" showPct />
                   <ProgressBar value={74} variant="gold"   label="GST Filing Consistency"   showPct />
                   <ProgressBar value={66} variant="teal"   label="Rental Payment Record"    showPct />
@@ -176,7 +176,7 @@ export default function Profile() {
             {/* Loan history */}
             {tab === 'loans' && (
               <div className="card animate-fade-in">
-                <h2 className="font-display font-bold text-white mb-6">Loan History</h2>
+                <h2 className="font-display font-bold text-primary mb-6">Loan History</h2>
                 <div className="space-y-4">
                   {LOAN_HISTORY.map((loan) => {
                     const repaidPct = Math.round((loan.repaid / loan.amount) * 100)
@@ -184,25 +184,25 @@ export default function Profile() {
                       <div
                         key={loan.id}
                         onClick={() => navigate(`/loan/${loan.id}`)}
-                        className="rounded-xl bg-bg border border-border p-4 hover:border-gold/30 transition-all duration-200 cursor-pointer"
+                        className="rounded-xl bg-surface-soft border border-hairline p-4 hover:border-primary/20 transition-all duration-200 cursor-pointer"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold text-white">{loan.purpose}</span>
+                              <span className="font-semibold text-primary">{loan.purpose}</span>
                               <span className={`badge text-xs ${
                                 loan.status === 'Active' ? 'badge-teal' : 'badge-grey'
                               }`}>
                                 {loan.status}
                               </span>
                             </div>
-                            <div className="text-xs text-grey">
+                            <div className="text-xs text-secondary">
                               Started {loan.startDate} · {loan.duration}M term
                             </div>
                           </div>
                           <div className="text-right flex-shrink-0">
-                            <div className="font-display font-bold text-white">{formatINR(loan.amount)}</div>
-                            <div className="text-xs text-grey mt-0.5">
+                            <div className="font-display font-bold text-primary">{formatINR(loan.amount)}</div>
+                            <div className="text-xs text-secondary mt-0.5">
                               {formatINR(loan.repaid)} repaid
                             </div>
                           </div>
@@ -220,9 +220,9 @@ export default function Profile() {
             {/* Timeline */}
             {tab === 'timeline' && (
               <div className="card animate-fade-in">
-                <h2 className="font-display font-bold text-white mb-6">Reputation Timeline</h2>
+                <h2 className="font-display font-bold text-primary mb-6">Reputation Timeline</h2>
                 <div className="relative">
-                  <div className="absolute left-4 top-0 bottom-0 w-px bg-border" />
+                  <div className="absolute left-4 top-0 bottom-0 w-px bg-hairline" />
                   <div className="space-y-5 pl-10">
                     {REPUTATION_TIMELINE.map((item, i) => (
                       <div
@@ -230,13 +230,13 @@ export default function Profile() {
                         className="relative animate-slide-right"
                         style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'both' }}
                       >
-                        <div className="absolute -left-10 w-8 h-8 rounded-full bg-card border border-border flex items-center justify-center text-sm">
+                        <div className="absolute -left-10 w-8 h-8 rounded-full bg-surface-soft border border-hairline flex items-center justify-center text-sm">
                           {item.icon}
                         </div>
-                        <div className="rounded-xl bg-bg border border-border p-3 hover:border-gold/20 transition-colors">
+                        <div className="rounded-xl bg-surface-soft border border-hairline p-3 hover:border-primary/20 transition-colors">
                           <div className="flex items-center justify-between">
                             <span className={`font-medium text-sm ${item.color}`}>{item.event}</span>
-                            <span className="text-xs text-grey">{item.date}</span>
+                            <span className="text-xs text-secondary">{item.date}</span>
                           </div>
                         </div>
                       </div>

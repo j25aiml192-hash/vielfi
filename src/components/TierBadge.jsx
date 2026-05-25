@@ -6,35 +6,31 @@
 
 const TIER_CONFIG = {
   Platinum: {
-    bg: 'bg-gradient-to-r from-slate-300/20 to-slate-100/10',
-    border: 'border-slate-300/40',
-    text: 'text-slate-200',
-    dot: 'bg-slate-300',
-    glow: 'shadow-[0_0_12px_rgba(203,213,225,0.3)]',
+    bg: 'bg-surface-container-high',
+    border: 'border-hairline',
+    text: 'text-primary',
+    dot: 'bg-primary/60',
     label: 'Platinum',
   },
   Gold: {
-    bg: 'bg-gradient-to-r from-gold/20 to-yellow-400/10',
-    border: 'border-gold/40',
-    text: 'text-gold',
-    dot: 'bg-gold',
-    glow: 'shadow-gold',
+    bg: 'bg-block-cream',
+    border: 'border-block-cream',
+    text: 'text-primary',
+    dot: 'bg-accent-magenta',
     label: 'Gold',
   },
   Silver: {
-    bg: 'bg-gradient-to-r from-grey/20 to-grey/10',
-    border: 'border-grey/40',
-    text: 'text-grey',
-    dot: 'bg-grey',
-    glow: '',
+    bg: 'bg-surface-container',
+    border: 'border-hairline',
+    text: 'text-secondary',
+    dot: 'bg-secondary/50',
     label: 'Silver',
   },
   Bronze: {
-    bg: 'bg-gradient-to-r from-orange-900/30 to-orange-800/10',
-    border: 'border-orange-700/40',
-    text: 'text-orange-400',
-    dot: 'bg-orange-500',
-    glow: '',
+    bg: 'bg-block-coral/30',
+    border: 'border-block-coral/40',
+    text: 'text-primary',
+    dot: 'bg-block-coral',
     label: 'Bronze',
   },
 }
@@ -59,7 +55,7 @@ export default function TierBadge({ tier = 'Silver', size = 'md' }) {
   return (
     <span
       className={`inline-flex items-center rounded-full border font-semibold tracking-wide
-        ${config.bg} ${config.border} ${config.text} ${config.glow} ${sizeClass}`}
+        ${config.bg} ${config.border} ${config.text} ${sizeClass}`}
     >
       <span className={`rounded-full ${config.dot} ${dotSize}`} />
       {config.label}

@@ -46,15 +46,15 @@ function BorrowerDashboard() {
       {/* Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Credit Score', value: d.creditScore, sub: `+${d.scoreChange} this month`, color: 'text-gold' },
-          { label: 'Total Borrowed', value: formatINR(d.totalBorrowed), sub: 'All loans', color: 'text-white' },
-          { label: 'Total Repaid', value: formatINR(d.totalRepaid), sub: `${totalPct}% complete`, color: 'text-teal' },
-          { label: 'On-Time Payments', value: `${d.onTimePayments}`, sub: '100% streak', color: 'text-indigo' },
+          { label: 'Credit Score', value: d.creditScore, sub: `+${d.scoreChange} this month`, color: 'text-primary' },
+          { label: 'Total Borrowed', value: formatINR(d.totalBorrowed), sub: 'All loans', color: 'text-on-surface' },
+          { label: 'Total Repaid', value: formatINR(d.totalRepaid), sub: `${totalPct}% complete`, color: 'text-semantic-success' },
+          { label: 'On-Time Payments', value: `${d.onTimePayments}`, sub: '100% streak', color: 'text-block-lilac' },
         ].map(({ label, value, sub, color }) => (
           <div key={label} className="card text-center">
             <div className={`font-display font-bold text-2xl ${color}`}>{value}</div>
-            <div className="text-xs text-grey mt-1">{label}</div>
-            <div className="text-xs text-grey/60 mt-0.5">{sub}</div>
+            <div className="text-xs text-secondary mt-1">{label}</div>
+            <div className="text-xs text-secondary/60 mt-0.5">{sub}</div>
           </div>
         ))}
       </div>
@@ -62,7 +62,7 @@ function BorrowerDashboard() {
       {/* Active loans */}
       <div className="card">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="font-display font-bold text-white">Active Loans</h2>
+          <h2 className="font-display font-bold text-primary">Active Loans</h2>
           <button onClick={() => navigate('/feed')} className="btn-secondary text-xs px-4 py-2">
             Apply for Loan
           </button>
@@ -70,20 +70,20 @@ function BorrowerDashboard() {
         {d.activeLoans.map((loan) => {
           const fundedPct = Math.round((loan.funded / loan.amount) * 100)
           return (
-            <div key={loan.id} className="rounded-xl bg-bg border border-border p-5 hover:border-gold/20 transition-colors">
+            <div key={loan.id} className="rounded-xl bg-surface-soft border border-hairline p-5 hover:border-primary/20 transition-colors">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <span className="font-semibold text-white">{loan.purpose}</span>
-                  <div className="flex items-center gap-3 mt-1 text-sm text-grey">
+                  <span className="font-semibold text-primary">{loan.purpose}</span>
+                  <div className="flex items-center gap-3 mt-1 text-sm text-secondary">
                     <span>{formatINR(loan.amount)} total</span>
                     <span>·</span>
                     <span>{formatINR(loan.funded)} funded</span>
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <div className="text-sm text-grey">Next EMI</div>
-                  <div className="font-display font-bold text-gold">{formatINR(loan.nextEMI)}</div>
-                  <div className="text-xs text-grey">Due {loan.nextEMIDate}</div>
+                  <div className="text-sm text-secondary">Next EMI</div>
+                  <div className="font-display font-bold text-primary">{formatINR(loan.nextEMI)}</div>
+                  <div className="text-xs text-secondary">Due {loan.nextEMIDate}</div>
                 </div>
               </div>
               <div className="mt-4">
@@ -102,9 +102,9 @@ function BorrowerDashboard() {
 
       {/* Repayment schedule visual */}
       <div className="card">
-        <h2 className="font-display font-bold text-white mb-4">Overall Repayment</h2>
+        <h2 className="font-display font-bold text-primary mb-4">Overall Repayment</h2>
         <ProgressBar value={totalPct} variant="gold" size="lg" showPct />
-        <div className="flex justify-between text-xs text-grey mt-2">
+        <div className="flex justify-between text-xs text-secondary mt-2">
           <span>{formatINR(d.totalRepaid)} repaid</span>
           <span>{formatINR(d.totalBorrowed - d.totalRepaid)} remaining</span>
         </div>
@@ -123,26 +123,26 @@ function LenderDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Deployed', value: formatINR(d.totalDeployed), color: 'text-gold' },
-          { label: 'Active Loans',   value: d.activeLoans, color: 'text-white' },
-          { label: 'Total Returns',  value: formatINR(d.totalReturns), color: 'text-teal' },
-          { label: 'Avg APR',        value: `${d.avgReturn}%`, color: 'text-indigo' },
+          { label: 'Total Deployed', value: formatINR(d.totalDeployed), color: 'text-primary' },
+          { label: 'Active Loans',   value: d.activeLoans, color: 'text-on-surface' },
+          { label: 'Total Returns',  value: formatINR(d.totalReturns), color: 'text-semantic-success' },
+          { label: 'Avg APR',        value: `${d.avgReturn}%`, color: 'text-block-lilac' },
         ].map(({ label, value, color }) => (
           <div key={label} className="card text-center">
             <div className={`font-display font-bold text-2xl ${color}`}>{value}</div>
-            <div className="text-xs text-grey mt-1">{label}</div>
+            <div className="text-xs text-secondary mt-1">{label}</div>
           </div>
         ))}
       </div>
 
       {/* Impact banner */}
-      <div className="card border border-teal/20 bg-teal/5">
+      <div className="card border border-semantic-success/20 bg-block-mint/30">
         <div className="flex items-center gap-4">
           <div className="text-4xl">🌱</div>
           <div>
-            <h3 className="font-display font-bold text-white text-lg">Your Social Impact</h3>
-            <p className="text-grey text-sm mt-1">
-              You've helped <span className="text-teal font-semibold">{d.impactStories} Indians</span> access fair credit —
+            <h3 className="font-display font-bold text-primary text-lg">Your Social Impact</h3>
+            <p className="text-secondary text-sm mt-1">
+              You've helped <span className="text-semantic-success font-semibold">{d.impactStories} Indians</span> access fair credit —
               bypassing traditional gatekeepers.
             </p>
           </div>
@@ -152,7 +152,7 @@ function LenderDashboard() {
       {/* Portfolio */}
       <div className="card">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="font-display font-bold text-white">Portfolio</h2>
+          <h2 className="font-display font-bold text-primary">Portfolio</h2>
           <button onClick={() => navigate('/feed')} className="btn-primary text-xs px-4 py-2">
             Fund More
           </button>
@@ -160,7 +160,7 @@ function LenderDashboard() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border text-xs text-grey text-left">
+              <tr className="border-b border-hairline text-xs text-secondary text-left">
                 <th className="pb-3 font-medium">Borrower</th>
                 <th className="pb-3 font-medium">Tier</th>
                 <th className="pb-3 font-medium text-right">Invested</th>
@@ -168,13 +168,13 @@ function LenderDashboard() {
                 <th className="pb-3 font-medium text-right">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/50">
+            <tbody className="divide-y divide-hairline">
               {d.portfolio.map((item) => (
-                <tr key={item.name} className="hover:bg-white/2 transition-colors">
-                  <td className="py-3 font-medium text-white">{item.name}</td>
+                <tr key={item.name} className="hover:bg-primary/5 transition-colors">
+                  <td className="py-3 font-medium text-primary">{item.name}</td>
                   <td className="py-3"><TierBadge tier={item.tier} size="sm" /></td>
-                  <td className="py-3 text-right text-grey">{formatINR(item.invested)}</td>
-                  <td className="py-3 text-right text-teal font-semibold">+{formatINR(item.returns)}</td>
+                  <td className="py-3 text-right text-secondary">{formatINR(item.invested)}</td>
+                  <td className="py-3 text-right text-semantic-success font-semibold">+{formatINR(item.returns)}</td>
                   <td className="py-3 text-right">
                     <span className={`badge text-xs ${item.status === 'Active' ? 'badge-teal' : 'badge-grey'}`}>
                       {item.status}
@@ -203,19 +203,19 @@ export default function Dashboard() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
             <p className="section-label mb-2">Overview</p>
-            <h1 className="font-display font-black text-4xl text-white">
+            <h1 className="font-display font-black text-4xl text-primary">
               Your <span className="text-gradient-gold">Dashboard</span>
             </h1>
           </div>
           {!isConnected && (
-            <div className="text-sm text-grey border border-border rounded-xl px-4 py-3 bg-card">
+            <div className="text-sm text-secondary border border-hairline rounded-xl px-4 py-3 bg-surface-soft">
               Showing demo data — connect wallet for live data
             </div>
           )}
         </div>
 
         {/* Role switcher */}
-        <div className="flex gap-2 p-1 bg-card rounded-xl border border-border w-fit mb-8">
+        <div className="flex gap-2 p-1 bg-surface-container rounded-full border border-hairline w-fit mb-8">
           <button
             onClick={() => setRole('borrower')}
             className={`tab-btn ${role === 'borrower' ? 'active' : ''}`}
