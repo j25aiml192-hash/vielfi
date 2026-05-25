@@ -119,17 +119,35 @@ export default function ChatBot({ address }) {
         )}
       </button>
 
-      {/* Chat window */}
+      {/* ── Full-screen blur backdrop ── */}
+      {open && (
+        <div
+          onClick={() => setOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9990,
+            background: 'rgba(10,10,10,0.35)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            animation: 'backdropFadeIn 0.25s ease',
+          }}
+        />
+      )}
+
+      {/* ── Chat window ── */}
       {open && (
         <div style={{
           position: 'fixed', bottom: 96, right: 28, zIndex: 9998,
-          width: 390, height: 560, borderRadius: 20,
-          background: '#fff',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.22), 0 0 0 1px rgba(201,149,42,0.12)',
+          width: 390, height: 560, borderRadius: 24,
+          /* Glassmorphism */
+          background: 'rgba(255,252,245,0.72)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          boxShadow: '0 32px 80px rgba(0,0,0,0.28), 0 0 0 1px rgba(201,149,42,0.22), inset 0 1px 0 rgba(255,255,255,0.6)',
           display: 'flex', flexDirection: 'column', overflow: 'hidden',
-          border: '1px solid rgba(201,149,42,0.18)',
-          animation: 'chatSlideIn 0.28s cubic-bezier(0.16,1,0.3,1)',
+          border: '1px solid rgba(201,149,42,0.25)',
+          animation: 'chatSlideIn 0.3s cubic-bezier(0.16,1,0.3,1)',
         }}>
+
 
           {/* ── Header ── */}
           <div style={{
@@ -357,6 +375,10 @@ export default function ChatBot({ address }) {
         @keyframes chatSlideIn {
           from { opacity: 0; transform: translateY(16px) scale(0.97); }
           to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes backdropFadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
         }
       `}</style>
     </>
