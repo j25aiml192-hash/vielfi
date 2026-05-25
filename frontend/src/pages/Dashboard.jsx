@@ -1,355 +1,448 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import ProgressBar from '../components/ProgressBar.jsx'
-import TierBadge from '../components/TierBadge.jsx'
+import {
+  TrendingUp, DollarSign, CheckCircle, Clock, AlertTriangle,
+  Calendar, Zap, Trophy, FileText, Star, ChevronRight, ArrowUp
+} from 'lucide-react'
+import { getBorrowerDashboard, getLenderDashboard } from '../api/index.js'
 import { useWallet } from '../context/WalletContext.jsx'
-import { getMarketplaceFeed } from '../api/index.js'
+import AIRecommendations from '../components/AIRecommendations.jsx'
+import LoanHistory from '../components/LoanHistory.jsx'
+import StarRating from '../components/StarRating.jsx'
+import SBTCard from '../components/SBTCard.jsx'
 
-/* ── helpers ── */
-const formatINR = (n = 0) =>
-  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
+const DEMO_ADDRESS = '0x3d4613bfFc15F8d46Df148F62C31B6d32575B002'
 
-const normalizeKey = (v) => String(v || '').trim().toLowerCase().replace(/[\s_-]+/g, '')
-const normalizeAddress = (v) => String(v || '').trim().toLowerCase()
-
-const adaptLoan = (loan) => {
-  const amount        = Number(loan.amount || 0)
-  const fundedAmount  = Number(loan.fundedAmount ?? loan.funded ?? 0)
-  const durationMonths = Number(loan.durationMonths || loan.duration || 12)
-  const interestRate  = Number(loan.apr ?? loan.interestRate ?? 12)
-  return {
-    ...loan,
-    id:           String(loan.id),
-    borrowerName: loan.borrowerName || loan.borrower || 'Borrower',
-    borrower:     loan.borrower || loan.borrowerName || '',
-    borrowerWallet: loan.borrowerWallet || loan.borrowerAddress || loan.wallet || loan.address || '',
-    profileId:    loan.profileId || loan.profile || loan.borrowerProfile || '',
-    tier:         loan.tier || 'Silver',
-    purpose:      loan.purpose || loan.title || 'Loan',
-    amount, fundedAmount, durationMonths, interestRate,
-    emiAmount:    Number(loan.emiAmount || Math.round((amount * (1 + interestRate / 100)) / Math.max(durationMonths, 1))),
-    lenderCount:  Number(loan.lenderCount || (Array.isArray(loan.lenders) ? loan.lenders.length : 0)),
-    daysRemaining: Number(loan.daysRemaining ?? loan.daysLeft ?? 30),
-    status:       loan.status || 'active',
-    lenders:      Array.isArray(loan.lenders) ? loan.lenders : [],
-  }
-}
-
-const DEMO_BORROWER_LOAN = adaptLoan({
-  id: 'demo_borrow_001', borrowerName: 'Rahul Sharma', borrower: 'rahul_shopkeeper',
-  tier: 'Gold', cibilScore: 762, amount: 200000, fundedAmount: 154000,
-  lenderCount: 8, apr: 11, purpose: 'Working Capital', duration: 12,
-  emiAmount: 18500, status: 'active',
-})
-
-const DEMO_FUNDED_LOANS = [
-  adaptLoan({ id: 'demo_f1', borrowerName: 'Priya Nair',  tier: 'Platinum', amount: 350000, fundedAmount: 350000, lenderCount: 14, apr: 9,  purpose: 'Equipment', duration: 18, emiAmount: 21500, status: 'funded' }),
-  adaptLoan({ id: 'demo_f2', borrowerName: 'Anita Meena', tier: 'Silver',   amount: 150000, fundedAmount: 150000, lenderCount: 4,  apr: 13, purpose: 'Inventory', duration: 6,  emiAmount: 26000, status: 'repaid' }),
-]
-
-const loanMatchesBorrower = (loan, address) => {
-  if (!address) return false
-  const wallet = normalizeAddress(address)
-  const wallets = [loan.borrowerWallet, loan.borrowerAddress, loan.wallet, loan.address].map(normalizeAddress)
-  if (wallets.includes(wallet)) return true
-  const key = normalizeKey(address)
-  return [loan.borrower, loan.borrowerName, loan.profileId].some(v => normalizeKey(v) === key)
-}
-
-const loanMatchesLender = (loan, address) => {
-  if (!address) return false
-  const wallet = normalizeAddress(address)
-  return [loan.lender, loan.lenderAddress, loan.fundedBy, ...(Array.isArray(loan.lenders) ? loan.lenders : [])]
-    .some(v => normalizeAddress(v?.address || v) === wallet)
-}
-
-const isFunded = (loan) =>
-  loan.status === 'funded' || loan.status === 'repaid' || (loan.amount > 0 && loan.fundedAmount >= loan.amount)
-
-/* ── Skeleton ── */
-function Skeleton() {
+// ── Stat card ──────────────────────────────────────────────────────────────
+function StatCard({ label, value, sub, icon, color = '#D4AF37', change }) {
   return (
-    <div className="space-y-6 animate-pulse">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[0,1,2,3].map(i => (
-          <div key={i} className="card">
-            <div className="h-7 bg-hairline rounded w-2/3 mx-auto" />
-            <div className="h-3 bg-hairline rounded w-1/2 mx-auto mt-3" />
-          </div>
-        ))}
+    <div style={{
+      background: '#fff', border: '1px solid #E5E7EB', borderRadius: 16,
+      padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 8,
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: 10,
+          background: color + '18', color,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          {icon}
+        </div>
+        {change !== undefined && (
+          <span style={{
+            fontSize: 11, fontWeight: 700,
+            color: change >= 0 ? '#10B981' : '#EF4444',
+            background: change >= 0 ? '#DCFCE7' : '#FEE2E2',
+            padding: '2px 7px', borderRadius: 20,
+            display: 'flex', alignItems: 'center', gap: 3,
+          }}>
+            <ArrowUp size={10} style={{ transform: change < 0 ? 'rotate(180deg)' : 'none' }} />
+            {Math.abs(change)}
+          </span>
+        )}
       </div>
-      <div className="card">
-        <div className="h-5 bg-hairline rounded w-40 mb-4" />
-        <div className="h-20 bg-hairline rounded-xl" />
+      <div style={{ fontSize: 26, fontWeight: 800, color: '#111827', fontFamily: 'JetBrains Mono, monospace' }}>
+        {value}
+      </div>
+      <div style={{ fontSize: 13, color: '#6B7280', fontWeight: 500 }}>{label}</div>
+      {sub && <div style={{ fontSize: 11, color: '#9CA3AF' }}>{sub}</div>}
+    </div>
+  )
+}
+
+// ── Timeline event ─────────────────────────────────────────────────────────
+function TimelineItem({ event, points, icon, date }) {
+  const ICONS = {
+    CheckCircle: <CheckCircle size={14} />,
+    Zap:         <Zap size={14} />,
+    FileText:    <FileText size={14} />,
+    Trophy:      <Trophy size={14} />,
+    DollarSign:  <DollarSign size={14} />,
+  }
+  return (
+    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+      <div style={{
+        width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+        background: '#FFFBEB', color: '#D4AF37',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        border: '2px solid #FEF3C7',
+      }}>
+        {ICONS[icon] || <CheckCircle size={14} />}
+      </div>
+      <div style={{ flex: 1, paddingTop: 3 }}>
+        <div style={{ fontSize: 13, color: '#111827', fontWeight: 500 }}>{event}</div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>{date}</div>
+      </div>
+      <span style={{
+        fontSize: 12, fontWeight: 700, color: '#10B981',
+        background: '#DCFCE7', padding: '2px 8px', borderRadius: 10,
+      }}>
+        +{points} pts
+      </span>
+    </div>
+  )
+}
+
+// ── BORROWER DASHBOARD ─────────────────────────────────────────────────────
+function BorrowerView({ address }) {
+  const [data, setData]   = useState(null)
+  const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    getBorrowerDashboard(address).then(setData).finally(() => setLoading(false))
+  }, [address])
+
+  if (loading) return <div style={{ padding: 32, textAlign: 'center', color: '#9CA3AF' }}>Loading dashboard…</div>
+  if (!data)   return null
+
+  const daysUntilEmi = data.next_emi?.days_remaining
+  const showEmiAlert = daysUntilEmi !== null && daysUntilEmi <= 7
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* Welcome */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: '#111827' }}>
+            Welcome back, {data.name?.split(' ')[0]} 👋
+          </h1>
+          <p style={{ color: '#6B7280', marginTop: 4 }}>Here's your credit overview</p>
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button
+            onClick={() => navigate('/feed')}
+            style={{
+              padding: '10px 20px', borderRadius: 10, border: '1px solid #E5E7EB',
+              background: '#fff', color: '#374151', fontWeight: 600, cursor: 'pointer',
+              fontSize: 14,
+            }}
+          >
+            Browse Loans
+          </button>
+          <button
+            onClick={() => navigate('/verify')}
+            style={{
+              padding: '10px 20px', borderRadius: 10, border: 'none',
+              background: 'linear-gradient(135deg,#D4AF37,#B8960C)',
+              color: '#1A1A1A', fontWeight: 700, cursor: 'pointer', fontSize: 14,
+            }}
+          >
+            + List a Loan
+          </button>
+        </div>
+      </div>
+
+      {/* EMI Alert */}
+      {showEmiAlert && data.next_emi && (
+        <div style={{
+          background: '#FFFBEB', border: '1px solid #FCD34D',
+          borderRadius: 12, padding: '14px 18px',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <AlertTriangle size={18} color="#D97706" />
+            <div>
+              <div style={{ fontWeight: 700, color: '#92400E', fontSize: 14 }}>
+                EMI Due in {daysUntilEmi} day{daysUntilEmi !== 1 ? 's' : ''}
+              </div>
+              <div style={{ fontSize: 12, color: '#B45309' }}>
+                ₹{data.next_emi.amount?.toLocaleString()} due on {data.next_emi.due_date} · Pay on time for +15 score points
+              </div>
+            </div>
+          </div>
+          <button style={{
+            padding: '8px 18px', borderRadius: 8, border: 'none',
+            background: 'linear-gradient(135deg,#D4AF37,#B8960C)',
+            color: '#1A1A1A', fontWeight: 700, cursor: 'pointer', fontSize: 13,
+          }}>
+            Pay Now
+          </button>
+        </div>
+      )}
+
+      {/* Stats grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+        <StatCard label="CIBIL Score" value={data.cibil_score} icon={<Star size={18} />} color="#D4AF37" change={data.score_change} />
+        <StatCard label="Total Borrowed" value={`₹${((data.total_borrowed || 0) / 1000).toFixed(0)}K`} icon={<DollarSign size={18} />} color="#6366F1" />
+        <StatCard label="Repayment Rate" value="100%" icon={<CheckCircle size={18} />} color="#10B981" />
+        <StatCard label="Active Loans" value={data.active_loans?.length || 0} icon={<TrendingUp size={18} />} color="#F59E0B" />
+      </div>
+
+      {/* Main 2-col layout */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {/* Active Loans */}
+          {data.active_loans?.length > 0 && (
+            <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 16, overflow: 'hidden' }}>
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid #F3F4F6', fontWeight: 700, fontSize: 15 }}>
+                Active Loans
+              </div>
+              {data.active_loans.map((loan, i) => (
+                <div key={i} style={{
+                  padding: '14px 20px', borderBottom: i < data.active_loans.length - 1 ? '1px solid #F9FAFB' : 'none',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 14, color: '#111827' }}>{loan.purpose}</div>
+                    <div style={{ fontSize: 12, color: '#6B7280', marginTop: 3 }}>
+                      {loan.emis_paid}/{loan.emis_total} EMIs paid · {loan.apr}% APR
+                    </div>
+                    <div style={{
+                      marginTop: 6, height: 6, background: '#F3F4F6', borderRadius: 3,
+                      width: 160, overflow: 'hidden',
+                    }}>
+                      <div style={{
+                        width: `${(loan.emis_paid / loan.emis_total) * 100}%`,
+                        height: '100%', background: '#D4AF37', borderRadius: 3,
+                      }} />
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: 800, fontSize: 16, fontFamily: 'JetBrains Mono, monospace' }}>
+                      ₹{(loan.amount / 1000).toFixed(0)}K
+                    </div>
+                    <button
+                      onClick={() => navigate(`/loan/${loan.id}`)}
+                      style={{
+                        marginTop: 4, fontSize: 12, color: '#D4AF37', fontWeight: 600,
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: 3, marginLeft: 'auto',
+                      }}
+                    >
+                      View <ChevronRight size={12} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Reputation Timeline */}
+          {data.reputation_timeline?.length > 0 && (
+            <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 16, padding: 20 }}>
+              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Reputation Timeline</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {data.reputation_timeline.map((t, i) => (
+                  <TimelineItem key={i} {...t} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* AI Tips */}
+          {data.ai_tips?.length > 0 && (
+            <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 16, padding: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: 8, background: '#EDE9FE',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Zap size={14} color="#7C3AED" />
+                </div>
+                <span style={{ fontWeight: 700, fontSize: 15 }}>AI Insights for You</span>
+                <span style={{ fontSize: 10, background: '#1A1A2E', color: '#D4AF37', padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>
+                  Groq AI
+                </span>
+              </div>
+              {data.ai_tips.map((tip, i) => (
+                <div key={i} style={{
+                  padding: '10px 14px', background: '#FFFBEB',
+                  borderLeft: '3px solid #D4AF37', borderRadius: '0 8px 8px 0',
+                  fontSize: 13, color: '#374151', marginBottom: 8, lineHeight: 1.5,
+                }}>
+                  {tip}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Loan History */}
+          <LoanHistory address={address} />
+        </div>
+
+        {/* Right sidebar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <SBTCard
+            name={data.name}
+            address={address}
+            score={data.cibil_score}
+            tier="Gold"
+            signals={{ upi: true, gst: true, rental: false }}
+            compact
+          />
+          <AIRecommendations role="borrower" address={address} creditScore={data.cibil_score} tier="Gold" />
+        </div>
       </div>
     </div>
   )
 }
 
-/* ── Borrower dashboard ── */
-function BorrowerDashboard({ loans, loading }) {
+// ── LENDER DASHBOARD ───────────────────────────────────────────────────────
+function LenderView({ address }) {
+  const [data, setData]     = useState(null)
+  const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
-  if (loading) return <Skeleton />
 
-  const loan        = loans[0] || DEMO_BORROWER_LOAN
-  const totalBorrowed = loans.reduce((s, l) => s + l.amount, 0)
-  const totalRepaid   = loans.reduce((s, l) => s + Math.min(l.fundedAmount, l.amount), 0)
-  const totalPct      = totalBorrowed > 0 ? Math.round((totalRepaid / totalBorrowed) * 100) : 0
-  const creditScore   = loan.cibilScore || 762
+  useEffect(() => {
+    getLenderDashboard(address).then(setData).finally(() => setLoading(false))
+  }, [address])
+
+  if (loading) return <div style={{ padding: 32, textAlign: 'center', color: '#9CA3AF' }}>Loading portfolio…</div>
+  if (!data)   return null
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Stats row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Credit Score',     value: creditScore,           color: 'text-primary' },
-          { label: 'Total Borrowed',   value: formatINR(totalBorrowed), color: 'text-on-surface' },
-          { label: 'Total Repaid',     value: formatINR(totalRepaid),   color: 'text-semantic-success' },
-          { label: 'On-Time Payments', value: `${Math.max(1, loans.length * 4)}`, color: 'text-block-lilac' },
-        ].map(({ label, value, color }) => (
-          <div key={label} className="card text-center">
-            <div className={`font-display font-bold text-2xl ${color}`}>{value}</div>
-            <div className="text-xs text-secondary mt-1">{label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* CTA banner */}
-      <div className="card border border-hairline bg-surface-soft flex items-center justify-between gap-4">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h3 className="font-display font-bold text-primary">Need more funds?</h3>
-          <p className="text-secondary text-sm mt-0.5">List a new loan and get funded by the community.</p>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: '#111827' }}>Your Portfolio</h1>
+          <p style={{ color: '#6B7280', marginTop: 4 }}>
+            Impact Score: <strong style={{ color: '#D4AF37' }}>{data.impact_score}/100</strong> · {data.people_helped} people funded
+          </p>
         </div>
-        <button onClick={() => navigate('/verify')} className="btn-primary flex-shrink-0">
-          List a Loan →
+        <button
+          onClick={() => navigate('/feed')}
+          style={{
+            padding: '10px 20px', borderRadius: 10, border: 'none',
+            background: 'linear-gradient(135deg,#D4AF37,#B8960C)',
+            color: '#1A1A1A', fontWeight: 700, cursor: 'pointer', fontSize: 14,
+          }}
+        >
+          Browse Loans →
         </button>
       </div>
 
-      {/* Active loans */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="font-display font-bold text-primary">Active Loans</h2>
-          <button onClick={() => navigate('/feed')} className="btn-secondary text-xs px-4 py-2">
-            View Marketplace
-          </button>
-        </div>
-        <div className="space-y-3">
-          {loans.map((l) => {
-            const fundedPct = l.amount > 0 ? Math.round((l.fundedAmount / l.amount) * 100) : 0
-            return (
-              <div key={l.id} className="rounded-xl bg-surface-soft border border-hairline p-5 hover:border-primary/20 transition-colors">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <span className="font-semibold text-primary">{l.purpose}</span>
-                    <div className="flex items-center gap-3 mt-1 text-sm text-secondary">
-                      <span>{formatINR(l.amount)} total</span>
-                      <span>·</span>
-                      <span>{formatINR(l.fundedAmount)} funded</span>
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+        <StatCard label="Total Invested" value={`₹${((data.total_invested || 0) / 1000).toFixed(0)}K`} icon={<DollarSign size={18} />} color="#6366F1" />
+        <StatCard label="Returns Earned" value={`₹${((data.total_earned || 0) / 1000).toFixed(1)}K`} icon={<TrendingUp size={18} />} color="#10B981" />
+        <StatCard label="Active Loans" value={data.active_investments || 0} icon={<CheckCircle size={18} />} color="#D4AF37" />
+        <StatCard label="Avg APR" value={`${data.avg_apr}%`} icon={<Star size={18} />} color="#F59E0B" />
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {/* Portfolio table */}
+          <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 16, overflow: 'hidden' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #F3F4F6', fontWeight: 700, fontSize: 15 }}>
+              Active Investments
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: '#F9FAFB' }}>
+                    {['Borrower', 'Tier', 'Amount', 'APR', 'EMI Status', 'Earned', 'Rating'].map(h => (
+                      <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 12, color: '#6B7280', fontWeight: 600 }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(data.portfolio || []).map((p, i) => (
+                    <tr key={i} style={{ borderTop: '1px solid #F3F4F6' }}>
+                      <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#111827' }}>{p.borrower}</td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <span style={{
+                          padding: '2px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
+                          background: p.tier === 'Platinum' ? '#EDE9FE' : p.tier === 'Gold' ? '#FEF3C7' : p.tier === 'Silver' ? '#F3F4F6' : '#FEF3C7',
+                          color: p.tier === 'Platinum' ? '#7C3AED' : p.tier === 'Gold' ? '#D97706' : p.tier === 'Silver' ? '#6B7280' : '#92400E',
+                        }}>{p.tier}</span>
+                      </td>
+                      <td style={{ padding: '12px 16px', fontSize: 13, fontFamily: 'JetBrains Mono, monospace' }}>
+                        ₹{(p.amount / 1000).toFixed(0)}K
+                      </td>
+                      <td style={{ padding: '12px 16px', fontSize: 13, color: '#10B981', fontWeight: 600 }}>{p.apr}%</td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <span style={{
+                          padding: '2px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
+                          background: p.emi_status === 'on_time' ? '#DCFCE7' : '#FEF3C7',
+                          color: p.emi_status === 'on_time' ? '#15803D' : '#D97706',
+                        }}>
+                          {p.emi_status === 'on_time' ? 'On Time' : 'Pending'}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 700, color: '#10B981', fontFamily: 'JetBrains Mono, monospace' }}>
+                        ₹{p.earned?.toLocaleString()}
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <StarRating rating={p.rating} size="sm" />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Monthly returns bar chart */}
+          {data.monthly_returns?.length > 0 && (
+            <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 16, padding: 20 }}>
+              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Monthly Returns</div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', height: 80 }}>
+                {data.monthly_returns.map((m, i) => {
+                  const max = Math.max(...data.monthly_returns.map(x => x.amount))
+                  const h = Math.max(8, (m.amount / max) * 70)
+                  return (
+                    <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                      <div style={{ fontSize: 10, color: '#374151', fontWeight: 600 }}>
+                        ₹{(m.amount / 1000).toFixed(1)}K
+                      </div>
+                      <div style={{
+                        width: '100%', height: h, background: i === data.monthly_returns.length - 1
+                          ? 'linear-gradient(180deg,#D4AF37,#B8960C)'
+                          : '#E5E7EB',
+                        borderRadius: '4px 4px 0 0', transition: 'height 0.8s ease',
+                      }} />
+                      <div style={{ fontSize: 10, color: '#9CA3AF' }}>{m.month}</div>
                     </div>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <div className="text-sm text-secondary">EMI</div>
-                    <div className="font-display font-bold text-primary">{formatINR(l.emiAmount)}</div>
-                    <div className="text-xs text-secondary">{l.daysRemaining}d remaining</div>
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <ProgressBar value={fundedPct} variant="gold" size="sm" showPct />
-                </div>
+                  )
+                })}
               </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Overall repayment */}
-      <div className="card">
-        <h2 className="font-display font-bold text-primary mb-4">Overall Repayment</h2>
-        <ProgressBar value={totalPct} variant="gold" size="lg" showPct />
-        <div className="flex justify-between text-xs text-secondary mt-2">
-          <span>{formatINR(totalRepaid)} repaid</span>
-          <span>{formatINR(totalBorrowed - totalRepaid)} remaining</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* ── Lender dashboard ── */
-function LenderDashboard({ fundedLoans, loading }) {
-  const navigate = useNavigate()
-  if (loading) return <Skeleton />
-
-  const totalDeployed = fundedLoans.reduce((s, l) => s + l.fundedAmount, 0)
-  const activeCount   = fundedLoans.filter(l => l.status !== 'repaid').length
-  const totalReturns  = fundedLoans.reduce((s, l) => s + Math.round(l.fundedAmount * (l.interestRate / 100)), 0)
-  const avgReturn     = fundedLoans.length
-    ? (fundedLoans.reduce((s, l) => s + l.interestRate, 0) / fundedLoans.length).toFixed(1)
-    : '0.0'
-
-  return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Stats row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Total Deployed', value: formatINR(totalDeployed), color: 'text-primary' },
-          { label: 'Active Loans',   value: activeCount,              color: 'text-on-surface' },
-          { label: 'Total Returns',  value: formatINR(totalReturns),  color: 'text-semantic-success' },
-          { label: 'Avg APR',        value: `${avgReturn}%`,          color: 'text-block-lilac' },
-        ].map(({ label, value, color }) => (
-          <div key={label} className="card text-center">
-            <div className={`font-display font-bold text-2xl ${color}`}>{value}</div>
-            <div className="text-xs text-secondary mt-1">{label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Impact banner */}
-      <div className="card border border-semantic-success/20 bg-block-mint/30">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-semantic-success/15 border border-semantic-success/30 flex items-center justify-center text-semantic-success font-display font-bold text-lg">
-            {activeCount}
-          </div>
-          <div>
-            <h3 className="font-display font-bold text-primary text-lg">Your Social Impact</h3>
-            <p className="text-secondary text-sm mt-1">
-              You've helped <span className="text-semantic-success font-semibold">{fundedLoans.length} Indians</span> access fair credit — bypassing traditional gatekeepers.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Portfolio table */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="font-display font-bold text-primary">Portfolio</h2>
-          <button onClick={() => navigate('/feed')} className="btn-primary text-xs px-4 py-2">Fund More</button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-hairline text-xs text-secondary text-left">
-                <th className="pb-3 font-medium">Borrower</th>
-                <th className="pb-3 font-medium">Tier</th>
-                <th className="pb-3 font-medium text-right">Funded</th>
-                <th className="pb-3 font-medium text-right">APR</th>
-                <th className="pb-3 font-medium text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-hairline">
-              {fundedLoans.map((loan) => (
-                <tr key={loan.id} className="hover:bg-primary/5 transition-colors">
-                  <td className="py-3 font-medium text-primary">{loan.borrowerName}</td>
-                  <td className="py-3"><TierBadge tier={loan.tier} size="sm" /></td>
-                  <td className="py-3 text-right text-secondary">{formatINR(loan.fundedAmount)}</td>
-                  <td className="py-3 text-right text-semantic-success font-semibold">{loan.interestRate}%</td>
-                  <td className="py-3 text-right">
-                    <span className={`badge text-xs ${loan.status === 'repaid' ? 'badge-grey' : 'badge-teal'}`}>
-                      {loan.status === 'repaid' ? 'Repaid' : 'Funded'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* ════════════════════════════
-   MAIN EXPORT
-════════════════════════════ */
-export default function Dashboard() {
-  const { address, isConnected, isBorrower, isLender } = useWallet()
-  const navigate  = useNavigate()
-  const [loans,    setLoans]    = useState([])
-  const [loading,  setLoading]  = useState(true)
-  const [apiError, setApiError] = useState('')
-  const [tab,      setTab]      = useState('borrower')
-
-  /* Sync tab with wallet role */
-  useEffect(() => {
-    if (isBorrower && !isLender) setTab('borrower')
-    if (!isBorrower && isLender)  setTab('lender')
-  }, [isBorrower, isLender])
-
-  /* Fetch loans */
-  useEffect(() => {
-    let alive = true
-    setLoading(true)
-    getMarketplaceFeed()
-      .then(data => { if (alive) { setLoans(Array.isArray(data) ? data.map(adaptLoan) : []); setApiError('') } })
-      .catch(err => { if (alive) { setLoans([]); setApiError(err.message || 'Network error') } })
-      .finally(() => { if (alive) setLoading(false) })
-    return () => { alive = false }
-  }, [])
-
-  const borrowerLoans = useMemo(() => {
-    const matched = loans.filter(l => loanMatchesBorrower(l, address))
-    if (matched.length > 0) return matched
-    const rahul = loans.find(l =>
-      normalizeKey(l.borrower).includes('rahul') || normalizeKey(l.borrowerName).includes('rahul')
-    )
-    return [rahul || DEMO_BORROWER_LOAN]
-  }, [address, loans])
-
-  const fundedLoans = useMemo(() => {
-    const matched = loans.filter(l => loanMatchesLender(l, address))
-    if (matched.length > 0) return matched
-    const feedFunded = loans.filter(isFunded)
-    if (feedFunded.length > 0) return feedFunded
-    return DEMO_FUNDED_LOANS
-  }, [address, loans])
-
-  return (
-    <div className="min-h-screen pt-24 pb-16 px-4">
-      <div className="max-w-5xl mx-auto">
-
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-          <div>
-            <p className="section-label mb-2">Overview</p>
-            <h1 className="font-display font-black text-4xl text-primary">
-              Your <span className="text-gradient-gold">Dashboard</span>
-            </h1>
-          </div>
-          {!isConnected && (
-            <div className="text-sm text-secondary border border-hairline rounded-xl px-4 py-3 bg-surface-soft">
-              Showing demo data — connect wallet for live data
             </div>
           )}
         </div>
 
-        {apiError && (
-          <div className="mb-6 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-sm px-4 py-3">
-            Marketplace API unavailable. Showing demo data. ({apiError})
-          </div>
-        )}
-
-        {/* Tab switcher */}
-        <div className="flex gap-2 p-1 bg-surface-container rounded-full border border-hairline w-fit mb-8">
-          <button
-            onClick={() => setTab('borrower')}
-            className={`tab-btn ${tab === 'borrower' ? 'active' : ''}`}
-          >
-            Borrower
-          </button>
-          <button
-            onClick={() => setTab('lender')}
-            className={`tab-btn ${tab === 'lender' ? 'active' : ''}`}
-          >
-            Lender
-          </button>
-        </div>
-
-        {tab === 'borrower' ? (
-          <BorrowerDashboard loans={borrowerLoans} loading={loading} />
-        ) : (
-          <LenderDashboard fundedLoans={fundedLoans} loading={loading} />
-        )}
+        {/* AI recommendations sidebar */}
+        <AIRecommendations role="lender" address={address} onFund={(id) => navigate(`/loan/${id}`)} />
       </div>
+    </div>
+  )
+}
+
+// ── MAIN DASHBOARD PAGE ────────────────────────────────────────────────────
+export default function Dashboard() {
+  const { account, userRole } = useWallet?.() || {}
+  const address = account || DEMO_ADDRESS
+  const [activeTab, setActiveTab] = useState(userRole === 'lender' ? 'lender' : 'borrower')
+
+  return (
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
+      {/* Role tabs */}
+      <div style={{
+        display: 'inline-flex', background: '#F3F4F6', borderRadius: 10,
+        padding: 4, gap: 4, marginBottom: 28,
+      }}>
+        {['borrower', 'lender'].map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            style={{
+              padding: '8px 20px', borderRadius: 8, border: 'none',
+              fontWeight: 600, fontSize: 14, cursor: 'pointer',
+              background: activeTab === tab ? '#fff' : 'transparent',
+              color: activeTab === tab ? '#111827' : '#6B7280',
+              boxShadow: activeTab === tab ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              textTransform: 'capitalize', transition: 'all 0.15s',
+            }}
+          >
+            {tab === 'borrower' ? '👤 Borrower' : '💰 Lender'}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'borrower'
+        ? <BorrowerView address={address} />
+        : <LenderView   address={address} />
+      }
     </div>
   )
 }

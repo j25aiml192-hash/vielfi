@@ -14,6 +14,7 @@ import {
   User, ArrowRight, Menu, X,
 } from 'lucide-react'
 import WalletButton from './WalletButton.jsx'
+import NotificationBell from './NotificationBell.jsx'
 import { useWallet } from '../context/WalletContext.jsx'
 
 const LINKS = [
@@ -180,6 +181,11 @@ export default function Navbar() {
           >
             {darkMode ? <Sun size={15} /> : <Moon size={15} />}
           </button>
+
+          {/* Notification Bell */}
+          <div className="hidden-mobile">
+            <NotificationBell />
+          </div>
 
           {/* Profile link */}
           <NavLink

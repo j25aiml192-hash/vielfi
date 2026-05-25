@@ -6,18 +6,13 @@ const api = axios.create({
   timeout: 30000,
 })
 
-// Request interceptor
 api.interceptors.request.use((config) => {
   console.log(`[API] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`, config.data || '')
   return config
 })
 
-// Response interceptor – unwrap .data and normalize errors
 api.interceptors.response.use(
-  (res) => {
-    console.log(`[API] Response:`, res.data)
-    return res.data
-  },
+  (res) => { console.log(`[API] Response:`, res.data); return res.data },
   (err) => {
     const msg = err.response?.data?.detail || err.message || 'Network error'
     console.error(`[API] Error:`, msg)
@@ -25,74 +20,66 @@ api.interceptors.response.use(
   }
 )
 
-// ─── Credit Verification ──────────────────────────────────────
-
-/**
- * Verify a borrower profile and get ZK credit scores.
- * POST /api/credit/verify  { profileName }
- * Returns: { upiScore, gstScore, rentalScore, weightedScore,
- *            tier, cibilScore, proofHash, narrative }
- */
+// ─── Credit Verification ───────────────────────────────────────────────────
 export const verifyProfile = (profileName) =>
   api.post('/api/credit/verify', { profileName })
 
-// ─── Marketplace ─────────────────────────────────────────────
+// ─── Marketplace ──────────────────────────────────────────────────────────
+export const getMarketplaceFeed = () => api.get('/api/marketplace/feed')
 
-/**
- * Fetch all live loan listings.
- * GET /api/marketplace/feed
- * Returns: [{ id, title, borrower, amount, interestRate,
- *             durationMonths, fundedAmount, status, tier }]
- */
-export const getMarketplaceFeed = () =>
-  api.get('/api/marketplace/feed')
+// ─── Loans ────────────────────────────────────────────────────────────────
+export const fundLoan    = (loanId, amount) => api.post('/api/loans/fund',   { loanId, amount })
+export const repayEMI    = (loanId)         => api.post('/api/loans/repay',  { loanId })
 
-// ─── Loans ───────────────────────────────────────────────────
+// ─── Circles ──────────────────────────────────────────────────────────────
+export const getCircleById = (id)     => api.get(`/api/circles/${id}`)
+export const createCircle  = (data)   => api.post('/api/circles/create', {
+  name: data.name, description: data.description,
+  targetAmount: Number(data.targetPool) || 0,
+})
+export const joinCircle = (circleId) => api.post('/api/circles/contribute', { circleId, amount: 0 })
+export const getCircles = ()          => Promise.resolve([])
+export const getNarrative = (profileName) => api.post(`/api/narrative/${profileName}`)
 
-/**
- * Fund a loan listing.
- * POST /api/loans/fund  { loanId, amount }
- */
-export const fundLoan = (loanId, amount) =>
-  api.post('/api/loans/fund', { loanId, amount })
+// ─── Feature 1: Ratings ───────────────────────────────────────────────────
+export const getRatings = (address) =>
+  api.get(`/api/ratings/${address}`)
 
-/**
- * Repay an EMI for a loan.
- * POST /api/loans/repay  { loanId }
- */
-export const repayEMI = (loanId) =>
-  api.post('/api/loans/repay', { loanId })
+export const submitRating = (data) =>
+  api.post('/api/ratings/submit', data)
 
-// ─── Circles ─────────────────────────────────────────────────
+// ─── Feature 2: Loan History ──────────────────────────────────────────────
+export const getLoanHistory = (address) =>
+  api.get(`/api/history/${address}`)
 
-/**
- * Get a specific circle by ID.
- * GET /api/circles/{circle_id}
- */
-export const getCircleById = (circleId) =>
-  api.get(`/api/circles/${circleId}`)
+// ─── Feature 3 & 6: Dashboard + AI Recommendations ───────────────────────
+export const getBorrowerDashboard = (address) =>
+  api.get(`/api/dashboard/borrower/${address}`)
 
-/**
- * Create a new credit circle.
- * POST /api/circles/create  { name, description, targetAmount }
- */
-export const createCircle = (data) =>
-  api.post('/api/circles/create', {
-    name:         data.name,
-    description:  data.description,
-    targetAmount: Number(data.targetPool) || 0,
-  })
+export const getLenderDashboard = (address) =>
+  api.get(`/api/dashboard/lender/${address}`)
 
-/**
- * Contribute to (join) a circle.
- * POST /api/circles/contribute  { circleId, amount }
- */
-export const joinCircle = (circleId, _address) =>
-  api.post('/api/circles/contribute', { circleId, amount: 0 })
+export const getAIRecommendationsForLender = (data) =>
+  api.post('/api/dashboard/ai/recommend/lender', data)
 
-// Keep for backward compat (Feed.jsx, Circles.jsx imports)
-export const getCircles = () => Promise.resolve([])
-export const getNarrative = (profileName) =>
-  api.post(`/api/narrative/${profileName}`)
+export const getAIRecommendationsForBorrower = (data) =>
+  api.post('/api/dashboard/ai/recommend/borrower', data)
+
+// ─── Feature 4: AI Chatbot ────────────────────────────────────────────────
+export const sendChatMessage = (data) =>
+  api.post('/api/chat/message', data)
+
+export const getChatWelcome = () =>
+  api.get('/api/chat/welcome')
+
+// ─── Feature 5: Notifications ─────────────────────────────────────────────
+export const getNotifications = (address) =>
+  api.get(`/api/notifications/${address}`)
+
+export const markNotificationsRead = (ids) =>
+  api.post('/api/notifications/read', { notification_ids: ids })
+
+export const markAllNotificationsRead = (address) =>
+  api.post(`/api/notifications/read-all/${address}`)
 
 export default api
