@@ -61,72 +61,10 @@ export default function Verify() {
 
   return (
     <div style={{ fontFamily: 'Inter, sans-serif', background: C.canvas, color: C.ink, minHeight: '100vh' }}>
-
-      {/* Sidebar */}
-      <div style={{ display: 'flex', minHeight: '100vh' }}>
-        <aside style={{
-          width: 240, background: C.surface, borderRight: `1px solid ${C.border}`,
-          padding: '32px 20px', display: 'flex', flexDirection: 'column',
-          position: 'fixed', top: 0, left: 0, bottom: 0,
-        }}>
-          <div style={{ marginBottom: 32 }}>
-            <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em', color: C.ink }}>🏦 VielFi</div>
-            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', color: C.secondary, marginTop: 2 }}>Institutional</div>
-            <div style={{ fontSize: 11, color: C.secondary }}>Credit Desk Alpha</div>
-          </div>
-
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
-            {[
-              { icon: '⬚', label: 'Overview',       path: '/dashboard' },
-              { icon: '🏦', label: 'Credit Facility', path: '/feed'      },
-              { icon: '👥', label: 'Lenders',         path: '/circles'   },
-              { icon: '🤝', label: 'Borrowers',       path: '/feed'      },
-              { icon: '📊', label: 'Reporting',       path: '/dashboard' },
-            ].map(item => (
-              <button
-                key={item.label}
-                onClick={() => navigate(item.path)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '12px 16px', borderRadius: 10,
-                  background: 'transparent', border: 'none',
-                  cursor: 'pointer', textAlign: 'left',
-                  fontSize: 14, fontWeight: 500, color: C.secondary,
-                  transition: 'background 0.15s, color 0.15s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#eeeee9'; e.currentTarget.style.color = C.ink }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.secondary }}
-              >
-                <span style={{ fontSize: 16 }}>{item.icon}</span> {item.label}
-              </button>
-            ))}
-          </nav>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, borderTop: `1px solid ${C.border}`, paddingTop: 16 }}>
-            <button style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: C.secondary }}>
-              ❓ Support
-            </button>
-            <button style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: C.secondary }}>
-              📄 Documentation
-            </button>
-            <button
-              onClick={() => navigate('/feed')}
-              style={{
-                background: C.ink, color: C.white, border: 'none', borderRadius: 12,
-                padding: '14px 16px', fontSize: 14, fontWeight: 700, cursor: 'pointer',
-                textAlign: 'center', marginTop: 8, transition: 'opacity 0.15s',
-              }}
-              onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
-              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-            >Launch Marketplace</button>
-          </div>
-        </aside>
-
-        {/* Main content */}
-        <main style={{ marginLeft: 240, flex: 1, padding: '56px 64px', maxWidth: 1040 }}>
+      <main style={{ flex: 1, padding: '56px 64px', maxWidth: 1040, margin: '0 auto' }}>
 
           <h1 style={{ fontSize: 40, fontWeight: 700, letterSpacing: '-0.04em', margin: '0 0 12px' }}>
-            Institutional Identity Verification
+            Identity Verification
           </h1>
           <p style={{ fontSize: 16, color: C.secondary, lineHeight: 1.6, margin: '0 0 48px', maxWidth: 600 }}>
             To comply with financial regulations and unlock full marketplace access, please complete your identity verification.
@@ -245,8 +183,7 @@ export default function Verify() {
             </button>
           </div>
 
-        </main>
-      </div>
+      </main>
     </div>
   )
 }

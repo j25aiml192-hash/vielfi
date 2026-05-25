@@ -4,7 +4,6 @@ import { WalletProvider } from './context/WalletContext.jsx'
 import { useWallet } from './context/WalletContext.jsx'
 import { SidebarProvider, useSidebar } from './context/SidebarContext.jsx'
 import Navbar from './components/Navbar.jsx'
-import Footer from './components/Footer.jsx'
 import AppSidebar from './components/AppSidebar.jsx'
 import Landing from './pages/Landing.jsx'
 import Onboarding from './pages/Onboarding.jsx'
@@ -108,7 +107,6 @@ function AppLayout({ children }) {
         <main style={{ flex: 1 }}>
           {children}
         </main>
-        <Footer />
         <ChatBot />
       </div>
     </div>
