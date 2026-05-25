@@ -223,7 +223,7 @@ export default function Landing() {
                 Verifiable credit identity and seamless lending for the next billion users.
               </p>
               <div className="animate-slide-up" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', animationDelay: '400ms', animationFillMode: 'both' }}>
-                <button onClick={() => navigate('/verify')} style={{
+                <button onClick={() => navigate('/feed', { state: { openDrawer: true } })} style={{
                   padding: '13px 28px', borderRadius: 999, color: '#fff', fontWeight: 700, fontSize: '0.95rem',
                   border: 'none', cursor: 'pointer', position: 'relative', overflow: 'hidden',
                   background: 'linear-gradient(135deg,#8b6914,#c9952a,#e8c05a,#c9952a,#8b6914)', backgroundSize: '200% 100%',
