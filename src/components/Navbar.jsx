@@ -175,19 +175,21 @@ export default function Navbar() {
       }}>
         <div style={{ height:56,maxWidth:1440,margin:'0 auto',padding:'0 24px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:16 }}>
 
-          {/* Left: Logo — only shown on pages without sidebar */}
-          {!hasSidebar && (
-            <div style={{ display:'flex',alignItems:'center',gap:12 }}>
+          {/* Left: Logo (no-sidebar pages) OR Wallet button (sidebar pages) */}
+          <div style={{ display:'flex',alignItems:'center',gap:12 }}>
+            {!hasSidebar ? (
               <NavLink to="/" style={{ display:'flex',alignItems:'center',gap:8,textDecoration:'none' }}>
                 <div style={{ width:26,height:26,borderRadius:6,background:'#0a0a0a',display:'flex',alignItems:'center',justifyContent:'center' }}>
                   <span style={{ color:'#fff',fontWeight:800,fontSize:'0.8rem' }}>V</span>
                 </div>
                 <span style={{ fontWeight:800,fontSize:'1.1rem',letterSpacing:'-0.02em',background:'linear-gradient(135deg,#7a5000,#c9952a,#e8c05a,#c9952a,#7a5000)',backgroundSize:'200% 100%',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text',animation:'goldShine 3s ease-in-out infinite' }}>VeilFi</span>
               </NavLink>
-            </div>
-          )}
+            ) : (
+              <WalletButton />
+            )}
+          </div>
 
-          {/* Right: List a Loan + Notifications + Profile + Wallet */}
+          {/* Right: List a Loan + Notifications + Profile */}
           <div style={{ display:'flex',alignItems:'center',gap:14,marginLeft:'auto' }}>
 
             {/* + List a Loan — visible when wallet connected */}
@@ -223,7 +225,6 @@ export default function Navbar() {
             >
               Profile
             </NavLink>
-            <WalletButton />
           </div>
         </div>
       </nav>
