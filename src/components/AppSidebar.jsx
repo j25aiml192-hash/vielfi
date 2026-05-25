@@ -96,63 +96,84 @@ export default function AppSidebar() {
         fontFamily: 'Inter, sans-serif',
       }}>
 
-        {/* ── Logo + collapse ── */}
+        {/* ── Logo row (always visible) ── */}
         <div style={{
           height: 64,
           display: 'flex',
           alignItems: 'center',
           justifyContent: expanded ? 'space-between' : 'center',
           padding: expanded ? '0 16px' : '0',
-          borderBottom: '1px solid #f0f0f0',
+          borderBottom: expanded ? '1px solid #f0f0f0' : 'none',
           flexShrink: 0,
         }}>
-          {expanded && (
-            <button onClick={() => navigate('/')} style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+          {/* Logo — full when expanded, icon-only when collapsed */}
+          <button onClick={() => navigate('/')} style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+          }}>
+            <div style={{
+              width: 34, height: 34, borderRadius: 9,
+              background: '#0a0a0a',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
             }}>
-              <div style={{
-                width: 34, height: 34, borderRadius: 9,
-                background: '#0a0a0a',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0,
-              }}>
-                <span style={{ color: '#fff', fontWeight: 900, fontSize: 14 }}>V</span>
-              </div>
+              <span style={{ color: '#fff', fontWeight: 900, fontSize: 14 }}>V</span>
+            </div>
+            {expanded && (
               <div style={{ textAlign: 'left' }}>
-                <div style={{
-                  fontWeight: 800, fontSize: 14, color: '#0a0a0a',
-                  letterSpacing: '-0.02em', lineHeight: 1.2,
-                }}>VeilFi</div>
-                <div style={{
-                  fontSize: 10, color: '#aaa',
-                  letterSpacing: '0.04em', lineHeight: 1.2,
-                }}>Credit Intelligence</div>
+                <div style={{ fontWeight: 800, fontSize: 14, color: '#0a0a0a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>VeilFi</div>
+                <div style={{ fontSize: 10, color: '#aaa', letterSpacing: '0.04em', lineHeight: 1.2 }}>Credit Intelligence</div>
               </div>
+            )}
+          </button>
+
+          {/* Collapse / expand toggle — only in expanded state */}
+          {expanded && (
+            <button
+              onClick={() => setExpanded(e => !e)}
+              title="Collapse"
+              style={{
+                width: 30, height: 30, borderRadius: 8,
+                border: '1px solid #e8e8e8', background: '#fafafa',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', flexShrink: 0, transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#f0f0f0'}
+              onMouseLeave={e => e.currentTarget.style.background = '#fafafa'}
+            >
+              <svg width={13} height={13} fill="none" viewBox="0 0 24 24" stroke="#666" strokeWidth={2.2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+              </svg>
             </button>
           )}
-
-          {/* Collapse / expand toggle */}
-          <button
-            onClick={() => setExpanded(e => !e)}
-            title={expanded ? 'Collapse' : 'Expand'}
-            style={{
-              width: 30, height: 30, borderRadius: 8,
-              border: '1px solid #e8e8e8',
-              background: '#fafafa',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', flexShrink: 0,
-              transition: 'background 0.15s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = '#f0f0f0'}
-            onMouseLeave={e => e.currentTarget.style.background = '#fafafa'}
-          >
-            <svg width={13} height={13} fill="none" viewBox="0 0 24 24" stroke="#666" strokeWidth={2.2}
-              style={{ transform: expanded ? 'none' : 'rotate(180deg)', transition: 'transform 0.25s' }}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
-            </svg>
-          </button>
         </div>
+
+        {/* ── Expand toggle row (collapsed mode only) ── */}
+        {!expanded && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '10px 0', borderBottom: '1px solid #f0f0f0', flexShrink: 0,
+          }}>
+            <button
+              onClick={() => setExpanded(e => !e)}
+              title="Expand"
+              style={{
+                width: 30, height: 30, borderRadius: 8,
+                border: '1px solid #e8e8e8', background: '#fafafa',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', flexShrink: 0, transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#f0f0f0'}
+              onMouseLeave={e => e.currentTarget.style.background = '#fafafa'}
+            >
+              <svg width={13} height={13} fill="none" viewBox="0 0 24 24" stroke="#666" strokeWidth={2.2}
+                style={{ transform: 'rotate(180deg)' }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+              </svg>
+            </button>
+          </div>
+        )}
+
 
         {/* ── Search filter (expanded only) ── */}
         {expanded && (
