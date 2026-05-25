@@ -124,6 +124,14 @@ export default function Feed() {
         @keyframes floatOrb1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-6px,8px) scale(1.08)} }
         @keyframes floatOrb2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(8px,-6px) scale(1.12)} }
         @keyframes floatOrb3 { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-8px) scale(0.9)} }
+        @keyframes sparkle {
+          0%,100% { opacity:0; transform:scale(0) rotate(0deg); }
+          50%      { opacity:1; transform:scale(1) rotate(180deg); }
+        }
+        @keyframes shimmerBorder {
+          0%,100% { border-color: rgba(201,149,42,0.3); box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 0 0 1px rgba(201,149,42,0.1); }
+          50%     { border-color: rgba(201,149,42,0.7); box-shadow: 0 8px 32px rgba(0,0,0,0.25), 0 0 12px rgba(201,149,42,0.2); }
+        }
       `}</style>
 
 
@@ -174,8 +182,8 @@ export default function Feed() {
                 border: '1px solid rgba(201,149,42,0.3)',
                 padding: '18px 16px 16px',
                 cursor: 'pointer',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.18), 0 0 0 1px rgba(201,149,42,0.1)',
-                transition: 'transform 0.2s, box-shadow 0.2s',
+                animation: 'shimmerBorder 3s ease-in-out infinite',
+                transition: 'transform 0.2s',
               }}
               onMouseEnter={e => {
                 e.currentTarget.style.transform = 'translateY(-2px)'
@@ -190,6 +198,28 @@ export default function Feed() {
               <div style={{ position:'absolute', top:-18, right:-18, width:70, height:70, borderRadius:'50%', background:'rgba(201,149,42,0.18)', filter:'blur(2px)', animation:'floatOrb1 4s ease-in-out infinite' }} />
               <div style={{ position:'absolute', bottom:-12, left:-10, width:48, height:48, borderRadius:'50%', background:'rgba(201,149,42,0.12)', filter:'blur(1px)', animation:'floatOrb2 5s ease-in-out infinite' }} />
               <div style={{ position:'absolute', top:'50%', right:14, width:22, height:22, borderRadius:'50%', background:'rgba(255,255,255,0.07)', animation:'floatOrb3 3.5s ease-in-out infinite' }} />
+
+              {/* ✦ Sparkle particles */}
+              {[
+                { top:'12%',  left:'72%',  size:8,  delay:'0s',   dur:'2.2s'  },
+                { top:'68%',  left:'82%',  size:6,  delay:'0.7s', dur:'1.8s'  },
+                { top:'30%',  left:'58%',  size:10, delay:'1.1s', dur:'2.6s'  },
+                { top:'80%',  left:'42%',  size:5,  delay:'0.3s', dur:'2.0s'  },
+                { top:'18%',  left:'30%',  size:7,  delay:'1.5s', dur:'1.6s'  },
+                { top:'55%',  left:'90%',  size:9,  delay:'0.9s', dur:'2.4s'  },
+              ].map((s, i) => (
+                <div key={i} style={{
+                  position:'absolute', top:s.top, left:s.left,
+                  width:s.size, height:s.size,
+                  opacity:0,
+                  animation:`sparkle ${s.dur} ease-in-out ${s.delay} infinite`,
+                  pointerEvents:'none', zIndex:0,
+                }}>
+                  <svg viewBox="0 0 20 20" fill="none" style={{ width:'100%', height:'100%' }}>
+                    <path d="M10 0 L11.8 8.2 L20 10 L11.8 11.8 L10 20 L8.2 11.8 L0 10 L8.2 8.2 Z" fill="rgba(201,149,42,0.9)"/>
+                  </svg>
+                </div>
+              ))}
 
               {/* Content */}
               <div style={{ position:'relative', zIndex:1 }}>
