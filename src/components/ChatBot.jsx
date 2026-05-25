@@ -82,7 +82,14 @@ export default function ChatBot({ address }) {
       >
         {open
           ? <X size={22} color="#fff" />
-          : <MessageCircle size={22} color="#fff" />
+          : (
+            <span style={{
+              fontFamily: 'Inter, sans-serif',
+              fontWeight: 900, fontSize: 22,
+              color: '#fff', letterSpacing: '-0.04em',
+              lineHeight: 1, userSelect: 'none',
+            }}>V</span>
+          )
         }
         {/* Unread dot */}
         {!open && messages.length === 0 && (
@@ -108,11 +115,17 @@ export default function ChatBot({ address }) {
             padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 10,
           }}>
             <div style={{
-              width: 36, height: 36, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #D4AF37, #B8960C)',
+              width: 36, height: 36, borderRadius: 10,
+              background: 'linear-gradient(135deg, #c9952a, #e8c05a)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 2px 8px rgba(201,149,42,0.4)',
             }}>
-              <Bot size={18} color="#fff" />
+              <span style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 900, fontSize: 18,
+                color: '#fff', letterSpacing: '-0.04em',
+                lineHeight: 1, userSelect: 'none',
+              }}>V</span>
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ color: '#fff', fontWeight: 700, fontSize: 14 }}>VeilFi AI</div>
