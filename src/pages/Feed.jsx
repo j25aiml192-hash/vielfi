@@ -2,411 +2,352 @@ import { useState, useEffect } from 'react'
 import { getMarketplaceFeed, fundLoan } from '../api/index.js'
 import { useNavigate, useLocation } from 'react-router-dom'
 
-/* ─────────────────────────────────────────────────────────────
-   DESIGN SYSTEM — Premium Institutional Light
-───────────────────────────────────────────────────────────── */
+/* ─── Design Tokens ─── */
 const C = {
-  bg:        '#F5F4F1',
-  surface:   '#FFFFFF',
-  surfaceAlt:'#FAFAF8',
-  border:    '#E8E6E1',
-  borderHover:'#C8C4BC',
-  text:      '#111111',
-  textMid:   '#444444',
-  textMuted: '#888888',
-  textFaint: '#AAAAAA',
-  gold:      '#C9A84C',
-  goldLight: '#F5E9C8',
-  goldDark:  '#8B6914',
-  indigo:    '#4F46E5',
-  success:   '#16A34A',
-  danger:    '#DC2626',
-  amber:     '#D97706',
+  bg:         '#f9f9f9',
+  surface:    '#ffffff',
+  border:     '#e6e6e6',
+  text:       '#1b1b1b',
+  textMid:    '#444444',
+  textMuted:  '#888888',
+  textFaint:  '#aaaaaa',
+  gold:       '#b58c2a',
+  success:    '#1ea64a',
+  danger:     '#dc2626',
+  amber:      '#d97706',
+  magenta:    '#ff3d8b',
 }
 
-/* ─────────────────────────────────────────────────────────────
-   NAV DRAWER — Kartik's feature: slides in from left
-   Auto-opens when navigated from Landing "Start Borrowing"
-───────────────────────────────────────────────────────────── */
-const NAV_ITEMS = [
-  { to: '/feed',      label: 'Markets',    desc: 'Browse all live loan listings',          icon: <svg width={20} height={20} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}><path strokeLinecap="round" strokeLinejoin="round" d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" /></svg> },
-  { to: '/verify',    label: 'Lending',    desc: 'Verify identity & get your credit score', icon: <svg width={20} height={20} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
-  { to: '/circles',   label: 'Borrowing',  desc: 'Create loan requests & join circles',    icon: <svg width={20} height={20} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" /></svg> },
-  { to: '/dashboard', label: 'Governance', desc: 'Your portfolio & repayment dashboard',   icon: <svg width={20} height={20} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg> },
-]
-
-function NavDrawer({ open, onClose }) {
-  const navigate = useNavigate()
-  const go = (to) => { onClose(); navigate(to) }
-  return (
-    <>
-      {/* Backdrop */}
-      <div onClick={onClose} style={{ position:'fixed', inset:0, zIndex:40, background:'rgba(0,0,0,0.22)', backdropFilter:'blur(4px)', opacity: open ? 1 : 0, pointerEvents: open ? 'auto' : 'none', transition:'opacity 0.3s ease' }} />
-      {/* Panel */}
-      <div style={{ position:'fixed', top:0, left:0, bottom:0, zIndex:50, width:300, background:'#fff', boxShadow:'4px 0 40px rgba(0,0,0,0.12)', transform: open ? 'translateX(0)' : 'translateX(-100%)', transition:'transform 0.35s cubic-bezier(0.22,1,0.36,1)', display:'flex', flexDirection:'column', overflowY:'auto' }}>
-        {/* Header */}
-        <div style={{ padding:'24px 24px 20px', borderBottom:`1px solid ${C.border}`, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <div>
-            <span style={{ fontFamily:"'Outfit', sans-serif", fontWeight:800, fontSize:'1.3rem', background:'linear-gradient(135deg,#7a5000,#c9952a,#e8c05a,#c9952a,#7a5000)', backgroundSize:'200% 100%', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text', animation:'goldShine 3s ease-in-out infinite' }}>VielFi</span>
-            <p style={{ fontSize:'0.62rem', color:C.textFaint, fontFamily:"'JetBrains Mono', monospace", letterSpacing:'0.14em', textTransform:'uppercase', marginTop:3 }}>Navigation</p>
-          </div>
-          <button onClick={onClose} style={{ width:32, height:32, borderRadius:'50%', border:`1px solid ${C.border}`, background:C.surfaceAlt, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:C.textMuted }}>
-            <svg width={14} height={14} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-          </button>
-        </div>
-        {/* Nav items */}
-        <div style={{ padding:'16px 12px', flex:1 }}>
-          {NAV_ITEMS.map(({ to, label, desc, icon }) => (
-            <button key={to} onClick={() => go(to)}
-              style={{ width:'100%', display:'flex', alignItems:'center', gap:14, padding:'14px 16px', borderRadius:12, background:'transparent', border:'none', cursor:'pointer', textAlign:'left', marginBottom:4, transition:'background 0.18s, transform 0.18s' }}
-              onMouseEnter={e => { e.currentTarget.style.background='#fdf9f3'; e.currentTarget.style.transform='translateX(4px)' }}
-              onMouseLeave={e => { e.currentTarget.style.background='transparent'; e.currentTarget.style.transform='none' }}
-            >
-              <div style={{ width:42, height:42, borderRadius:12, flexShrink:0, background:'linear-gradient(145deg,#fdf8ec,#faf0d8)', border:'1px solid rgba(212,175,55,0.18)', display:'flex', alignItems:'center', justifyContent:'center', color:'#c9952a' }}>{icon}</div>
-              <div>
-                <div style={{ fontWeight:700, fontSize:'0.95rem', color:C.text, marginBottom:2 }}>{label}</div>
-                <div style={{ fontSize:'0.72rem', color:C.textMuted, lineHeight:1.4 }}>{desc}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-        {/* Footer */}
-        <div style={{ padding:'16px 24px', borderTop:`1px solid ${C.border}` }}>
-          <p style={{ fontFamily:"'JetBrains Mono', monospace", fontSize:'0.6rem', color:C.textFaint, letterSpacing:'0.12em', textTransform:'uppercase', textAlign:'center', margin:0 }}>Secure · Transparent · Decentralized</p>
-        </div>
-      </div>
-      <style>{`@keyframes goldShine { 0%{background-position:100% 0;} 50%{background-position:0% 0;} 100%{background-position:100% 0;} }`}</style>
-    </>
-  )
+/* ─── Category config ─── */
+const PURPOSE_CFG = {
+  Business:    { color: '#1a1a1a', label: 'BUSINESS'    },
+  Education:   { color: '#4F46E5', label: 'EDUCATION'   },
+  Medical:     { color: '#1ea64a', label: 'MEDICAL'     },
+  Equipment:   { color: '#0369A1', label: 'EQUIPMENT'   },
+  Agriculture: { color: '#65A30D', label: 'AGRICULTURE' },
+  Personal:    { color: '#9333EA', label: 'PERSONAL'    },
 }
 
-const PURPOSE_ACCENT = {
-  Business:    { bar: '#1a1a1a', bg: '#F8F8F8', label: 'BUSINESS'    },
-  Education:   { bar: '#4F46E5', bg: '#F5F5FF', label: 'EDUCATION'   },
-  Medical:     { bar: '#16A34A', bg: '#F3FBF5', label: 'MEDICAL'     },
-  Equipment:   { bar: '#0369A1', bg: '#F0F7FF', label: 'EQUIPMENT'   },
-  Agriculture: { bar: '#65A30D', bg: '#F6FBF0', label: 'AGRICULTURE' },
-  Personal:    { bar: '#9333EA', bg: '#FAF5FF', label: 'PERSONAL'    },
-}
-
-const TIER_STYLE = {
+/* ─── Tier config ─── */
+const TIER_CFG = {
   Platinum: { color: '#4F46E5', bg: '#EEEEFF', label: 'Platinum' },
-  Gold:     { color: '#92400E', bg: '#FEF3C7', label: 'Gold'     },
+  Gold:     { color: '#9c781e', bg: '#fcf1d8', label: 'Gold'     },
   Silver:   { color: '#374151', bg: '#F3F4F6', label: 'Silver'   },
   Bronze:   { color: '#7C2D12', bg: '#FFF7ED', label: 'Bronze'   },
 }
 
-/* ─────────────────────────────────────────────────────────────
-   DATA ADAPTER
-───────────────────────────────────────────────────────────── */
+/* ─── Avatar colour pairs from initials ─── */
+const AVATAR_COLORS = [
+  { bg: '#e6f4ea', fg: '#1ea64a' },
+  { bg: '#eeeeff', fg: '#5252ff' },
+  { bg: '#f2f7e9', fg: '#83b728' },
+  { bg: '#fef3c7', fg: '#d97706' },
+  { bg: '#fce7f3', fg: '#db2777' },
+  { bg: '#e0f2fe', fg: '#0369a1' },
+  { bg: '#f3e8ff', fg: '#7c3aed' },
+  { bg: '#fff1f2', fg: '#e11d48' },
+]
+const avatarColor = (name) => AVATAR_COLORS[(name?.charCodeAt(0) || 0) % AVATAR_COLORS.length]
+
+/* ─── Data adapter ─── */
 const adaptLoan = (loan) => ({
   id:           loan.id,
   borrowerName: loan.borrowerName || loan.borrower || 'Borrower',
   tier:         loan.tier         || 'Silver',
-  purpose:      loan.purpose      || loan.title    || 'Loan',
+  purpose:      loan.purpose      || 'Loan',
   city:         loan.city         || 'India',
-  story:        loan.story        || `${loan.borrowerName || loan.borrower} is seeking funding.`,
+  story:        loan.story        || '',
   amount:       loan.amount,
   funded:       loan.fundedAmount ?? 0,
   duration:     loan.duration     || loan.durationMonths || 12,
-  emi:          loan.emiAmount    || Math.round((loan.amount * (1 + (loan.apr ?? loan.interestRate ?? 12) / 100)) / (loan.duration || loan.durationMonths || 12)),
+  emi:          loan.emiAmount    || 0,
   interestRate: loan.apr          || loan.interestRate || 12,
   lenders:      loan.lenderCount  || loan.lenders || 0,
   daysLeft:     loan.daysRemaining ?? loan.daysLeft ?? 30,
   featured:     loan.featured     ?? false,
 })
 
-/* ─────────────────────────────────────────────────────────────
-   MOCK DATA
-───────────────────────────────────────────────────────────── */
+/* ─── Mock data ─── */
 const MOCK_LOANS = [
-  {
-    id: '1', borrowerName: 'Rahul Sharma', tier: 'Gold', purpose: 'Business',
-    city: 'New Delhi', featured: true,
-    story: 'Expanding my street food operation with a second cart and industrial equipment. Consistent ₹2.1L/mo UPI volume for 24 consecutive months.',
-    amount: 200000, funded: 154000, duration: 12, emi: 18500, interestRate: 11, lenders: 8, daysLeft: 5,
-  },
-  {
-    id: '2', borrowerName: 'Priya Nair', tier: 'Platinum', purpose: 'Equipment',
-    city: 'Bengaluru', featured: false,
-    story: 'Upgrading a professional design studio — MacBook Pro M3 and Wacom Cintiq. International clientele, 4 years unblemished repayment record.',
-    amount: 350000, funded: 318000, duration: 18, emi: 21500, interestRate: 9, lenders: 14, daysLeft: 12,
-  },
-  {
-    id: '3', borrowerName: 'Anita Meena', tier: 'Silver', purpose: 'Business',
-    city: 'Jaipur', featured: false,
-    story: 'Pre-Diwali inventory build for a GST-registered kirana store operating continuously for 6 years. Seasonal demand consistently 3x baseline.',
-    amount: 150000, funded: 67500, duration: 6, emi: 26000, interestRate: 13, lenders: 4, daysLeft: 18,
-  },
-  {
-    id: '4', borrowerName: 'Vikram Singh', tier: 'Bronze', purpose: 'Personal',
-    city: 'Mumbai', featured: false,
-    story: 'Engine replacement for auto-rickshaw. 8,400+ verified trips on Ola and Uber with 4.8 average rating. 6-month repayment horizon.',
-    amount: 80000, funded: 24000, duration: 6, emi: 14200, interestRate: 15, lenders: 2, daysLeft: 22,
-  },
-  {
-    id: '5', borrowerName: 'Meera Pillai', tier: 'Gold', purpose: 'Education',
-    city: 'Chennai', featured: false,
-    story: 'Online MBA, NMIMS. Currently earning ₹85,000/mo in a stable corporate role. 24-month repayment plan fully mapped to salary progression.',
-    amount: 500000, funded: 450000, duration: 24, emi: 24500, interestRate: 10, lenders: 21, daysLeft: 7,
-  },
-  {
-    id: '6', borrowerName: 'Suresh Yadav', tier: 'Silver', purpose: 'Personal',
-    city: 'Pune', featured: false,
-    story: 'Kitchen and bathroom renovation. Landlord contractually agreed to ₹2,000/mo rent reduction post-completion, effectively self-financing.',
-    amount: 120000, funded: 36000, duration: 9, emi: 14000, interestRate: 12, lenders: 3, daysLeft: 30,
-  },
-  {
-    id: '7', borrowerName: 'Farida Shaikh', tier: 'Platinum', purpose: 'Medical',
-    city: 'Hyderabad', featured: true,
-    story: 'Bridge financing for elective surgery — insurance covers 70%, gap is ₹84,000. 8-year employment at TCS, zero defaults, high repayment capacity.',
-    amount: 280000, funded: 256000, duration: 12, emi: 25000, interestRate: 9.5, lenders: 18, daysLeft: 3,
-  },
-  {
-    id: '8', borrowerName: 'Arun Kumar', tier: 'Gold', purpose: 'Agriculture',
-    city: 'Nashik', featured: false,
-    story: 'Drip irrigation system for 5-acre grape vineyard. ROI expected within 2 harvests based on historical yield data. 15 years farming experience.',
-    amount: 180000, funded: 90000, duration: 12, emi: 16500, interestRate: 11, lenders: 9, daysLeft: 20,
-  },
+  { id:'7', borrowerName:'Farida Shaikh',  tier:'Platinum', purpose:'Medical',     city:'Hyderabad', featured:true,
+    story:'Bridge financing for elective surgery — insurance covers 70%, gap is \u20b984,000. 8-year employment at TCS, zero defaults, high repayment capacity.',
+    amount:280000, funded:256000, duration:12, emi:25000, interestRate:9.5, lenders:18, daysLeft:3 },
+  { id:'5', borrowerName:'Meera Pillai',   tier:'Gold',     purpose:'Education',   city:'Chennai',   featured:false,
+    story:'Online MBA, NMIMS. Currently earning \u20b985,000/mo in a stable corporate role. 24-month repayment plan fully mapped to current surplus income.',
+    amount:500000, funded:450000, duration:24, emi:24500, interestRate:10, lenders:21, daysLeft:7 },
+  { id:'8', borrowerName:'Arun Kumar',     tier:'Gold',     purpose:'Agriculture', city:'Nashik',    featured:false,
+    story:'Drip irrigation system for 5-acre grape vineyard. ROI expected within 2 harvests based on historical yield data. Verified land ownership.',
+    amount:180000, funded:90000,  duration:12, emi:16500, interestRate:11, lenders:9,  daysLeft:20 },
+  { id:'1', borrowerName:'Rahul Sharma',   tier:'Gold',     purpose:'Business',    city:'New Delhi', featured:false,
+    story:'Expanding my street food operation with a second cart and industrial equipment. Consistent \u20b92.1L/mo UPI volume for 24 consecutive months.',
+    amount:200000, funded:154000, duration:12, emi:18500, interestRate:11, lenders:8,  daysLeft:5 },
+  { id:'2', borrowerName:'Priya Nair',     tier:'Platinum', purpose:'Equipment',   city:'Bengaluru', featured:false,
+    story:'Upgrading a professional design studio — MacBook Pro M3 and Wacom Cintiq. International clientele, 4 years unblemished repayment record.',
+    amount:350000, funded:318000, duration:18, emi:21500, interestRate:9,  lenders:14, daysLeft:12 },
+  { id:'3', borrowerName:'Anita Meena',    tier:'Silver',   purpose:'Business',    city:'Jaipur',    featured:false,
+    story:'Pre-Diwali inventory build for a GST-registered kirana store operating continuously for 6 years. Seasonal demand consistently 3x baseline.',
+    amount:150000, funded:67500,  duration:6,  emi:26000, interestRate:13, lenders:4,  daysLeft:18 },
+  { id:'4', borrowerName:'Vikram Singh',   tier:'Bronze',   purpose:'Personal',    city:'Mumbai',    featured:false,
+    story:'Engine replacement for auto-rickshaw. 8,400+ verified trips on Ola and Uber with 4.8 average rating. 6-month repayment horizon.',
+    amount:80000,  funded:24000,  duration:6,  emi:14200, interestRate:15, lenders:2,  daysLeft:22 },
+  { id:'6', borrowerName:'Suresh Yadav',   tier:'Silver',   purpose:'Personal',    city:'Pune',      featured:false,
+    story:'Kitchen and bathroom renovation. Landlord contractually agreed to \u20b92,000/mo rent reduction post-completion, effectively self-financing.',
+    amount:120000, funded:36000,  duration:9,  emi:14000, interestRate:12, lenders:3,  daysLeft:30 },
 ]
 
-const ALL_PURPOSES = ['All', 'Business', 'Education', 'Medical', 'Equipment', 'Agriculture', 'Personal']
-const ALL_TIERS    = ['All', 'Platinum', 'Gold', 'Silver', 'Bronze']
+const ALL_PURPOSES = ['All','Business','Education','Medical','Equipment','Agriculture','Personal']
+const ALL_TIERS    = ['All','Platinum','Gold','Silver','Bronze']
 const SORTS = [
-  { label: 'Closing Soon',   value: 'daysLeft' },
-  { label: 'Most Funded',    value: 'pct' },
-  { label: 'Highest Amount', value: 'amount' },
-  { label: 'Lowest Rate',    value: 'interestRate' },
+  { label:'Closing Soon',   value:'daysLeft' },
+  { label:'Most Funded',    value:'pct' },
+  { label:'Highest Amount', value:'amount' },
+  { label:'Lowest Rate',    value:'interestRate' },
 ]
 
-/* ─────────────────────────────────────────────────────────────
-   UTILITY
-───────────────────────────────────────────────────────────── */
-const formatINR = (n) =>
-  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
+const initials = (n) => n?.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() || 'NA'
+const formatINR = (n) => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n)
+const formatShort = (n) => n >= 100000 ? `\u20b9${(n/100000).toFixed(1)}L` : n >= 1000 ? `\u20b9${(n/1000).toFixed(0)}k` : `\u20b9${n}`
 
-const initials = (name) =>
-  name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
-
-/* ─────────────────────────────────────────────────────────────
-   PROGRESS BAR
-───────────────────────────────────────────────────────────── */
-const FundingBar = ({ pct }) => {
-  const color = pct >= 70 ? C.success : pct >= 30 ? C.amber : C.danger
-  return (
-    <div style={{ width: '100%', height: 3, background: C.border, borderRadius: 2, overflow: 'hidden' }}>
-      <div style={{
-        height: '100%',
-        width: `${Math.min(pct, 100)}%`,
-        background: color,
-        borderRadius: 2,
-        transition: 'width 1s cubic-bezier(0.16,1,0.3,1)',
-      }} />
-    </div>
-  )
-}
-
-/* ─────────────────────────────────────────────────────────────
-   LOAN CARD
-───────────────────────────────────────────────────────────── */
-const LoanCard = ({ loan, onFund, variant = 'default' }) => {
-  const [hovered, setHovered] = useState(false)
-  const [funded,  setFunded]  = useState(false)
+/* ════════════════════════════════════════
+   LOAN CARD  — LinkedIn-style article
+════════════════════════════════════════ */
+function LoanCard({ loan, onFund, fundedId }) {
   const navigate = useNavigate()
+  const [liked, setLiked] = useState(false)
+  const [likes, setLikes] = useState(Math.floor(Math.random() * 18))
 
   const {
-    id, borrowerName = 'Borrower', tier = 'Silver',
-    purpose = 'Personal', city = 'India',
-    story = '', amount = 0, funded: fundedAmt = 0,
-    interestRate = 12, lenders = 0, daysLeft = 30,
-    featured = false, duration = 12,
+    id, borrowerName, tier='Silver', purpose='Personal',
+    city='India', story='', amount=0, funded:fundedAmt=0,
+    interestRate=12, lenders=0, daysLeft=30, featured=false, duration=12,
   } = loan
 
-  const pct     = Math.round((fundedAmt / amount) * 100)
-  const tierCfg = TIER_STYLE[tier] || TIER_STYLE.Silver
-  const purCfg  = PURPOSE_ACCENT[purpose] || PURPOSE_ACCENT.Personal
-  const ini     = initials(borrowerName)
-  const isLarge = variant === 'large'
+  const pct      = Math.round((fundedAmt / amount) * 100)
+  const tierCfg  = TIER_CFG[tier]   || TIER_CFG.Silver
+  const purCfg   = PURPOSE_CFG[purpose] || PURPOSE_CFG.Personal
+  const av       = avatarColor(borrowerName)
+  const ini      = initials(borrowerName)
   const isUrgent = daysLeft <= 7
-
-  const handleFund = (e) => {
-    e.stopPropagation()
-    onFund?.(id, 5000)
-    setFunded(true)
-    setTimeout(() => setFunded(false), 2500)
-  }
+  const justFunded = fundedId === id
+  const barColor = pct >= 70 ? C.success : pct >= 30 ? C.amber : C.danger
 
   return (
-    <div
-      onClick={() => navigate(`/loan/${id}`)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: C.surface,
-        border: `1px solid ${hovered ? C.borderHover : C.border}`,
-        borderRadius: 12,
-        overflow: 'hidden',
-        cursor: 'pointer',
-        transition: 'all 0.22s cubic-bezier(0.16,1,0.3,1)',
-        boxShadow: hovered
-          ? '0 12px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06)'
-          : '0 1px 3px rgba(0,0,0,0.04)',
-        transform: hovered ? 'translateY(-3px)' : 'none',
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
+    <article style={{
+      background: C.surface, border:`1px solid ${C.border}`,
+      borderRadius: 12, overflow:'hidden',
+      transition:'box-shadow 0.2s',
+      fontFamily:'Inter, sans-serif',
+    }}
+    onMouseEnter={e => e.currentTarget.style.boxShadow='0 2px 12px rgba(0,0,0,0.08)'}
+    onMouseLeave={e => e.currentTarget.style.boxShadow='none'}
     >
-      {/* Purpose accent bar */}
-      <div style={{ height: 3, background: purCfg.bar, width: '100%', flexShrink: 0 }} />
-
-      {/* Featured badge */}
-      {featured && (
-        <div style={{
-          position: 'absolute', top: 18, right: 18,
-          background: C.text, color: C.surface,
-          fontSize: 9, fontWeight: 700, letterSpacing: '0.14em',
-          padding: '3px 8px', borderRadius: 3, textTransform: 'uppercase',
-        }}>
-          Featured
-        </div>
-      )}
-
-      <div style={{ padding: isLarge ? '22px 24px' : '18px 20px', flex: 1, display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-        {/* Category + Tier */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', color: purCfg.bar, textTransform: 'uppercase' }}>
-            {purCfg.label}
-          </span>
-          <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', color: tierCfg.color, background: tierCfg.bg, padding: '2px 8px', borderRadius: 4 }}>
-            {tierCfg.label}
-          </span>
-        </div>
-
-        {/* Borrower */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      {/* Card header — borrower + category */}
+      <div style={{ padding:'20px 20px 0', display:'flex', alignItems:'flex-start', gap:12, justifyContent:'space-between' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+          {/* Avatar */}
           <div style={{
-            width: 40, height: 40, borderRadius: 8,
-            background: purCfg.bg, border: `1px solid ${C.border}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 13,
-            color: purCfg.bar, flexShrink: 0, letterSpacing: '-0.02em',
-          }}>
-            {ini}
-          </div>
+            width:44, height:44, borderRadius:'50%', flexShrink:0,
+            background:av.bg, color:av.fg,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            fontWeight:700, fontSize:15, border:`1px solid ${C.border}`,
+          }}>{ini}</div>
+          {/* Name + location */}
           <div>
-            <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: 15, color: C.text, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-              {borrowerName}
-            </div>
-            <div style={{ fontSize: 12, color: C.textMuted, marginTop: 2 }}>
-              {city} · {duration}M tenure
-            </div>
-          </div>
-        </div>
-
-        {/* Story */}
-        <p style={{
-          fontSize: 13, color: C.textMid, lineHeight: 1.7, margin: 0,
-          display: '-webkit-box', WebkitLineClamp: isLarge ? 3 : 2,
-          WebkitBoxOrient: 'vertical', overflow: 'hidden', fontWeight: 400,
-        }}>
-          {story}
-        </p>
-
-        <div style={{ height: 1, background: C.border }} />
-
-        {/* Financials */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 24px' }}>
-          <div>
-            <div style={{ fontSize: 10, color: C.textFaint, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 3 }}>
-              Loan Amount
-            </div>
-            <div style={{ fontFamily: "'Outfit', monospace", fontWeight: 800, fontSize: isLarge ? 22 : 18, color: C.text, letterSpacing: '-0.03em', lineHeight: 1 }}>
-              {formatINR(amount)}
-            </div>
-          </div>
-          <div>
-            <div style={{ fontSize: 10, color: C.textFaint, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 3 }}>
-              Interest Rate
-            </div>
-            <div style={{ fontFamily: "'Outfit', monospace", fontWeight: 800, fontSize: isLarge ? 22 : 18, color: C.gold, letterSpacing: '-0.03em', lineHeight: 1 }}>
-              {interestRate}% <span style={{ fontSize: 11, fontWeight: 500, color: C.textFaint }}>p.a.</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Progress */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-          <FundingBar pct={pct} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 11, color: C.textMuted }}>
-              <span style={{ fontWeight: 700, color: pct >= 70 ? C.success : pct >= 30 ? C.amber : C.danger }}>
-                {pct}% funded
+            <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+              <span style={{ fontWeight:700, fontSize:'0.95rem', color:C.text }}>{borrowerName}</span>
+              {/* Tier badge */}
+              <span style={{ fontSize:10, fontWeight:700, color:tierCfg.color, background:tierCfg.bg, padding:'2px 8px', borderRadius:4, letterSpacing:'0.04em', textTransform:'uppercase' }}>
+                {tierCfg.label}
               </span>
-              {' '}· {formatINR(fundedAmt)} raised
-            </span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: isUrgent ? C.danger : C.textMuted }}>
-              {isUrgent && '⏱ '}{daysLeft}d left
-            </span>
+              {featured && (
+                <span style={{ fontSize:10, fontWeight:700, color:'#fff', background:C.text, padding:'2px 8px', borderRadius:4, letterSpacing:'0.12em', textTransform:'uppercase' }}>
+                  FEATURED
+                </span>
+              )}
+            </div>
+            <div style={{ fontSize:12, color:C.textMuted, marginTop:2 }}>{city} &bull; {duration}M tenure</div>
           </div>
         </div>
+        {/* Category label top-right */}
+        <span style={{ fontSize:10, fontWeight:700, color:purCfg.color, letterSpacing:'0.14em', textTransform:'uppercase', flexShrink:0 }}>
+          {purCfg.label}
+        </span>
+      </div>
 
-        {/* Footer */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 4 }}>
-          <div style={{ fontSize: 12, color: C.textMuted }}>
-            <span style={{ fontWeight: 700, color: C.text }}>{lenders}</span> lender{lenders !== 1 ? 's' : ''}
+      {/* Story */}
+      <p style={{ margin:'14px 20px', fontSize:14, color:C.text, lineHeight:1.65, fontWeight:400 }}>
+        {story}
+      </p>
+
+      {/* Loan details box */}
+      <div style={{ margin:'0 20px 16px', background:'#f5f5f3', border:`1px solid ${C.border}`, borderRadius:10, padding:'14px 16px' }}>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px 24px', marginBottom:14 }}>
+          <div>
+            <div style={{ fontSize:9, color:C.textFaint, fontWeight:600, letterSpacing:'0.14em', textTransform:'uppercase', marginBottom:4 }}>LOAN AMOUNT</div>
+            <div style={{ fontWeight:800, fontSize:'1.3rem', color:C.text, letterSpacing:'-0.03em', lineHeight:1 }}>{formatINR(amount)}</div>
           </div>
-          <button
-            onClick={handleFund}
-            style={{
-              background: funded ? C.success : C.text,
-              color: '#fff', border: 'none', borderRadius: 8,
-              padding: '9px 20px', fontSize: 12, fontWeight: 700,
-              cursor: 'pointer', letterSpacing: '0.02em',
-              transition: 'all 0.18s ease',
-              boxShadow: hovered && !funded ? '0 4px 14px rgba(17,17,17,0.25)' : 'none',
-              transform: hovered ? 'scale(1.02)' : 'scale(1)',
-            }}
-          >
-            {funded ? 'Funded ✓' : 'Fund Now'}
-          </button>
+          <div style={{ textAlign:'right' }}>
+            <div style={{ fontSize:9, color:C.textFaint, fontWeight:600, letterSpacing:'0.14em', textTransform:'uppercase', marginBottom:4 }}>INTEREST RATE</div>
+            <div style={{ fontWeight:800, fontSize:'1.3rem', color:C.gold, letterSpacing:'-0.03em', lineHeight:1 }}>{interestRate}% <span style={{ fontSize:11, fontWeight:500, color:C.textMuted }}>p.a.</span></div>
+          </div>
+        </div>
+        {/* Progress bar */}
+        <div>
+          <div style={{ height:8, width:'100%', background:'#e0deda', borderRadius:4, overflow:'hidden', marginBottom:8 }}>
+            <div style={{ height:'100%', width:`${Math.min(pct,100)}%`, background:barColor, borderRadius:4, transition:'width 1s ease' }} />
+          </div>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <span style={{ fontSize:12 }}>
+              <span style={{ fontWeight:700, color:barColor }}>{pct}% funded</span>
+              <span style={{ color:C.textMuted }}> &bull; {formatShort(fundedAmt)} raised</span>
+            </span>
+            <span style={{ fontSize:12, fontWeight:600, color:isUrgent ? C.danger : C.textMuted }}>
+              {isUrgent ? '\u23f1 ' : ''}{daysLeft}d left
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Footer — like/comment/share + Fund */}
+      <div style={{
+        borderTop:`1px solid ${C.border}`, padding:'12px 20px',
+        display:'flex', alignItems:'center', justifyContent:'space-between',
+      }}>
+        <div style={{ display:'flex', alignItems:'center', gap:20, color:C.textMuted }}>
+          {/* Like */}
+          <button
+            onClick={() => { setLiked(l => !l); setLikes(n => liked ? n-1 : n+1) }}
+            style={{ display:'flex', alignItems:'center', gap:5, background:'none', border:'none', cursor:'pointer', color: liked ? '#e11d48' : C.textMuted, fontSize:13, transition:'color 0.15s' }}
+          >
+            <svg width={16} height={16} fill={liked?'#e11d48':'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+            Like{likes > 0 && <span style={{ fontSize:11 }}>{likes}</span>}
+          </button>
+          {/* Comment */}
+          <button style={{ display:'flex', alignItems:'center', gap:5, background:'none', border:'none', cursor:'pointer', color:C.textMuted, fontSize:13 }}
+            onClick={() => navigate(`/loan/${id}`)}>
+            <svg width={15} height={15} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            {lenders}
+          </button>
+          {/* Share */}
+          <button style={{ display:'flex', alignItems:'center', gap:5, background:'none', border:'none', cursor:'pointer', color:C.textMuted, fontSize:13 }}>
+            <svg width={15} height={15} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Fund button */}
+        <button
+          onClick={(e) => { e.stopPropagation(); onFund?.(id, 5000) }}
+          style={{
+            background: justFunded ? C.success : C.text,
+            color:'#fff', border:'none', borderRadius:999,
+            padding:'9px 24px', fontSize:13, fontWeight:700,
+            cursor:'pointer', letterSpacing:'0.01em',
+            transition:'all 0.18s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.opacity='0.85'}
+          onMouseLeave={e => e.currentTarget.style.opacity='1'}
+        >
+          {justFunded ? 'Funded \u2713' : 'Fund'}
+        </button>
+      </div>
+    </article>
   )
 }
 
-/* ─────────────────────────────────────────────────────────────
-   MASONRY GRID
-───────────────────────────────────────────────────────────── */
-const MasonryGrid = ({ loans, onFund }) => (
-  <div style={{ columns: '3 320px', gap: 16 }}>
-    {loans.map((loan, i) => (
-      <div key={loan.id} style={{ breakInside: 'avoid', marginBottom: 16, opacity: 0, animation: `cardIn 0.5s cubic-bezier(0.16,1,0.3,1) ${i * 55}ms both` }}>
-        <LoanCard loan={loan} onFund={onFund} variant={(loan.featured || loan.tier === 'Platinum') ? 'large' : 'default'} />
+/* ════════════════════════════════════════
+   LEFT SIDEBAR — LinkedIn-style profile
+════════════════════════════════════════ */
+function LeftSidebar() {
+  const navigate = useNavigate()
+  return (
+    <aside style={{
+      width:260, flexShrink:0,
+      position:'sticky', top:72,
+      height:'calc(100vh - 80px)', overflowY:'auto',
+      display:'flex', flexDirection:'column', gap:12,
+      fontFamily:'Inter, sans-serif',
+      scrollbarWidth:'none',
+    }}>
+      {/* Profile card */}
+      <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:12, overflow:'hidden' }}>
+        {/* Gradient banner */}
+        <div style={{ height:52, background:'linear-gradient(135deg,#dceeb1,#c8e6cd)' }} />
+        <div style={{ padding:'0 20px 20px', marginTop:-24 }}>
+          {/* Avatar */}
+          <div style={{
+            width:48, height:48, borderRadius:'50%',
+            background:'#e2e2e2', border:`3px solid ${C.surface}`,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            fontWeight:700, fontSize:16, color:C.text, marginBottom:10,
+          }}>KT</div>
+          <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
+            <span style={{ fontWeight:700, fontSize:'0.95rem', color:C.text }}>Kartik Thakur</span>
+            <svg width={14} height={14} fill="#1ea64a" viewBox="0 0 24 24">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <p style={{ fontSize:11, color:C.textMuted, lineHeight:1.5, marginBottom:12 }}>
+            CSE (AIML) '29 @ JSS Noida | Hackathon Winner \ud83c\udfc6 X1 | Building...
+          </p>
+          <div style={{ borderTop:`1px solid ${C.border}`, paddingTop:12 }}>
+            {[
+              { label:'PROFILE VIEWERS', value:'108' },
+              { label:'POST IMPRESSIONS', value:'30' },
+            ].map(({ label, value }) => (
+              <div key={label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'5px 0' }}>
+                <span style={{ fontSize:10, color:C.textMuted, letterSpacing:'0.08em', textTransform:'uppercase', fontFamily:'JetBrains Mono, monospace' }}>{label}</span>
+                <span style={{ fontWeight:700, fontSize:14, color:C.text }}>{value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Nav links */}
+        <div style={{ borderTop:`1px solid ${C.border}`, padding:'10px 12px', background:'#fafafa' }}>
+          {[
+            { icon:'🔖', label:'Saved items' },
+            { icon:'\ud83d\udc65', label:'Groups' },
+            { icon:'\ud83d\udcf0', label:'Newsletters' },
+            { icon:'\ud83d\udcc5', label:'Events' },
+          ].map(({ icon, label }) => (
+            <button key={label} style={{
+              display:'flex', alignItems:'center', gap:10,
+              width:'100%', padding:'9px 10px', borderRadius:8,
+              background:'none', border:'none', cursor:'pointer',
+              fontSize:13, color:C.textMid, textAlign:'left',
+              transition:'background 0.15s, color 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background='#f0ede8'; e.currentTarget.style.color=C.text }}
+            onMouseLeave={e => { e.currentTarget.style.background='none'; e.currentTarget.style.color=C.textMid }}
+            >
+              <span style={{ fontSize:15 }}>{icon}</span> {label}
+            </button>
+          ))}
+        </div>
       </div>
+    </aside>
+  )
+}
+
+/* ════════════════════════════════════════
+   SKELETON
+════════════════════════════════════════ */
+const Skeleton = () => (
+  <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:12, padding:20, display:'flex', flexDirection:'column', gap:12 }}>
+    {[80,60,100,40,60].map((w,i) => (
+      <div key={i} style={{ height:14, background:'#eeece8', borderRadius:4, width:`${w}%`, animation:'pulse 1.6s ease-in-out infinite', animationDelay:`${i*100}ms` }} />
     ))}
   </div>
 )
 
-/* ─────────────────────────────────────────────────────────────
-   SKELETON
-───────────────────────────────────────────────────────────── */
-const SkeletonCard = ({ height = 280 }) => (
-  <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, height, overflow: 'hidden' }}>
-    <div style={{ height: 3, background: C.border }} />
-    <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {[60, 40, 100, 40, 50].map((w, i) => (
-        <div key={i} style={{ height: i === 2 ? 12 : 14, background: '#EEECE8', borderRadius: 4, width: `${w}%`, animation: 'skeletonPulse 1.6s ease-in-out infinite', animationDelay: `${i * 100}ms` }} />
-      ))}
-    </div>
-  </div>
-)
-
-/* ─────────────────────────────────────────────────────────────
-   MAIN COMPONENT
-───────────────────────────────────────────────────────────── */
+/* ════════════════════════════════════════
+   MAIN EXPORT
+════════════════════════════════════════ */
 export default function Feed() {
   const location = useLocation()
   const [loans,         setLoans]         = useState(MOCK_LOANS)
@@ -415,14 +356,14 @@ export default function Feed() {
   const [purposeFilter, setPurpose]       = useState('All')
   const [sort,          setSort]          = useState('daysLeft')
   const [search,        setSearch]        = useState('')
-  const [fundSuccess,   setFundSuccess]   = useState(null)
+  const [fundedId,      setFundedId]      = useState(null)
   const [apiError,      setApiError]      = useState('')
   const [searchFocused, setSearchFocused] = useState(false)
 
   useEffect(() => {
-    const prev = document.body.style.backgroundColor
-    document.body.style.backgroundColor = C.bg
-    return () => { document.body.style.backgroundColor = prev }
+    const prev = document.body.style.background
+    document.body.style.background = C.bg
+    return () => { document.body.style.background = prev }
   }, [])
 
   useEffect(() => {
@@ -430,198 +371,180 @@ export default function Feed() {
       setLoading(true)
       try {
         const data = await getMarketplaceFeed()
-        if (Array.isArray(data) && data.length > 0) {
-          setLoans(data.map(adaptLoan))
-          setApiError('')
-        }
-      } catch (err) {
-        setApiError(err.message)
-      } finally {
-        setLoading(false)
-      }
+        if (Array.isArray(data) && data.length > 0) { setLoans(data.map(adaptLoan)); setApiError('') }
+      } catch (err) { setApiError(err.message) }
+      finally { setLoading(false) }
     }
     load()
   }, [])
 
   const handleFund = async (loanId, amount) => {
     try { await fundLoan(loanId, amount) } catch {}
-    setFundSuccess(loanId)
-    setTimeout(() => setFundSuccess(null), 3000)
+    setFundedId(loanId)
+    setTimeout(() => setFundedId(null), 3000)
   }
 
   const filtered = loans
     .filter(l => {
-      if (tierFilter !== 'All' && l.tier !== tierFilter) return false
+      if (tierFilter !== 'All'    && l.tier    !== tierFilter)    return false
       if (purposeFilter !== 'All' && l.purpose !== purposeFilter) return false
       if (search && !l.borrowerName.toLowerCase().includes(search.toLowerCase()) &&
-          !l.story.toLowerCase().includes(search.toLowerCase())) return false
+          !l.story.toLowerCase().includes(search.toLowerCase()))  return false
       return true
     })
     .sort((a, b) => {
-      if (sort === 'pct')          return (b.funded / b.amount) - (a.funded / a.amount)
+      if (sort === 'pct')          return (b.funded/b.amount) - (a.funded/a.amount)
       if (sort === 'amount')       return b.amount - a.amount
       if (sort === 'interestRate') return a.interestRate - b.interestRate
       return a.daysLeft - b.daysLeft
     })
 
-  const totalDeployed = loans.reduce((s, l) => s + l.funded, 0)
-  const avgReturn     = (loans.reduce((s, l) => s + l.interestRate, 0) / loans.length).toFixed(1)
-  const activeLenders = loans.reduce((s, l) => s + l.lenders, 0)
+  const totalDeployed = loans.reduce((s,l) => s + l.funded, 0)
+  const avgReturn     = (loans.reduce((s,l) => s + l.interestRate, 0) / loans.length).toFixed(1)
+  const activeLenders = loans.reduce((s,l) => s + l.lenders, 0)
 
   return (
     <>
       <style>{`
-        @keyframes cardIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes skeletonPulse { 0%,100%{opacity:1;} 50%{opacity:0.45;} }
-        @keyframes toastSlide { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
-        @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
-        @keyframes goldShine { 0%{background-position:100% 0;} 50%{background-position:0% 0;} 100%{background-position:100% 0;} }
-        *{box-sizing:border-box;}
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.45;} }
+        @keyframes cardIn { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:none;} }
+        .feed-filter-btn { transition: background 0.15s, color 0.15s; }
+        .feed-filter-btn:hover { background:#eeeeee !important; }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: C.bg, fontFamily: "'Inter', -apple-system, sans-serif", color: C.text, paddingTop: 24 }}>
+      <div style={{ minHeight:'100vh', background:C.bg, fontFamily:'Inter, sans-serif' }}>
 
-        {/* HEADER */}
-        <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}` }}>
-          <div style={{ maxWidth: 1320, margin: '0 auto', padding: '32px 32px 0' }}>
-
-            {/* Breadcrumb */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
-              <div style={{ fontSize: 12, color: C.textFaint, fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase', display:'flex', alignItems:'center', gap:8 }}>
-                <span>VeilFi</span><span style={{ opacity: 0.4 }}>/</span><span style={{ color: C.text }}>Marketplace</span>
-              </div>
-            </div>
-
-            {/* Headline + stats */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 32, flexWrap: 'wrap', paddingBottom: 40 }}>
-              <div style={{ flex: '1 1 400px' }}>
-                <h1 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: 'clamp(36px, 4vw, 56px)', color: C.text, letterSpacing: '-0.04em', lineHeight: 1.0, margin: '0 0 14px' }}>
-                  Credit{' '}
-                  <span style={{ color: C.gold }}>Marketplace</span>
+        {/* ── PAGE HEADER ── */}
+        <div style={{ background:C.surface, borderBottom:`1px solid ${C.border}` }}>
+          <div style={{ maxWidth:1080, margin:'0 auto', padding:'28px 24px 0' }}>
+            <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'space-between', alignItems:'flex-end', gap:20, paddingBottom:28 }}>
+              {/* Left: breadcrumb + title */}
+              <div>
+                <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:11, color:C.textFaint, fontFamily:'JetBrains Mono, monospace', letterSpacing:'0.12em', textTransform:'uppercase', marginBottom:10 }}>
+                  <span>VEILFI</span><span>/</span><span style={{ color:C.text }}>MARKETPLACE</span>
+                </div>
+                <h1 style={{ fontWeight:700, fontSize:'clamp(1.6rem,3vw,2rem)', color:C.text, letterSpacing:'-0.03em', marginBottom:6, lineHeight:1.1 }}>
+                  Credit <span style={{ fontWeight:400, color:C.textMuted }}>Marketplace</span>
                 </h1>
-                <p style={{ fontSize: 15, color: C.textMid, margin: 0, lineHeight: 1.6, maxWidth: 480, fontWeight: 400 }}>
-                  Peer-to-peer lending for verified borrowers.
-                  Deploy capital, earn transparent returns.
+                <p style={{ fontSize:13, color:C.textMid, maxWidth:380, lineHeight:1.6, margin:0 }}>
+                  Peer-to-peer lending for verified borrowers. Deploy capital, earn transparent returns.
                 </p>
                 {apiError && (
-                  <div style={{ marginTop: 14, display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, color: C.amber, background: '#FFF8EC', border: `1px solid #F6DBA0`, borderRadius: 6, padding: '5px 12px', fontWeight: 500 }}>
-                    Demo mode — backend offline
+                  <div style={{ marginTop:10, display:'inline-flex', alignItems:'center', gap:6, fontSize:10, color:'#b86000', background:'#fff8f0', border:'1px solid #ffd0a0', borderRadius:20, padding:'4px 12px', fontFamily:'JetBrains Mono, monospace', letterSpacing:'0.08em', fontStyle:'italic' }}>
+                    DEMO NODE — BACKEND OFFLINE
                   </div>
                 )}
               </div>
-
-              {/* Stats panel */}
-              <div style={{ display: 'flex', gap: 0, flexShrink: 0, border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden', background: C.surfaceAlt }}>
+              {/* Right: stats panel */}
+              <div style={{ display:'flex', border:`1px solid ${C.border}`, borderRadius:10, overflow:'hidden', flexShrink:0 }}>
                 {[
-                  { label: 'Capital Deployed',  value: `₹${(totalDeployed / 100000).toFixed(1)}L` },
-                  { label: 'Avg. Return',        value: `${avgReturn}%` },
-                  { label: 'Active Lenders',     value: `${activeLenders}` },
-                  { label: 'Open Listings',      value: `${loans.length}` },
+                  { label:'CAPITAL DEPLOYED',  value:formatShort(totalDeployed),    color:C.text    },
+                  { label:'AVG. RETURN',        value:`${avgReturn}%`,               color:C.success },
+                  { label:'ACTIVE LENDERS',     value:`${activeLenders}`,            color:C.text    },
+                  { label:'OPEN LISTINGS',      value:`${loans.length}`,             color:C.magenta },
                 ].map((stat, i) => (
-                  <div key={stat.label} style={{ padding: '16px 24px', borderLeft: i > 0 ? `1px solid ${C.border}` : 'none', textAlign: 'center', minWidth: 100 }}>
-                    <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 20, color: C.text, letterSpacing: '-0.04em', lineHeight: 1.1 }}>
-                      {stat.value}
-                    </div>
-                    <div style={{ fontSize: 10, color: C.textFaint, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 4 }}>
-                      {stat.label}
-                    </div>
+                  <div key={stat.label} style={{ padding:'14px 20px', textAlign:'center', borderLeft: i>0 ? `1px solid ${C.border}` : 'none', minWidth:90 }}>
+                    <div style={{ fontWeight:800, fontSize:'1.05rem', color:stat.color, letterSpacing:'-0.03em', lineHeight:1 }}>{stat.value}</div>
+                    <div style={{ fontSize:9, color:C.textFaint, fontWeight:600, letterSpacing:'0.12em', textTransform:'uppercase', marginTop:5, fontFamily:'JetBrains Mono, monospace' }}>{stat.label}</div>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* ── FILTER TOOLBAR ── */}
+            <div style={{ borderTop:`1px solid ${C.border}`, padding:'10px 0', display:'flex', flexWrap:'wrap', alignItems:'center', gap:12 }}>
+              {/* Search */}
+              <div style={{ position:'relative', flexShrink:0 }}>
+                <svg width={13} height={13} fill="none" viewBox="0 0 24 24" stroke={C.textFaint} strokeWidth={2} style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}>
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+                <input
+                  type="text" placeholder="Search borrowers..."
+                  value={search} onChange={e => setSearch(e.target.value)}
+                  onFocus={() => setSearchFocused(true)} onBlur={() => setSearchFocused(false)}
+                  style={{ width:180, padding:'7px 12px 7px 30px', border:`1px solid ${searchFocused ? '#aaa' : C.border}`, borderRadius:8, background:C.surface, fontSize:13, color:C.text, outline:'none', fontFamily:'inherit' }}
+                />
+              </div>
+
+              {/* Purpose pills */}
+              <div style={{ display:'flex', gap:4, overflowX:'auto', scrollbarWidth:'none', flexShrink:0 }}>
+                {ALL_PURPOSES.map(p => (
+                  <button key={p} onClick={() => setPurpose(p)}
+                    style={{ padding:'5px 14px', border:'none', borderRadius:999, background: purposeFilter===p ? C.text : 'transparent', color: purposeFilter===p ? '#fff' : C.textMuted, fontSize:13, fontWeight: purposeFilter===p ? 700 : 400, cursor:'pointer', whiteSpace:'nowrap', fontFamily:'inherit', transition:'all 0.15s' }}
+                    className="feed-filter-btn"
+                  >{p}</button>
+                ))}
+              </div>
+
+              <div style={{ width:1, height:20, background:C.border, flexShrink:0 }} />
+
+              {/* Tier pills */}
+              <div style={{ display:'flex', gap:4, flexShrink:0 }}>
+                {ALL_TIERS.map(t => (
+                  <button key={t} onClick={() => setTier(t)}
+                    style={{ padding:'5px 14px', border:'none', borderRadius:999, background: tierFilter===t ? C.text : 'transparent', color: tierFilter===t ? '#fff' : C.textMuted, fontSize:13, fontWeight: tierFilter===t ? 700 : 400, cursor:'pointer', whiteSpace:'nowrap', fontFamily:'inherit', transition:'all 0.15s', display:'flex', alignItems:'center', gap:5 }}
+                    className="feed-filter-btn"
+                  >
+                    {tierFilter===t && <span style={{ width:6, height:6, borderRadius:'50%', background:'#fff' }} />}
+                    {t}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:10, flexShrink:0 }}>
+                <span style={{ fontSize:11, color:C.textFaint, fontFamily:'JetBrains Mono, monospace', letterSpacing:'0.08em', textTransform:'uppercase' }}>{filtered.length} RESULTS</span>
+                <select value={sort} onChange={e => setSort(e.target.value)}
+                  style={{ border:'none', background:'transparent', fontSize:13, color:C.textMid, cursor:'pointer', fontFamily:'inherit', outline:'none' }}>
+                  {SORTS.map(({ label, value }) => <option key={value} value={value}>{label}</option>)}
+                </select>
               </div>
             </div>
           </div>
         </div>
 
-        {/* FILTER TOOLBAR */}
-        <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}`, position: 'sticky', top: 64, zIndex: 40 }}>
-          <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', gap: 0, height: 52, overflowX: 'auto' }}>
+        {/* ── MAIN LAYOUT: sidebar + feed ── */}
+        <div style={{ maxWidth:1080, margin:'0 auto', padding:'24px 24px 80px', display:'flex', gap:20, alignItems:'flex-start' }}>
 
-            {/* Search */}
-            <div style={{ position: 'relative', marginRight: 24, flexShrink: 0 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.textFaint} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-              </svg>
-              <input
-                type="text"
-                placeholder="Search borrowers…"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setSearchFocused(false)}
-                style={{ width: 200, height: 34, paddingLeft: 32, paddingRight: 12, border: `1px solid ${searchFocused ? C.borderHover : C.border}`, borderRadius: 7, background: C.surfaceAlt, fontSize: 13, color: C.text, outline: 'none', transition: 'border-color 0.15s', fontFamily: 'inherit' }}
-              />
-            </div>
-
-            <div style={{ width: 1, height: 24, background: C.border, marginRight: 24, flexShrink: 0 }} />
-
-            {/* Purpose filters */}
-            <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
-              {ALL_PURPOSES.map(p => (
-                <button key={p} onClick={() => setPurpose(p)} style={{ padding: '5px 14px', border: 'none', borderRadius: 6, background: purposeFilter === p ? C.text : 'transparent', color: purposeFilter === p ? '#fff' : C.textMuted, fontSize: 12, fontWeight: purposeFilter === p ? 700 : 500, cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>
-                  {p}
-                </button>
-              ))}
-            </div>
-
-            <div style={{ width: 1, height: 24, background: C.border, margin: '0 24px', flexShrink: 0 }} />
-
-            {/* Tier filters */}
-            <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
-              {ALL_TIERS.map(t => (
-                <button key={t} onClick={() => setTier(t)} style={{ padding: '5px 12px', border: 'none', borderRadius: 6, background: tierFilter === t ? C.text : 'transparent', color: tierFilter === t ? '#fff' : C.textMuted, fontSize: 12, fontWeight: tierFilter === t ? 700 : 500, cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>
-                  {t}
-                </button>
-              ))}
-            </div>
-
-            <div style={{ flex: 1 }} />
-
-            {/* Sort + count */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-              <span style={{ fontSize: 11, color: C.textFaint, fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-                {filtered.length} results
-              </span>
-              <select value={sort} onChange={e => setSort(e.target.value)} style={{ padding: '5px 10px', border: `1px solid ${C.border}`, borderRadius: 7, background: C.surfaceAlt, fontSize: 12, color: C.text, fontWeight: 500, cursor: 'pointer', outline: 'none', fontFamily: 'inherit', height: 34 }}>
-                {SORTS.map(({ label, value }) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-            </div>
+          {/* Left sidebar — only on wide screens */}
+          <div style={{ display:'block' }} className="sidebar-wrap">
+            <LeftSidebar />
           </div>
-        </div>
 
-        {/* GRID */}
-        <div style={{ maxWidth: 1320, margin: '0 auto', padding: '32px 32px 80px' }}>
-          {loading ? (
-            <div style={{ columns: '3 320px', gap: 16 }}>
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} style={{ breakInside: 'avoid', marginBottom: 16 }}>
-                  <SkeletonCard height={i % 3 === 0 ? 340 : 270} />
+          {/* Center feed */}
+          <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', gap:16 }}>
+            {loading ? (
+              Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} />)
+            ) : filtered.length === 0 ? (
+              <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:12, padding:'60px 24px', textAlign:'center' }}>
+                <div style={{ fontSize:40, marginBottom:12 }}>🔍</div>
+                <div style={{ fontWeight:700, fontSize:15, color:C.text, marginBottom:6 }}>No results</div>
+                <div style={{ fontSize:13, color:C.textMuted }}>Adjust filters to find matching loans</div>
+              </div>
+            ) : (
+              filtered.map((loan, i) => (
+                <div key={loan.id} style={{ opacity:0, animation:`cardIn 0.45s cubic-bezier(0.16,1,0.3,1) ${i*60}ms both` }}>
+                  <LoanCard loan={loan} onFund={handleFund} fundedId={fundedId} />
                 </div>
-              ))}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '100px 20px', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, animation: 'fadeIn 0.3s ease' }}>
-              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 48, fontWeight: 900, color: C.border, letterSpacing: '-0.04em', marginBottom: 12 }}>0</div>
-              <div style={{ fontWeight: 700, fontSize: 16, color: C.text, marginBottom: 6 }}>No results</div>
-              <div style={{ fontSize: 13, color: C.textMuted }}>Adjust your filters to find matching loans</div>
-            </div>
-          ) : (
-            <MasonryGrid loans={filtered} onFund={handleFund} />
-          )}
+              ))
+            )}
+          </div>
         </div>
       </div>
 
-      {/* TOAST */}
-      {fundSuccess && (
-        <div style={{ position: 'fixed', bottom: 28, right: 28, zIndex: 9999, background: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.success}`, borderRadius: 10, padding: '14px 20px', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', display: 'flex', alignItems: 'center', gap: 12, animation: 'toastSlide 0.35s cubic-bezier(0.16,1,0.3,1) both', fontFamily: 'inherit', maxWidth: 300 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 6, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>✓</div>
+      {/* Fund success toast */}
+      {fundedId && (
+        <div style={{ position:'fixed', bottom:28, right:28, zIndex:9999, background:C.surface, border:`1px solid ${C.border}`, borderLeft:`3px solid ${C.success}`, borderRadius:10, padding:'14px 20px', boxShadow:'0 8px 32px rgba(0,0,0,0.12)', display:'flex', alignItems:'center', gap:12, maxWidth:280, fontFamily:'inherit' }}>
+          <div style={{ width:28, height:28, borderRadius:6, background:'#f0fdf4', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, color:C.success, fontWeight:700 }}>\u2713</div>
           <div>
-            <div style={{ fontWeight: 700, fontSize: 13, color: C.text }}>Funding submitted</div>
-            <div style={{ fontSize: 11, color: C.textMuted, marginTop: 2 }}>Transaction sent to Ethereum Sepolia</div>
+            <div style={{ fontWeight:700, fontSize:13, color:C.text }}>Funding submitted</div>
+            <div style={{ fontSize:11, color:C.textMuted, marginTop:2 }}>Sent to Ethereum Sepolia</div>
           </div>
         </div>
       )}
+
+      <style>{`
+        @media (max-width:800px) { .sidebar-wrap { display:none !important; } }
+      `}</style>
     </>
   )
 }
