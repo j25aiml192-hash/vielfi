@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
-import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { NavLink, useNavigate } from 'react-router-dom'
 import WalletButton from './WalletButton.jsx'
 import { useWallet } from '../context/WalletContext.jsx'
-import { useSidebar } from '../context/SidebarContext.jsx'
+
 
 /* ΓöÇΓöÇ Nav items for the slide-in drawer ΓöÇΓöÇ */
 const NAV_ITEMS = [
@@ -157,22 +157,11 @@ function NotificationBell() {
    NAVBAR (sticky, every page)
 ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 export default function Navbar() {
-  const [drawerOpen, setDrawerOpen] = useState(false)
-  const location = useLocation()
   const navigate = useNavigate()
   const { isConnected } = useWallet()
-  const { expanded } = useSidebar()
-
-  // Sidebar widths — must match AppSidebar constants
-  const SIDEBAR_COLLAPSED = 60
-  const SIDEBAR_EXPANDED  = 264
-  const sidebarW = expanded ? SIDEBAR_EXPANDED : SIDEBAR_COLLAPSED
-
-  useEffect(() => setDrawerOpen(false), [location])
 
   return (
     <>
-      <NavDrawer open={drawerOpen} onClose={()=>setDrawerOpen(false)} />
 
       <nav style={{
         position:'sticky', top:0, zIndex:30,
@@ -181,18 +170,8 @@ export default function Navbar() {
       }}>
         <div style={{ height:56,maxWidth:1440,margin:'0 auto',padding:'0 24px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:16 }}>
 
-          {/* Left: Hamburger + Logo */}
+          {/* Left: Logo */}
           <div style={{ display:'flex',alignItems:'center',gap:12 }}>
-            <button id="navbar-menu-btn" onClick={()=>setDrawerOpen(true)} aria-label="Open navigation"
-              style={{ width:36,height:36,borderRadius:9,border:'1px solid #e8e4df',background:'#faf8f5',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',flexShrink:0,transition:'background 0.18s,box-shadow 0.18s' }}
-              onMouseEnter={e=>{e.currentTarget.style.background='#fdf5e0';e.currentTarget.style.boxShadow='0 2px 10px rgba(200,160,40,0.18)'}}
-              onMouseLeave={e=>{e.currentTarget.style.background='#faf8f5';e.currentTarget.style.boxShadow='none'}}
-            >
-              <svg width={15} height={15} fill="none" viewBox="0 0 24 24" stroke="#c9952a" strokeWidth={2.2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-              </svg>
-            </button>
-
             <NavLink to="/" style={{ display:'flex',alignItems:'center',gap:8,textDecoration:'none' }}>
               <div style={{ width:26,height:26,borderRadius:6,background:'#0a0a0a',display:'flex',alignItems:'center',justifyContent:'center' }}>
                 <span style={{ color:'#fff',fontWeight:800,fontSize:'0.8rem' }}>V</span>
