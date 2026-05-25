@@ -1,342 +1,186 @@
-﻿import { useState, useEffect } from 'react'
-import ProgressBar from '../components/ProgressBar.jsx'
-import TierBadge from '../components/TierBadge.jsx'
-import { createCircle, joinCircle } from '../api/index.js'
+import { useState } from 'react'
 import { useWallet } from '../context/WalletContext.jsx'
 
-const formatINR = (n) =>
-  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
+const C = {
+  canvas: '#fffaf0', ink: '#0a0a0a', secondary: '#615e57',
+  pink: '#ff3399', teal: '#008080', lavender: '#9966ff',
+  peach: '#ff9966', ochre: '#cc9900',
+  surface: '#f4f4ef', surface0: '#ffffff', border: '#cac6c3',
+  white: '#ffffff',
+}
 
-/* ΓöÇΓöÇ Mock circles ΓöÇΓöÇ */
-const MOCK_CIRCLES = [
-  {
-    id: 'c1',
-    name: 'Delhi Street Vendors',
-    description: 'A tight-knit group of Chandni Chowk vendors pooling credit power together.',
-    members: 12,
-    maxMembers: 20,
-    totalPool: 600000,
-    tier: 'Gold',
-    purpose: 'Working Capital',
-    admin: '0x3f7a...9b2e',
-    joined: true,
-    contributions: [
-      { name: 'Rahul S.', amount: 50000 },
-      { name: 'Ravi K.',  amount: 45000 },
-      { name: 'Sunita M.',amount: 40000 },
-    ],
-  },
-  {
-    id: 'c2',
-    name: 'Bangalore Freelancers',
-    description: 'Creative professionals building collective credit history in the gig economy.',
-    members: 8,
-    maxMembers: 15,
-    totalPool: 800000,
-    tier: 'Platinum',
-    purpose: 'Equipment & Tools',
-    admin: '0x7d8e...9f0a',
-    joined: false,
-    contributions: [
-      { name: 'Priya N.', amount: 100000 },
-      { name: 'Arun T.',  amount: 80000 },
-    ],
-  },
-  {
-    id: 'c3',
-    name: 'Maharashtra Farmers',
-    description: 'Seasonal credit circle for Nashik farmers for harvest equipment and storage.',
-    members: 25,
-    maxMembers: 30,
-    totalPool: 1250000,
-    tier: 'Silver',
-    purpose: 'Agricultural',
-    admin: '0x1c2d...3e4f',
-    joined: false,
-    contributions: [
-      { name: 'Ganesh P.', amount: 50000 },
-      { name: 'Lata B.',   amount: 45000 },
-    ],
-  },
+const CIRCLES = [
+  { id: 1, color: C.teal,    tag: 'Emerging Market Credit', icon: '🌐', name: 'Global Alpha Circle',      members: 12, apy: '10-14', pct: 85, goal: '$5M'  },
+  { id: 2, color: C.lavender, tag: 'Commercial Real Estate',  icon: '🏢', name: 'Apex Real Estate Pool',    members: 4,  apy: '8-11',  pct: 40, goal: '$10M' },
+  { id: 3, color: C.peach,   tag: 'Mid-Market Receivables',  icon: '🏪', name: 'SME Growth Fund',          members: 8,  apy: '9-12',  pct: 60, goal: '$2M'  },
+  { id: 4, color: C.pink,    tag: 'Sustainability-Linked',   icon: '🌿', name: 'GreenTech Debt Circle',    members: 2,  apy: '7-9',   pct: 25, goal: '$3M'  },
 ]
 
-/* ΓöÇΓöÇ Circle Card ΓöÇΓöÇ */
-function CircleCard({ circle, onJoin }) {
-  const [expanded, setExpanded] = useState(false)
-  const fillPct = Math.round((circle.members / circle.maxMembers) * 100)
+const MY_CIRCLES = [
+  { id: 1, icon: '⚡', iconColor: C.ochre,   bg: '#fef9e7', name: 'Energy Infrastructure Fund', commitment: '$1,500,000', yield: '9.2%',  status: 'Active'  },
+  { id: 2, icon: '🏦', iconColor: C.teal,    bg: '#e6f4f4', name: 'European FinTech Debt',     commitment: '$500,000',   yield: '11.5%', status: 'Funding' },
+]
 
+function CircleCard({ c }) {
   return (
-    <div className="card-hover">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-display font-bold text-primary">{circle.name}</h3>
-            <TierBadge tier={circle.tier} size="sm" />
-          </div>
-          <p className="text-secondary text-sm">{circle.description}</p>
-        </div>
-        {circle.joined && (
-          <span className="badge badge-teal flex-shrink-0">Joined</span>
-        )}
-      </div>
+    <div style={{
+      background: c.color, borderRadius: 24, padding: 32, color: C.white,
+      display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+      minHeight: 300, position: 'relative', overflow: 'hidden',
+      transition: 'transform 0.25s',
+    }}
+    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+    >
+      {/* ghost icon */}
+      <div style={{ position: 'absolute', top: 0, right: 0, padding: 24, opacity: 0.2, fontSize: 120, lineHeight: 1 }}>{c.icon}</div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mt-5 pt-4 border-t border-hairline">
-        <div className="text-center">
-          <div className="font-bold text-primary">{circle.members}/{circle.maxMembers}</div>
-          <div className="text-xs text-secondary mt-0.5">Members</div>
-        </div>
-        <div className="text-center">
-          <div className="font-bold text-primary">{formatINR(circle.totalPool)}</div>
-          <div className="text-xs text-secondary mt-0.5">Pool Size</div>
-        </div>
-        <div className="text-center">
-          <div className="font-bold text-primary">{circle.purpose}</div>
-          <div className="text-xs text-secondary mt-0.5">Purpose</div>
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{
+          display: 'inline-block', padding: '4px 14px', borderRadius: 999,
+          background: 'rgba(255,255,255,0.2)', fontSize: 12, fontWeight: 600,
+          backdropFilter: 'blur(4px)', marginBottom: 16,
+        }}>{c.tag}</div>
+        <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 8 }}>{c.name}</div>
+        <div style={{ display: 'flex', gap: 20, fontSize: 14, opacity: 0.9, marginBottom: 32 }}>
+          <span>👥 {c.members} Members</span>
+          <span>📈 {c.apy}% APY</span>
         </div>
       </div>
 
-      {/* Capacity bar */}
-      <div className="mt-4">
-        <ProgressBar value={fillPct} variant={fillPct > 80 ? 'gold' : 'indigo'} label="Capacity" showPct size="sm" />
-      </div>
-
-      {/* Expand: contributions */}
-      {expanded && (
-        <div className="mt-4 pt-4 border-t border-hairline animate-fade-in">
-          <h4 className="text-sm font-semibold text-primary mb-3">Top Contributors</h4>
-          <div className="space-y-2">
-            {circle.contributions.map((c) => (
-              <div key={c.name} className="flex justify-between text-sm">
-                <span className="text-secondary">{c.name}</span>
-                <span className="text-primary font-medium">{formatINR(c.amount)}</span>
-              </div>
-            ))}
-          </div>
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 600, marginBottom: 6 }}>
+          <span>{c.pct}% Funded</span>
+          <span>Goal: {c.goal}</span>
         </div>
-      )}
-
-      {/* Actions */}
-      <div className="flex gap-2 mt-4">
-        <button
-          onClick={() => setExpanded((p) => !p)}
-          className="btn-secondary text-xs px-4 py-2 flex-1 justify-center"
-        >
-          {expanded ? 'Collapse' : 'View Members'}
-        </button>
-        {!circle.joined && (
-          <button
-            onClick={() => onJoin(circle.id)}
-            className="btn-primary text-xs px-4 py-2 flex-1 justify-center"
-          >
-            Join Circle
-          </button>
-        )}
-        {circle.joined && (
-          <button className="btn-primary text-xs px-4 py-2 flex-1 justify-center">
-            Manage
-          </button>
-        )}
+        <div style={{ width: '100%', background: 'rgba(255,255,255,0.25)', borderRadius: 999, height: 6 }}>
+          <div style={{ width: `${c.pct}%`, background: C.white, height: 6, borderRadius: 999 }} />
+        </div>
       </div>
     </div>
   )
 }
 
-/* ΓöÇΓöÇ Create Circle Form ΓöÇΓöÇ */
-function CreateCircleForm({ onCreated }) {
-  const [form, setForm] = useState({
-    name: '',
-    description: '',
-    purpose: '',
-    maxMembers: 15,
-    targetPool: '',
-  })
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
-
-  const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }))
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    try {
-      await createCircle(form)
-    } catch { /* demo */ }
-    setSuccess(true)
-    setLoading(false)
-    setTimeout(() => { setSuccess(false); onCreated?.() }, 2000)
-  }
-
-  if (success) {
-    return (
-      <div className="text-center py-8">
-        <div className="text-4xl mb-3">≡ƒÄë</div>
-        <h3 className="font-display font-bold text-primary text-xl mb-2">Circle Created!</h3>
-        <p className="text-secondary text-sm">Your credit circle is now live on VeilFi.</p>
-      </div>
-    )
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="text-sm text-secondary mb-2 block">Circle Name *</label>
-        <input required className="input" placeholder="e.g. Mumbai Artisans Circle" value={form.name} onChange={set('name')} />
-      </div>
-      <div>
-        <label className="text-sm text-secondary mb-2 block">Description *</label>
-        <textarea required className="input min-h-[80px] resize-none" placeholder="What is this circle for?" value={form.description} onChange={set('description')} />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="text-sm text-secondary mb-2 block">Purpose</label>
-          <select className="select" value={form.purpose} onChange={set('purpose')}>
-            <option value="">SelectΓÇª</option>
-            {['Working Capital', 'Equipment', 'Education', 'Agricultural', 'Health', 'Housing'].map((p) => (
-              <option key={p}>{p}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="text-sm text-secondary mb-2 block">Max Members</label>
-          <input type="number" className="input" min={3} max={50} value={form.maxMembers} onChange={set('maxMembers')} />
-        </div>
-      </div>
-      <div>
-        <label className="text-sm text-secondary mb-2 block">Target Pool (INR)</label>
-        <div className="relative">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary">Γé╣</span>
-          <input type="number" className="input pl-8" placeholder="500000" value={form.targetPool} onChange={set('targetPool')} />
-        </div>
-      </div>
-      <button type="submit" disabled={loading} className="btn-primary w-full justify-center py-3.5 disabled:opacity-60">
-        {loading ? 'CreatingΓÇª' : 'Create Circle'}
-      </button>
-    </form>
-  )
-}
-
 export default function Circles() {
-  const [circles, setCircles] = useState(MOCK_CIRCLES)
-  const [tab, setTab]         = useState('browse')
-  const [apiOnline, setApiOnline] = useState(null) // null=checking, true, false
-  const { isConnected }       = useWallet()
-
-  // Probe backend health on mount
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/health`)
-      .then((r) => {
-        setApiOnline(r.ok)
-        console.log('[Circles] Backend health:', r.ok ? 'online' : 'offline')
-      })
-      .catch(() => {
-        setApiOnline(false)
-        console.log('[Circles] Backend offline')
-      })
-  }, [])
-
-  const handleJoin = async (circleId) => {
-    try {
-      await joinCircle(circleId, '0x0000')
-    } catch { /* demo */ }
-    setCircles((prev) =>
-      prev.map((c) => c.id === circleId ? { ...c, joined: true, members: c.members + 1 } : c)
-    )
-  }
-
-  const joined    = circles.filter((c) => c.joined)
-  const notJoined = circles.filter((c) => !c.joined)
+  const { isConnected, address } = useWallet()
+  const [showCreate, setShowCreate] = useState(false)
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4">
-      <div className="max-w-5xl mx-auto">
+    <div style={{ fontFamily: 'Inter, sans-serif', background: C.canvas, color: C.ink, minHeight: '100vh' }}>
+      <main style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 64px 80px' }}>
 
-        {/* Header */}
-        <div className="mb-8">
-          <p className="section-label mb-2">Collective Credit</p>
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div>
-              <h1 className="font-display font-black text-4xl text-primary">
-                Credit <span className="text-block-lilac">Circles</span>
-              </h1>
-              <p className="text-secondary mt-2 text-lg">
-                Pool credit power with your community. Borrow bigger, together.
-              </p>
-            </div>
-            <div className="text-xs flex items-center gap-2 border border-border rounded-lg px-3 py-2 bg-card">
-              {apiOnline === null && <span className="text-grey animate-pulse">Checking backendΓÇª</span>}
-              {apiOnline === true  && <><span className="w-2 h-2 rounded-full bg-teal" /><span className="text-teal">Backend online</span></>}
-              {apiOnline === false && <><span className="w-2 h-2 rounded-full bg-amber-400" /><span className="text-amber-400">Demo mode</span></>}
-            </div>
-          </div>
-        </div>
+        {/* ── Hero ── */}
+        <section style={{ marginBottom: 56 }}>
+          <h1 style={{ fontSize: 48, fontWeight: 700, letterSpacing: '-0.04em', margin: '0 0 12px' }}>Investment Circles</h1>
+          <p style={{ fontSize: 18, color: C.secondary, lineHeight: 1.6, maxWidth: 640, margin: 0 }}>
+            Join or create private lending groups to pool capital and diversify risk with trusted institutional partners.
+          </p>
+        </section>
 
-        {/* Overview stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        {/* ── Stats Row ── */}
+        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 20, marginBottom: 64 }}>
           {[
-            { label: 'Active Circles', value: circles.length },
-            { label: 'Total Members',  value: circles.reduce((a, c) => a + c.members, 0) },
-            { label: 'Total Pool',     value: 'Γé╣26.5L' },
-          ].map(({ label, value }) => (
-            <div key={label} className="stat-card">
-              <div className="stat-value">{value}</div>
-              <div className="stat-label">{label}</div>
+            { label: 'Active Circles',       value: '14'       },
+            { label: 'Total Pooled Capital',  value: '$42.5M'   },
+            { label: 'Average Circle Yield',  value: '9.4% APY' },
+          ].map(s => (
+            <div key={s.label} style={{
+              background: C.surface0, border: `1px solid rgba(196,199,199,0.35)`,
+              borderRadius: 16, padding: 24, display: 'flex', flexDirection: 'column',
+              transition: 'transform 0.25s', boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: C.secondary, marginBottom: 8 }}>{s.label}</span>
+              <span style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em', color: C.ink }}>{s.value}</span>
             </div>
           ))}
-        </div>
+        </section>
 
-        {/* Tab switcher */}
-        <div className="flex gap-2 p-1 bg-surface-soft rounded-xl border border-hairline w-fit mb-8">
-          <button onClick={() => setTab('browse')}  className={`tab-btn ${tab === 'browse'  ? 'active' : ''}`}>Browse Circles</button>
-          <button onClick={() => setTab('mine')}    className={`tab-btn ${tab === 'mine'    ? 'active' : ''}`}>My Circles ({joined.length})</button>
-          <button onClick={() => setTab('create')}  className={`tab-btn ${tab === 'create'  ? 'active' : ''}`}>Create Circle</button>
-        </div>
-
-        {/* Browse */}
-        {tab === 'browse' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
-            {notJoined.map((c, i) => (
-              <div key={c.id} className="animate-slide-up" style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'both' }}>
-                <CircleCard circle={c} onJoin={handleJoin} />
-              </div>
-            ))}
+        {/* ── Available Circles ── */}
+        <section style={{ marginBottom: 64 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em', margin: 0 }}>Available Circles</h2>
+            <button style={{ fontSize: 13, color: C.secondary, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+              View All →
+            </button>
           </div>
-        )}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+            {CIRCLES.map(c => <CircleCard key={c.id} c={c} />)}
+          </div>
+        </section>
 
-        {/* My circles */}
-        {tab === 'mine' && (
-          <div className="animate-fade-in">
-            {joined.length === 0 ? (
-              <div className="text-center py-20">
-                <div className="text-6xl mb-4">Γ¡ò</div>
-                <h3 className="font-display font-bold text-primary text-xl mb-2">No circles yet</h3>
-                <p className="text-secondary mb-5">Browse and join a credit circle to get started</p>
-                <button onClick={() => setTab('browse')} className="btn-primary">Browse Circles</button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {joined.map((c) => (
-                  <CircleCard key={c.id} circle={c} onJoin={handleJoin} />
+        {/* ── My Circles ── */}
+        <section>
+          <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em', margin: '0 0 28px' }}>My Circles</h2>
+          <div style={{ background: C.surface0, border: `1px solid rgba(196,199,199,0.35)`, borderRadius: 16, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: `1px solid rgba(196,199,199,0.25)`, background: 'rgba(244,244,239,0.5)' }}>
+                  {['Circle Name','My Commitment','Current Yield','Status','Actions'].map((h, i) => (
+                    <th key={h} style={{
+                      padding: '14px 24px', textAlign: i === 4 ? 'right' : 'left',
+                      fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: C.secondary,
+                    }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {MY_CIRCLES.map((row, i) => (
+                  <tr key={row.id} style={{
+                    borderBottom: i < MY_CIRCLES.length - 1 ? `1px solid rgba(196,199,199,0.15)` : 'none',
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(244,244,239,0.35)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <td style={{ padding: '16px 24px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: '50%', background: row.bg, color: row.iconColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
+                          {row.icon}
+                        </div>
+                        <span style={{ fontWeight: 500 }}>{row.name}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: '16px 24px', color: C.ink }}>{row.commitment}</td>
+                    <td style={{ padding: '16px 24px', color: C.ink }}>{row.yield}</td>
+                    <td style={{ padding: '16px 24px' }}>
+                      <span style={{
+                        padding: '4px 12px', borderRadius: 999,
+                        background: '#e8e8e3', fontSize: 12, fontWeight: 600, color: C.secondary,
+                      }}>{row.status}</span>
+                    </td>
+                    <td style={{ padding: '16px 24px', textAlign: 'right' }}>
+                      <button style={{ color: C.secondary, background: 'none', border: 'none', cursor: 'pointer', fontSize: 18 }}
+                        onMouseEnter={e => e.currentTarget.style.color = C.ink}
+                        onMouseLeave={e => e.currentTarget.style.color = C.secondary}
+                      >•••</button>
+                    </td>
+                  </tr>
                 ))}
-              </div>
-            )}
+              </tbody>
+            </table>
           </div>
-        )}
+        </section>
 
-        {/* Create */}
-        {tab === 'create' && (
-          <div className="max-w-lg mx-auto card animate-slide-up">
-            <h2 className="font-display font-bold text-primary text-xl mb-6">Create a Credit Circle</h2>
-            {!isConnected && (
-              <div className="badge badge-gold mb-4 text-xs px-3 py-2">
-                Connect wallet to create a circle
-              </div>
-            )}
-            <CreateCircleForm onCreated={() => setTab('browse')} />
-          </div>
-        )}
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer style={{
+        borderTop: `1px solid rgba(196,199,199,0.15)`, padding: '24px 64px',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12,
+      }}>
+        <span style={{ fontSize: 13, color: C.secondary }}>© 2024 VielFi Institutional Credit Marketplace</span>
+        <div style={{ display: 'flex', gap: 24 }}>
+          {['Terms of Service','Privacy Policy','Compliance','Contact'].map(l => (
+            <a key={l} href="#" style={{ fontSize: 13, color: C.secondary, textDecoration: 'none' }}
+              onMouseEnter={e => e.currentTarget.style.color = C.ink}
+              onMouseLeave={e => e.currentTarget.style.color = C.secondary}
+            >{l}</a>
+          ))}
+        </div>
+      </footer>
     </div>
   )
 }

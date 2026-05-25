@@ -1,525 +1,306 @@
-﻿import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import SBTCard from '../components/SBTCard.jsx'
-import ProgressBar from '../components/ProgressBar.jsx'
+import { useState } from 'react'
 import { useWallet } from '../context/WalletContext.jsx'
-import api from '../api/index.js'
 
-const DEFAULT_PROFILE_NAME = 'rahul_shopkeeper'
-const ETHERSCAN_URL = 'https://sepolia.etherscan.io/address/0x3d4613bfFc15F8d46Df148F62C31B6d32575B002'
-
-const FALLBACK_VERIFY_RESPONSE = {
-  tier: 'Gold',
-  cibilScore: 762,
-  upiScore: 100,
-  gstScore: 100,
-  rentalScore: 97.5,
-  proofHash: '0x7f3a9b2e1c4d8f6a5b0e3d9c7f2a4e8b1d6c3f9a2b5e8c1d4f7a0b3e6c9f2a5b8e1',
-  narrative: 'Demo profile loaded while the verification API is unavailable.',
+const C = {
+  canvas: '#fffaf0', ink: '#0a0a0a', secondary: '#615e57',
+  teal: '#008080', lavender: '#9966ff', peach: '#ff9966', ochre: '#cc9900',
+  surface: '#f4f4ef', surface0: '#ffffff', border: '#cac6c3',
+  white: '#ffffff', pink: '#ff3399', error: '#ba1a1a',
 }
 
-const PROFILE_META = {
-  name: 'Rahul Sharma',
-  wallet: '0x3d4613bfFc15F8d46Df148F62C31B6d32575B002',
-  tagline: 'UPI, GST & rental verified business owner',
-  mintedAt: '2024-03-15',
-}
-
-const LOAN_HISTORY = [
-  { id: '1', purpose: 'Working Capital', amount: 100000, status: 'Active', repaid: 45000, duration: 12, startDate: 'Jan 2024' },
-  { id: '2', purpose: 'Equipment', amount: 50000, status: 'Closed', repaid: 50000, duration: 6, startDate: 'Jul 2023' },
-  { id: '3', purpose: 'Inventory', amount: 75000, status: 'Closed', repaid: 75000, duration: 9, startDate: 'Jan 2023' },
+const SESSIONS = [
+  { device: '💻', name: 'Mac OS • Chrome', location: 'Mumbai, IN • Current Session', revoke: false },
+  { device: '📱', name: 'iOS • Safari',    location: 'Mumbai, IN • 2 hours ago',     revoke: true  },
+]
+const TEAM = [
+  { initials: 'AR', bg: C.lavender, name: 'Alex Rivera', note: '(You)', role: 'Admin',  status: 'Active',   pending: false },
+  { initials: 'SJ', bg: C.teal,     name: 'Sarah Jenkins',              role: 'Viewer', status: 'Active',   pending: false },
+  { initials: 'MT', bg: '#e8e8e3',  name: 'Michael Tran',               role: 'Editor', status: 'Pending',  pending: true  },
 ]
 
-const REPUTATION_TIMELINE = [
-  { date: 'Mar 2024', event: 'SBT Minted',          icon: '≡ƒÅà', color: 'text-primary' },
-  { date: 'Mar 2024', event: 'ZK Proof Generated',   icon: '≡ƒöÉ', color: 'text-block-lilac' },
-  { date: 'Mar 2024', event: 'GST Data Linked',       icon: '≡ƒôï', color: 'text-semantic-success' },
-  { date: 'Feb 2024', event: 'UPI History Verified',  icon: '≡ƒô▒', color: 'text-semantic-success' },
-  { date: 'Jan 2024', event: 'Loan #1 Repaid Early',  icon: 'Γ£ô',  color: 'text-semantic-success' },
-  { date: 'Jul 2023', event: 'Loan #2 Funded',        icon: '≡ƒÆ░', color: 'text-primary' },
-]
-
-const readScore = (data, camelKey, snakeKey) =>
-  Number(data?.[camelKey] ?? data?.[snakeKey] ?? 0)
-
-const adaptVerifyResponse = (data) => ({
-  tier: data?.tier || 'Silver',
-  cibilScore: readScore(data, 'cibilScore', 'cibil_score'),
-  upiScore: readScore(data, 'upiScore', 'upi_score'),
-  gstScore: readScore(data, 'gstScore', 'gst_score'),
-  rentalScore: readScore(data, 'rentalScore', 'rental_score'),
-  proofHash: data?.proofHash || data?.proof_hash || '',
-  narrative: data?.narrative || '',
-})
-
-const formatINR = (n) =>
-  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
-
-const clampPct = (value) => Math.max(0, Math.min(100, Math.round(value || 0)))
-
-function buildScoreHistory(score) {
-  const current = Number(score || 700)
-  return [
-    { month: 'Nov', score: Math.max(300, current - 142) },
-    { month: 'Dec', score: Math.max(300, current - 114) },
-    { month: 'Jan', score: Math.max(300, current - 77) },
-    { month: 'Feb', score: Math.max(300, current - 42) },
-    { month: 'Mar', score: Math.max(300, current - 14) },
-    { month: 'Apr', score: current },
-  ]
-}
-
-function ScoreChart({ history }) {
-  const max = Math.max(...history.map((h) => h.score))
-  const min = Math.min(550, ...history.map((h) => h.score))
-  const range = Math.max(max - min, 1)
-
+function Input({ label, type = 'text', value, placeholder, mono }) {
   return (
-    <div className="relative h-32 flex items-end gap-2">
-      {history.map(({ month, score }) => {
-        const pct = ((score - min) / range) * 100
-        return (
-          <div key={month} className="flex-1 flex flex-col items-center gap-1 group">
-            <span className="text-xs text-primary font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
-              {score}
-            </span>
-            <div
-              className="w-full rounded-t-lg bg-gradient-to-t from-primary/20 to-primary/40 transition-all duration-700 relative overflow-hidden"
-              style={{ height: `${pct}%`, minHeight: '8px' }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent shimmer" />
-            </div>
-            <span className="text-xs text-secondary">{month}</span>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function ProfileSkeleton() {
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
-      <div className="lg:col-span-1 space-y-4">
-        <div className="card h-96">
-          <div className="h-16 w-16 rounded-2xl bg-border" />
-          <div className="h-7 bg-border rounded w-2/3 mt-5" />
-          <div className="h-3 bg-border rounded w-1/2 mt-3" />
-          <div className="h-24 bg-border rounded mt-12" />
-        </div>
-        <div className="card grid grid-cols-2 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="space-y-2">
-              <div className="h-6 bg-border rounded mx-auto w-14" />
-              <div className="h-3 bg-border rounded mx-auto w-20" />
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="lg:col-span-2">
-        <div className="card h-80">
-          <div className="h-6 bg-border rounded w-48" />
-          <div className="h-32 bg-border rounded mt-8" />
-          <div className="space-y-3 mt-8">
-            <div className="h-3 bg-border rounded" />
-            <div className="h-3 bg-border rounded" />
-            <div className="h-3 bg-border rounded" />
-          </div>
-        </div>
-      </div>
+    <div>
+      {label && <label style={{ display: 'block', fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: C.secondary, marginBottom: 8 }}>{label}</label>}
+      <input
+        type={type} defaultValue={value} placeholder={placeholder}
+        style={{
+          width: '100%', padding: '12px 16px', boxSizing: 'border-box',
+          background: C.canvas, border: `1px solid rgba(196,199,199,0.4)`,
+          borderRadius: 10, fontSize: 15, color: C.ink, outline: 'none',
+          fontFamily: mono ? 'monospace' : 'Inter, sans-serif',
+          transition: 'border-color 0.15s',
+        }}
+        onFocus={e => e.target.style.borderColor = C.ink}
+        onBlur={e => e.target.style.borderColor = 'rgba(196,199,199,0.4)'}
+      />
     </div>
   )
 }
 
 export default function Profile() {
-  const [tab, setTab] = useState('overview')
-  const [verifyData, setVerifyData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [apiError, setApiError] = useState('')
-  const { isConnected, shortAddress } = useWallet()
-  const navigate = useNavigate()
+  const { isConnected, address } = useWallet()
+  const [saved, setSaved] = useState(false)
 
-  useEffect(() => {
-    let isMounted = true
-
-    const loadProfile = async () => {
-      setLoading(true)
-      try {
-        const data = await api.post('/api/credit/verify', {
-          profile_name: DEFAULT_PROFILE_NAME,
-          profileName: DEFAULT_PROFILE_NAME,
-        })
-        if (!isMounted) return
-
-        setVerifyData(adaptVerifyResponse(data))
-        setApiError('')
-      } catch (err) {
-        if (!isMounted) return
-
-        setVerifyData(adaptVerifyResponse(FALLBACK_VERIFY_RESPONSE))
-        setApiError(err.message || 'Verification API failed')
-      } finally {
-        if (isMounted) setLoading(false)
-      }
-    }
-
-    loadProfile()
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
-
-  const profile = useMemo(() => {
-    const data = verifyData || adaptVerifyResponse(FALLBACK_VERIFY_RESPONSE)
-    return {
-      ...PROFILE_META,
-      tier: data.tier,
-      score: data.cibilScore,
-      proofHash: data.proofHash,
-      signals: {
-        upi: data.upiScore > 0,
-        gst: data.gstScore > 0,
-        rental: data.rentalScore > 0,
-      },
-    }
-  }, [verifyData])
-
-  const scoreHistory = useMemo(() => buildScoreHistory(profile.score), [profile.score])
-  const scoreGain = scoreHistory.at(-1).score - scoreHistory[0].score
-  const proofHash = profile.proofHash || FALLBACK_VERIFY_RESPONSE.proofHash
+  const displayAddr = address ? `${address.slice(0,6)}...${address.slice(-4)}` : '0x...'
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <p className="section-label mb-2">Your Identity</p>
-            <h1 className="font-display font-black text-4xl text-primary">
-              Credit <span className="text-gradient-gold">Profile</span>
-            </h1>
-          </div>
-          {!isConnected && (
-            <div className="card border border-primary/20 bg-primary/5 text-sm text-primary py-3 px-4 max-w-xs">
-              Connect wallet to see your live profile
-            </div>
-          )}
+    <div style={{ fontFamily: 'Inter, sans-serif', background: C.canvas, color: C.ink, minHeight: '100vh' }}>
+
+      {/* Top header */}
+      <header style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '0 64px', height: 64, background: C.canvas,
+        borderBottom: `1px solid rgba(196,199,199,0.25)`,
+        position: 'sticky', top: 0, zIndex: 40, backdropFilter: 'blur(8px)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>Profile Settings</h1>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          {/* Left: SBT Card */}
-          <div className="lg:col-span-1 space-y-4">
-            <SBTCard sbt={{ ...profile, wallet: isConnected ? `${shortAddress}` : profile.wallet }} size="lg" />
-
-            {/* Quick stats */}
-            <div className="card grid grid-cols-2 gap-4">
-              {[
-                { label: 'Loans Taken',   value: '3' },
-                { label: 'On-Time Repay', value: '100%' },
-                { label: 'Total Borrowed', value: 'Γé╣2.25L' },
-                { label: 'Current Score',  value: profile.score },
-              ].map(({ label, value }) => (
-                <div key={label} className="text-center">
-                  <div className="font-display font-bold text-xl text-primary">{value}</div>
-                  <div className="text-xs text-secondary mt-0.5">{label}</div>
-                </div>
-              ))}
-            </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          <div style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: C.secondary, fontSize: 16 }}>🔍</span>
+            <input placeholder="Search…" style={{
+              paddingLeft: 36, paddingRight: 16, paddingTop: 8, paddingBottom: 8,
+              background: C.surface, border: `1px solid rgba(196,199,199,0.3)`,
+              borderRadius: 999, fontSize: 14, color: C.ink, outline: 'none', width: 220,
+            }} />
           </div>
+          <button style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: C.secondary }}>🔔</button>
+          <div style={{ width: 36, height: 36, borderRadius: '50%', background: C.teal, color: C.white, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13 }}>
+            {isConnected ? displayAddr.slice(2,4).toUpperCase() : 'VF'}
+          </div>
+        </div>
+      </header>
 
-          {/* Right: Tabs */}
-          <div className="lg:col-span-2 space-y-4">
+      <main style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 64px 80px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 24, alignItems: 'start' }}>
 
-            {/* Tab bar */}
-            <div className="flex gap-2 p-1 bg-surface-container rounded-full border border-hairline w-fit">
-              {['overview', 'loans', 'timeline'].map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTab(t)}
-                  className={`tab-btn capitalize ${tab === t ? 'active' : ''}`}
-                >
-                  {t === 'overview' ? 'Score History' : t === 'loans' ? 'Loan History' : 'Timeline'}
-                </button>
-              ))}
-            </div>
+          {/* ── LEFT COLUMN ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-            {/* Overview: Score chart */}
-            {tab === 'overview' && (
-              <div className="card animate-fade-in">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="font-display font-bold text-primary">Credit Score History</h2>
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl font-display font-bold text-gradient-gold">{profile.score}</span>
-                    <span className="badge badge-teal text-xs">+14 this month</span>
-                  </div>
-                </div>
-                <ScoreChart history={SCORE_HISTORY} />
-                <div className="mt-6 grid grid-cols-3 gap-4 pt-4 border-t border-hairline">
-                  <div className="text-center">
-                    <div className="text-sm font-semibold text-primary">6 months</div>
-                    <div className="text-xs text-secondary">Score period</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-sm font-semibold text-semantic-success">+142</div>
-                    <div className="text-xs text-secondary">Total gain</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-sm font-semibold text-primary">Gold</div>
-                    <div className="text-xs text-secondary">Current tier</div>
-                  </div>
-                </div>
-
-                {/* Signal breakdown */}
-                <div className="mt-6 space-y-4 pt-4 border-t border-hairline">
-                  <h3 className="text-sm font-semibold text-primary">Signal Breakdown</h3>
-                  <ProgressBar value={82} variant="indigo" label="UPI Transaction History" showPct />
-                  <ProgressBar value={74} variant="gold"   label="GST Filing Consistency"   showPct />
-                  <ProgressBar value={66} variant="teal"   label="Rental Payment Record"    showPct />
-                </div>
-              </div>
-            )}
-
-            {/* Loan history */}
-            {tab === 'loans' && (
-              <div className="card animate-fade-in">
-                <h2 className="font-display font-bold text-primary mb-6">Loan History</h2>
-                <div className="space-y-4">
-                  {LOAN_HISTORY.map((loan) => {
-                    const repaidPct = Math.round((loan.repaid / loan.amount) * 100)
-                    return (
-                      <div
-                        key={loan.id}
-                        onClick={() => navigate(`/loan/${loan.id}`)}
-                        className="rounded-xl bg-surface-soft border border-hairline p-4 hover:border-primary/20 transition-all duration-200 cursor-pointer"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold text-primary">{loan.purpose}</span>
-                              <span className={`badge text-xs ${
-                                loan.status === 'Active' ? 'badge-teal' : 'badge-grey'
-                              }`}>
-                                {loan.status}
-                              </span>
-                            </div>
-                            <div className="text-xs text-secondary">
-                              Started {loan.startDate} ┬╖ {loan.duration}M term
-                            </div>
-                          </div>
-                          <div className="text-right flex-shrink-0">
-                            <div className="font-display font-bold text-primary">{formatINR(loan.amount)}</div>
-                            <div className="text-xs text-secondary mt-0.5">
-                              {formatINR(loan.repaid)} repaid
-                            </div>
-                          </div>
-                        </div>
-                        <div className="mt-3">
-                          <ProgressBar value={repaidPct} variant={loan.status === 'Closed' ? 'teal' : 'gold'} size="sm" />
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Timeline */}
-            {tab === 'timeline' && (
-              <div className="card animate-fade-in">
-                <h2 className="font-display font-bold text-primary mb-6">Reputation Timeline</h2>
-                <div className="relative">
-                  <div className="absolute left-4 top-0 bottom-0 w-px bg-hairline" />
-                  <div className="space-y-5 pl-10">
-                    {REPUTATION_TIMELINE.map((item, i) => (
-                      <div
-                        key={i}
-                        className="relative animate-slide-right"
-                        style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'both' }}
-                      >
-                        <div className="absolute -left-10 w-8 h-8 rounded-full bg-surface-soft border border-hairline flex items-center justify-center text-sm">
-                          {item.icon}
-                        </div>
-                        <div className="rounded-xl bg-surface-soft border border-hairline p-3 hover:border-primary/20 transition-colors">
-                          <div className="flex items-center justify-between">
-                            <span className={`font-medium text-sm ${item.color}`}>{item.event}</span>
-                            <span className="text-xs text-secondary">{item.date}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-            <a
-              href={ETHERSCAN_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="btn-secondary text-sm"
+            {/* Profile Card */}
+            <div style={{
+              background: C.surface0, border: `1px solid rgba(196,199,199,0.25)`,
+              borderRadius: 16, padding: 32, position: 'relative', overflow: 'hidden',
+              transition: 'transform 0.25s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.01)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             >
-              View on Etherscan
-            </a>
+              {/* top accent bar */}
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: C.lavender }} />
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                <div style={{
+                  width: 88, height: 88, borderRadius: '50%', marginBottom: 16, marginTop: 12,
+                  background: C.surface, border: `2px solid ${C.canvas}`, boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32,
+                }}>
+                  {isConnected ? displayAddr.slice(2,4).toUpperCase() : '👤'}
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 4 }}>
+                  {isConnected ? displayAddr : 'VeilFi User'}
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.secondary, marginBottom: 24 }}>
+                  Portfolio Manager
+                </div>
+                <button style={{
+                  width: '100%', padding: '12px 0', background: C.surface, color: C.ink,
+                  border: `1px solid rgba(196,199,199,0.35)`, borderRadius: 10,
+                  fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  transition: 'background 0.15s',
+                }}>
+                  ✏️ Edit Photo
+                </button>
+              </div>
+            </div>
+
+            {/* Personal Information Form */}
+            <div style={{ background: C.surface0, border: `1px solid rgba(196,199,199,0.25)`, borderRadius: 16, padding: 32 }}>
+              <h3 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 24px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ color: C.teal }}>👤</span> Personal Information
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <Input label="Full Name"          value={isConnected ? displayAddr : 'VeilFi User'} />
+                <Input label="Professional Email"  type="email" placeholder="user@veilfi.io" />
+                <Input label="Wallet Address"      value={address || ''} placeholder="0x..." mono />
+                <button
+                  onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 2000) }}
+                  style={{
+                    width: '100%', padding: '14px 0', background: C.ink, color: C.white,
+                    border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                    transition: 'opacity 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+                  onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                >{saved ? '✅ Saved!' : 'Save Changes'}</button>
+              </div>
+            </div>
+          </div>
+
+          {/* ── RIGHT COLUMN ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+            {/* Institutional Bento */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+
+              {/* Teal institution card */}
+              <div style={{
+                background: C.teal, borderRadius: 24, padding: 32, color: C.white,
+                position: 'relative', overflow: 'hidden',
+                transition: 'transform 0.25s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.01)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                <div style={{ position: 'absolute', width: 128, height: 128, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', top: -32, right: -32 }} />
+                <div style={{ fontSize: 28, marginBottom: 16 }}>🏢</div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', opacity: 0.75, marginBottom: 8 }}>Institutional Entity</div>
+                <h3 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 16px' }}>VeilFi Institutional</h3>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {[['Entity Type','LLC'],['Founded','2024'],['Network','Sepolia ETH']].map(([k,v]) => (
+                    <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
+                      <span style={{ opacity: 0.75 }}>{k}</span>
+                      <span style={{ fontWeight: 700 }}>{v}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Legal Details */}
+              <div style={{
+                background: C.surface0, border: `1px solid rgba(196,199,199,0.25)`,
+                borderRadius: 16, padding: 28, display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+              }}>
+                <div>
+                  <h4 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ color: C.ochre }}>📋</span> Legal Details
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <div>
+                      <div style={{ fontSize: 12, color: C.secondary, fontWeight: 600, letterSpacing: '0.04em', marginBottom: 4 }}>Wallet Address</div>
+                      <div style={{ fontFamily: 'monospace', fontSize: 13, color: C.ink }}>{address || '**-***0000'}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 12, color: C.secondary, fontWeight: 600, letterSpacing: '0.04em', marginBottom: 4 }}>Network</div>
+                      <div style={{ fontSize: 14, color: C.ink }}>Ethereum Sepolia Testnet</div>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ borderTop: `1px solid rgba(196,199,199,0.2)`, paddingTop: 16, marginTop: 16 }}>
+                  <button style={{ color: C.teal, background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    Update Details →
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Team Management */}
+            <div style={{ background: C.surface0, border: `1px solid rgba(196,199,199,0.25)`, borderRadius: 16, padding: 32 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                <h4 style={{ fontSize: 18, fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ color: C.peach }}>👥</span> Team Management
+                </h4>
+                <button style={{
+                  background: C.peach, color: C.ink, border: 'none', borderRadius: 10,
+                  padding: '10px 20px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 8,
+                }}>
+                  👤+ Invite Member
+                </button>
+              </div>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid rgba(196,199,199,0.2)` }}>
+                    {['Member','Role','Status','Actions'].map((h,i) => (
+                      <th key={h} style={{ paddingBottom: 14, textAlign: i === 3 ? 'right' : 'left', fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: C.secondary }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {TEAM.map((m, i) => (
+                    <tr key={m.name} style={{
+                      borderBottom: i < TEAM.length - 1 ? `1px solid rgba(196,199,199,0.12)` : 'none',
+                      transition: 'background 0.15s',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(244,244,239,0.5)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <td style={{ padding: '14px 0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <div style={{ width: 32, height: 32, borderRadius: '50%', background: m.bg, color: C.white, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>{m.initials}</div>
+                          <span style={{ fontWeight: 500 }}>{m.name} {m.note && <span style={{ color: C.secondary, fontSize: 13, fontWeight: 400 }}>{m.note}</span>}</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '14px 16px', color: C.secondary, fontSize: 14 }}>{m.role}</td>
+                      <td style={{ padding: '14px 16px' }}>
+                        <span style={{
+                          padding: '4px 12px', borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+                          background: m.pending ? 'transparent' : '#e8e8e3', color: C.secondary,
+                          border: m.pending ? `1px solid ${C.border}` : 'none',
+                        }}>{m.status}</span>
+                      </td>
+                      <td style={{ padding: '14px 0', textAlign: 'right' }}>
+                        <button style={{ color: C.secondary, background: 'none', border: 'none', cursor: 'pointer', fontSize: 18 }}>•••</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Security Section */}
+            <div style={{ background: C.surface0, border: `1px solid rgba(196,199,199,0.25)`, borderRadius: 16, padding: 32 }}>
+              <h4 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 24px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                🛡️ Security
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {/* 2FA */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', background: C.surface, borderRadius: 12, gap: 16 }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>Two-Factor Authentication (2FA)</div>
+                    <div style={{ fontSize: 12, color: C.secondary }}>Add an extra layer of security to your account.</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span style={{ color: C.teal, fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>✅ Enabled</span>
+                    <button style={{ padding: '8px 16px', border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: C.white }}>Manage</button>
+                  </div>
+                </div>
+                {/* Password */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', background: C.canvas, border: `1px solid rgba(196,199,199,0.2)`, borderRadius: 12 }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>Password</div>
+                    <div style={{ fontSize: 12, color: C.secondary }}>Last changed 4 months ago.</div>
+                  </div>
+                  <button style={{ padding: '8px 16px', border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: C.white }}>Change Password</button>
+                </div>
+                {/* Sessions */}
+                <div style={{ paddingTop: 8 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.secondary, marginBottom: 16 }}>Active Sessions</div>
+                  {SESSIONS.map((s, i) => (
+                    <div key={s.name} style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0',
+                      borderBottom: i < SESSIONS.length - 1 ? `1px solid rgba(196,199,199,0.15)` : 'none',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <span style={{ fontSize: 20, color: C.secondary }}>{s.device}</span>
+                        <div>
+                          <div style={{ fontSize: 15, fontWeight: 500 }}>{s.name}</div>
+                          <div style={{ fontSize: 12, color: C.secondary }}>{s.location}</div>
+                        </div>
+                      </div>
+                      {s.revoke && (
+                        <button style={{ color: C.error, background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>Revoke</button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
-
-        {apiError && (
-          <div className="mb-6 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm px-4 py-3">
-            Verification API failed. Showing demo fallback. ({apiError})
-          </div>
-        )}
-
-        {loading ? (
-          <ProfileSkeleton />
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1 space-y-4">
-              <SBTCard
-                sbt={{ ...profile, wallet: isConnected ? `${shortAddress}` : profile.wallet }}
-                size="lg"
-                contractUrl={ETHERSCAN_URL}
-              />
-
-              <div className="card grid grid-cols-2 gap-4">
-                {[
-                  { label: 'Loans Taken', value: '3' },
-                  { label: 'On-Time Repay', value: '100%' },
-                  { label: 'Total Borrowed', value: 'INR 2.25L' },
-                  { label: 'Current Score', value: profile.score },
-                ].map(({ label, value }) => (
-                  <div key={label} className="text-center">
-                    <div className="font-display font-bold text-xl text-white">{value}</div>
-                    <div className="text-xs text-grey mt-0.5">{label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="lg:col-span-2 space-y-4">
-              <div className="flex gap-2 p-1 bg-card rounded-xl border border-border w-fit">
-                {['overview', 'loans', 'timeline'].map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setTab(t)}
-                    className={`tab-btn capitalize ${tab === t ? 'active' : ''}`}
-                  >
-                    {t === 'overview' ? 'Score History' : t === 'loans' ? 'Loan History' : 'Timeline'}
-                  </button>
-                ))}
-              </div>
-
-              {tab === 'overview' && (
-                <div className="card animate-fade-in">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="font-display font-bold text-white">Credit Score History</h2>
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl font-display font-bold text-gradient-gold">{profile.score}</span>
-                      <span className="badge badge-teal text-xs">+{scoreGain} total</span>
-                    </div>
-                  </div>
-                  <ScoreChart history={scoreHistory} />
-                  <div className="mt-6 grid grid-cols-3 gap-4 pt-4 border-t border-border">
-                    <div className="text-center">
-                      <div className="text-sm font-semibold text-white">6 months</div>
-                      <div className="text-xs text-grey">Score period</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-sm font-semibold text-teal">+{scoreGain}</div>
-                      <div className="text-xs text-grey">Total gain</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-sm font-semibold text-gold">{profile.tier}</div>
-                      <div className="text-xs text-grey">Current tier</div>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 space-y-4 pt-4 border-t border-border">
-                    <h3 className="text-sm font-semibold text-white">Signal Breakdown</h3>
-                    <ProgressBar value={clampPct(verifyData.upiScore)} variant="indigo" label="UPI Transaction History" showPct />
-                    <ProgressBar value={clampPct(verifyData.gstScore)} variant="gold" label="GST Filing Consistency" showPct />
-                    <ProgressBar value={clampPct(verifyData.rentalScore)} variant="teal" label="Rental Payment Record" showPct />
-                  </div>
-
-                  <div className="mt-6 pt-4 border-t border-border">
-                    <h3 className="text-sm font-semibold text-white">Proof Hash</h3>
-                    <p className="mt-2 text-xs text-grey font-mono break-all">{proofHash}</p>
-                  </div>
-                </div>
-              )}
-
-              {tab === 'loans' && (
-                <div className="card animate-fade-in">
-                  <h2 className="font-display font-bold text-white mb-6">Loan History</h2>
-                  <div className="space-y-4">
-                    {LOAN_HISTORY.map((loan) => {
-                      const repaidPct = Math.round((loan.repaid / loan.amount) * 100)
-                      return (
-                        <div
-                          key={loan.id}
-                          onClick={() => navigate(`/loan/${loan.id}`)}
-                          className="rounded-xl bg-bg border border-border p-4 hover:border-gold/30 transition-all duration-200 cursor-pointer"
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-semibold text-white">{loan.purpose}</span>
-                                <span className={`badge text-xs ${loan.status === 'Active' ? 'badge-teal' : 'badge-grey'}`}>
-                                  {loan.status}
-                                </span>
-                              </div>
-                              <div className="text-xs text-grey">
-                                Started {loan.startDate} | {loan.duration}M term
-                              </div>
-                            </div>
-                            <div className="text-right flex-shrink-0">
-                              <div className="font-display font-bold text-white">{formatINR(loan.amount)}</div>
-                              <div className="text-xs text-grey mt-0.5">
-                                {formatINR(loan.repaid)} repaid
-                              </div>
-                            </div>
-                          </div>
-                          <div className="mt-3">
-                            <ProgressBar value={repaidPct} variant={loan.status === 'Closed' ? 'teal' : 'gold'} size="sm" />
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {tab === 'timeline' && (
-                <div className="card animate-fade-in">
-                  <h2 className="font-display font-bold text-white mb-6">Reputation Timeline</h2>
-                  <div className="relative">
-                    <div className="absolute left-4 top-0 bottom-0 w-px bg-border" />
-                    <div className="space-y-5 pl-10">
-                      {REPUTATION_TIMELINE.map((item, i) => (
-                        <div
-                          key={item.event}
-                          className="relative animate-slide-right"
-                          style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'both' }}
-                        >
-                          <div className="absolute -left-10 w-8 h-8 rounded-full bg-card border border-border flex items-center justify-center text-[10px] font-bold text-grey">
-                            {item.marker}
-                          </div>
-                          <div className="rounded-xl bg-bg border border-border p-3 hover:border-gold/20 transition-colors">
-                            <div className="flex items-center justify-between">
-                              <span className={`font-medium text-sm ${item.color}`}>{item.event}</span>
-                              <span className="text-xs text-grey">{item.date}</span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+      </main>
     </div>
   )
 }
