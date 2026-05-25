@@ -167,9 +167,7 @@ function LeftSidebar() {
                 </span>
               </div>
             </>
-          ) : (
-            <p style={{ fontSize:11, color:C.textMuted, lineHeight:1.55, marginBottom:12 }}>{bio}</p>
-          )}
+          ) : null}
 
           {/* Stats */}
           <div style={{ borderTop:`1px solid ${C.border}`, paddingTop:10, marginBottom:4 }}>
@@ -231,26 +229,7 @@ function LeftSidebar() {
               {connecting ? 'Connecting…' : 'Connect Wallet'}
             </button>
             {/* Quick nav even when not connected */}
-            <div style={{ marginTop:12, paddingTop:12, borderTop:`1px solid ${C.border}` }}>
-              {[
-                { emoji:'\ud83d\udd16', label:'Saved items'  },
-                { emoji:'\ud83d\udc65', label:'Groups'       },
-                { emoji:'\ud83d\udcf0', label:'Newsletters'  },
-                { emoji:'\ud83d\udcc5', label:'Events'       },
-              ].map(({ emoji, label }) => (
-                <button key={label} style={{
-                  display:'flex', alignItems:'center', gap:10, width:'100%',
-                  padding:'7px 8px', borderRadius:8, background:'none', border:'none',
-                  cursor:'pointer', fontSize:13, color:C.textMuted, textAlign:'left',
-                  transition:'background 0.15s',
-                }}
-                onMouseEnter={e=>{e.currentTarget.style.background='#f5f4f1'}}
-                onMouseLeave={e=>{e.currentTarget.style.background='none'}}
-                >
-                  <span style={{fontSize:14}}>{emoji}</span> {label}
-                </button>
-              ))}
-            </div>
+
           </div>
         )}
       </div>
