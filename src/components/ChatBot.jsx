@@ -65,19 +65,38 @@ export default function ChatBot({ address }) {
 
   return (
     <>
+      {/* Pulse ring */}
+      {!open && (
+        <div style={{
+          position: 'fixed', bottom: 28, right: 28, zIndex: 9998,
+          width: 56, height: 56, borderRadius: '50%',
+          boxShadow: '0 0 0 0 rgba(201,149,42,0.7)',
+          animation: 'veilPulse 2s ease-out infinite',
+          pointerEvents: 'none',
+        }} />
+      )}
+
       {/* Floating button */}
       <button
         onClick={() => setOpen(o => !o)}
         style={{
           position: 'fixed', bottom: 28, right: 28, zIndex: 9999,
           width: 56, height: 56, borderRadius: '50%',
-          background: 'linear-gradient(135deg, #D4AF37, #B8960C)',
-          border: 'none', cursor: 'pointer', boxShadow: '0 4px 20px rgba(212,175,55,0.45)',
+          background: '#0a0a0a',
+          border: '2px solid rgba(201,149,42,0.35)',
+          cursor: 'pointer',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.35), 0 0 0 1px rgba(201,149,42,0.15)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'transform 0.2s',
+          transition: 'transform 0.2s, box-shadow 0.2s',
         }}
-        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+        onMouseEnter={e => {
+          e.currentTarget.style.transform = 'scale(1.1)'
+          e.currentTarget.style.boxShadow = '0 6px 32px rgba(0,0,0,0.4), 0 0 0 3px rgba(201,149,42,0.4)'
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.transform = 'scale(1)'
+          e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.35), 0 0 0 1px rgba(201,149,42,0.15)'
+        }}
         title="Chat with VeilFi AI"
       >
         {open
@@ -85,7 +104,7 @@ export default function ChatBot({ address }) {
           : (
             <span style={{
               fontFamily: 'Inter, sans-serif',
-              fontWeight: 900, fontSize: 22,
+              fontWeight: 900, fontSize: 24,
               color: '#fff', letterSpacing: '-0.04em',
               lineHeight: 1, userSelect: 'none',
             }}>V</span>
@@ -95,7 +114,7 @@ export default function ChatBot({ address }) {
         {!open && messages.length === 0 && (
           <span style={{
             position: 'absolute', top: 4, right: 4, width: 10, height: 10,
-            borderRadius: '50%', background: '#EF4444', border: '2px solid #fff',
+            borderRadius: '50%', background: '#EF4444', border: '2px solid #0a0a0a',
           }} />
         )}
       </button>
@@ -246,6 +265,11 @@ export default function ChatBot({ address }) {
         @keyframes bounce {
           0%, 60%, 100% { transform: translateY(0); }
           30% { transform: translateY(-5px); }
+        }
+        @keyframes veilPulse {
+          0%   { box-shadow: 0 0 0 0 rgba(201,149,42,0.55); }
+          70%  { box-shadow: 0 0 0 18px rgba(201,149,42,0); }
+          100% { box-shadow: 0 0 0 0 rgba(201,149,42,0); }
         }
       `}</style>
     </>
