@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef } from 'react'
+﻿import { createContext, useContext, useState, useCallback, useRef } from 'react'
 import { ethers } from 'ethers'
 
 const WalletContext = createContext(null)
@@ -81,7 +81,7 @@ export function WalletProvider({ children }) {
     setProvider(null)
     setSigner(null)
     setChainId(null)
-    // Do NOT clear role on disconnect — user preference persists
+    // Do NOT clear role on disconnect ΓÇö user preference persists
   }, [])
 
   const shortAddress = address

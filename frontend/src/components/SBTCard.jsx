@@ -1,167 +1,136 @@
-/* ─────────────────────────────────────────────────────────────
-   SBTCard — Soul-Bound Token identity card
-   Used in: Verify Step 4, Profile
-   Props: name, tier, score, signals, hash, animate
-───────────────────────────────────────────────────────────── */
-import { useEffect, useRef, useState } from 'react'
-import { Check, Minus } from 'lucide-react'
-import Avatar from './Avatar.jsx'
-import TierBadge from './TierBadge.jsx'
+﻿import TierBadge from './TierBadge.jsx'
+import ProgressBar from './ProgressBar.jsx'
 
-const SIGNAL_LABELS = { upi: 'UPI', gst: 'GST', rental: 'Rental' }
+/**
+ * SBTCard ΓÇö Soul-Bound Token identity card
+ * @prop {object} sbt ΓÇö { name, tier, score, wallet, avatar, tagline, signals }
+ * @prop {string} size ΓÇö 'sm' | 'md' | 'lg'
+ */
 
-function useCountUp(target, duration = 1200, shouldRun = true) {
-  const [current, setCurrent] = useState(0)
-  const rafRef  = useRef(null)
-  const ran     = useRef(false)
+const TIER_SCORES = {
+  Platinum: 850,
+  Gold:     750,
+  Silver:   650,
+  Bronze:   550,
+}
 
-  useEffect(() => {
-    if (!shouldRun || ran.current) return
-    ran.current = true
-    const start = performance.now()
-    const step  = (now) => {
-      const p = Math.min((now - start) / duration, 1)
-      // easeOut cubic
-      const ease = 1 - Math.pow(1 - p, 3)
-      setCurrent(Math.round(ease * target))
-      if (p < 1) rafRef.current = requestAnimationFrame(step)
-    }
-    rafRef.current = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(rafRef.current)
-  }, [target, duration, shouldRun])
+const AVATAR_INITIALS = (name = '') =>
+  name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
 
-  return current
+const TIER_AVATAR_BG = {
+  Platinum: 'bg-surface-container-high text-primary',
+  Gold:     'bg-block-cream text-primary',
+  Silver:   'bg-surface-container text-secondary',
+  Bronze:   'bg-block-coral/30 text-primary',
 }
 
 export default function SBTCard({
-  name     = 'Rahul Sharma',
-  role     = 'Street Food Vendor',
-  city     = 'Delhi',
-  tier     = 'Gold',
-  score    = 762,
-  signals  = { upi: true, gst: true, rental: false },
-  hash     = '0x7f3a9b2e1c4d8f6a...',
-  animate  = true,
+  sbt = {},
+  size = 'md',
+  contractUrl = '',
 }) {
-  const displayScore = useCountUp(score, 1200, animate)
-  const scorePct = ((displayScore - 300) / (900 - 300)) * 100
+  const {
+    name      = 'Anonymous',
+    tier      = 'Silver',
+    score     = 700,
+    wallet    = '0x0000...0000',
+    tagline   = 'DeFi Identity Verified',
+    signals   = { upi: true, gst: false, rental: true },
+    mintedAt  = null,
+  } = sbt
+
+  const maxScore     = TIER_SCORES[tier] || 800
+  const scorePct     = Math.round((score / 900) * 100)
+  const avatarStyle  = TIER_AVATAR_BG[tier] || TIER_AVATAR_BG.Silver
+  const isLarge      = size === 'lg'
 
   return (
-    <div className="card-gold" style={{ maxWidth: 380, width: '100%' }}>
+    <div
+      className={`relative overflow-hidden rounded-2xl border border-hairline bg-surface-soft shadow-card transition-all duration-300 hover:shadow-card-hover
+        ${isLarge ? 'p-8' : 'p-5'}
+      `}
+    >
+      {/* Subtle decorative accent */}
+      <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-primary/[0.02] pointer-events-none" />
 
-      {/* Top row: tier badge */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
-        <TierBadge tier={tier} size="lg" />
-      </div>
-
-      {/* Avatar + name */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-        <Avatar name={name} size="2xl" />
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 18, fontWeight: 600, color: '#111827', letterSpacing: '-0.02em' }}>{name}</div>
-          <div style={{ fontSize: 13, color: '#6B7280', marginTop: 2 }}>{role} · {city}</div>
-        </div>
-      </div>
-
-      {/* Divider */}
-      <hr className="divider" style={{ margin: '0 0 20px' }} />
-
-      {/* Credit Score */}
-      <div style={{ marginBottom: 16 }}>
-        <div className="section-label" style={{ marginBottom: 6 }}>Credit Score</div>
-        <div style={{
-          fontSize:      54,
-          fontWeight:    700,
-          color:         '#D4AF37',
-          lineHeight:    1,
-          letterSpacing: '-0.04em',
-          animation:     animate ? 'countUp 300ms cubic-bezier(0.16,1,0.3,1) both' : 'none',
-        }}>
-          {displayScore}
-        </div>
-
-        {/* Score bar: 300–900 */}
-        <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 11, color: '#9CA3AF', fontFamily: 'JetBrains Mono, monospace' }}>300</span>
-          <div style={{ flex: 1, height: 6, background: '#E5E7EB', borderRadius: 9999, overflow: 'hidden' }}>
-            <div style={{
-              width:        `${scorePct}%`,
-              height:       '100%',
-              background:   '#D4AF37',
-              borderRadius: 9999,
-              transition:   'width 1200ms cubic-bezier(0.16,1,0.3,1)',
-            }} />
+      {/* Header row */}
+      <div className="relative flex items-start justify-between gap-4">
+        <div className="flex items-center gap-3">
+          {/* Avatar */}
+          <div
+            className={`rounded-2xl flex items-center justify-center font-display font-bold
+              ${avatarStyle}
+              ${isLarge ? 'w-16 h-16 text-2xl' : 'w-12 h-12 text-lg'}
+            `}
+          >
+            {AVATAR_INITIALS(name)}
           </div>
-          <span style={{ fontSize: 11, color: '#9CA3AF', fontFamily: 'JetBrains Mono, monospace' }}>900</span>
+          <div>
+            <h3 className={`font-display font-bold text-primary ${isLarge ? 'text-2xl' : 'text-lg'}`}>
+              {name}
+            </h3>
+            <p className="text-secondary text-xs mt-0.5">{tagline}</p>
+          </div>
+        </div>
+        <TierBadge tier={tier} size={isLarge ? 'md' : 'sm'} />
+      </div>
+
+      {/* Score */}
+      <div className={`relative ${isLarge ? 'mt-8' : 'mt-5'}`}>
+        <div className="flex items-end justify-between mb-2">
+          <span className="text-xs text-secondary uppercase tracking-wider font-mono">Credit Score</span>
+          <span className={`font-display font-bold text-primary ${isLarge ? 'text-4xl' : 'text-2xl'}`}>
+            {score}
+          </span>
+        </div>
+        <ProgressBar value={scorePct} variant="gold" size={isLarge ? 'lg' : 'md'} />
+        <div className="flex justify-between text-xs text-secondary mt-1">
+          <span>300</span>
+          <span>900</span>
         </div>
       </div>
 
-      {/* Divider */}
-      <hr className="divider" style={{ margin: '0 0 16px' }} />
+      {/* Verified Signals */}
+      {isLarge && (
+        <div className="relative mt-6">
+          <p className="text-xs text-secondary uppercase tracking-wider mb-3 font-mono">Verified Signals</p>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(signals).map(([signal, verified]) => (
+              <span
+                key={signal}
+                className={`badge text-xs ${verified ? 'badge-teal' : 'badge-grey opacity-50'}`}
+              >
+                {verified ? 'Γ£ô' : 'ΓÇö'} {signal.toUpperCase()}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
-      {/* Verified signals */}
-      <div style={{ marginBottom: 16 }}>
-        <div className="section-label" style={{ marginBottom: 8 }}>Verified Signals</div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {Object.entries(signals).map(([key, verified]) => (
-            <span
-              key={key}
-              style={{
-                display:      'inline-flex',
-                alignItems:   'center',
-                gap:          4,
-                padding:      '3px 10px',
-                borderRadius: 9999,
-                fontSize:     12,
-                fontWeight:   500,
-                background:   verified ? '#D1FAE5' : '#F3F4F6',
-                color:        verified ? '#065F46' : '#9CA3AF',
-                border:       `1px solid ${verified ? '#A7F3D0' : '#E5E7EB'}`,
-              }}
+      {/* Wallet + Proof hash */}
+      <div className="relative mt-5 pt-4 border-t border-hairline flex items-center justify-between">
+        <span className="text-xs text-secondary font-mono truncate max-w-[60%]">{wallet}</span>
+        {mintedAt && (
+          <span className="text-xs text-secondary/60">
+            Minted {new Date(mintedAt).toLocaleDateString('en-IN')}
+          </span>
+        )}
+        {!mintedAt && (
+          contractUrl ? (
+            <a
+              href={contractUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="badge badge-teal text-xs hover:opacity-80 transition-opacity"
             >
-              {verified
-                ? <><Check size={11} strokeWidth={3} /> {SIGNAL_LABELS[key] || key.toUpperCase()}</>
-                : <><Minus size={11} /> {SIGNAL_LABELS[key] || key.toUpperCase()}</>
-              }
+              On-Chain
+            </a>
+          ) : (
+            <span className="badge badge-teal text-xs">
+              On-Chain
             </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Divider */}
-      <hr className="divider" style={{ margin: '0 0 14px' }} />
-
-      {/* Proof hash */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-        <span
-          style={{
-            fontFamily: 'JetBrains Mono, monospace',
-            fontSize:   11,
-            color:      '#9CA3AF',
-            overflow:   'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            flex:       1,
-          }}
-        >
-          {hash}
-        </span>
-        <a
-          href={`https://sepolia.etherscan.io/tx/${hash}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            fontSize:    12,
-            fontWeight:  500,
-            color:       '#D4AF37',
-            whiteSpace:  'nowrap',
-            display:     'flex',
-            alignItems:  'center',
-            gap:         3,
-          }}
-        >
-          On-Chain ↗
-        </a>
+          )
+        )}
       </div>
     </div>
   )

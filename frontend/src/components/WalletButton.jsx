@@ -1,108 +1,58 @@
-/* ─────────────────────────────────────────────────────────────
-   WalletButton — Connect / Connected state
-   Disconnected: "Connect Wallet" — dark filled
-   Connected:    "0x398C...a2d2 ●" — outline + green dot
-───────────────────────────────────────────────────────────── */
-import { useWallet } from '../context/WalletContext.jsx'
+﻿import { useWallet } from '../context/WalletContext.jsx'
 
-export default function WalletButton() {
-  const { isConnected, connect, disconnect, shortAddress, connecting: isLoading } = useWallet()
+export default function WalletButton({ size = 'md' }) {
+  const { address, shortAddress, connecting, error, connect, disconnect, isConnected } = useWallet()
 
-  if (isLoading) {
-    return (
-      <button
-        disabled
-        style={{
-          height:       36,
-          padding:      '0 14px',
-          borderRadius: 6,
-          background:   '#F3F4F6',
-          border:       '1px solid #E5E7EB',
-          color:        '#9CA3AF',
-          fontSize:     13,
-          fontWeight:   500,
-          cursor:       'not-allowed',
-          fontFamily:   "'Inter', sans-serif",
-          display:      'flex',
-          alignItems:   'center',
-          gap:          6,
-        }}
-      >
-        <span style={{
-          width:        14,
-          height:       14,
-          borderRadius: '50%',
-          border:       '2px solid #D4AF37',
-          borderTopColor: 'transparent',
-          animation:    'spin 0.7s linear infinite',
-          display:      'inline-block',
-        }} />
-        Connecting...
-      </button>
-    )
-  }
+  const sizeClasses = size === 'sm'
+    ? 'px-4 py-2 text-xs'
+    : 'px-5 py-2.5 text-sm'
 
   if (isConnected) {
     return (
-      <button
-        onClick={disconnect}
-        title="Click to disconnect"
-        style={{
-          height:       36,
-          padding:      '0 12px',
-          borderRadius: 6,
-          background:   '#FFFFFF',
-          border:       '1px solid #E5E7EB',
-          color:        '#111827',
-          fontSize:     13,
-          fontWeight:   500,
-          cursor:       'pointer',
-          fontFamily:   "'JetBrains Mono', monospace",
-          display:      'flex',
-          alignItems:   'center',
-          gap:          7,
-          transition:   'border-color 150ms cubic-bezier(0.16,1,0.3,1)',
-          whiteSpace:   'nowrap',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = '#D1D5DB' }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = '#E5E7EB' }}
-      >
-        {/* Green connected dot */}
-        <span style={{
-          width:        7,
-          height:       7,
-          borderRadius: '50%',
-          background:   '#10B981',
-          flexShrink:   0,
-        }} />
-        {shortAddress || '0x...'}
-      </button>
+      <div className="flex items-center gap-2">
+        <div className={`flex items-center gap-2 ${sizeClasses} rounded-xl bg-surface-soft border border-hairline font-mono`}>
+          <span className="w-2 h-2 rounded-full bg-semantic-success animate-pulse" />
+          <span className="text-primary">{shortAddress}</span>
+        </div>
+        <button
+          onClick={disconnect}
+          className={`${sizeClasses} rounded-xl border border-hairline text-secondary hover:text-red-500 hover:border-red-400/30 transition-all duration-200 font-medium`}
+          aria-label="Disconnect wallet"
+        >
+          Disconnect
+        </button>
+      </div>
     )
   }
 
   return (
-    <button
-      onClick={connect}
-      style={{
-        height:       36,
-        padding:      '0 14px',
-        borderRadius: 6,
-        background:   '#111827',
-        color:        '#FFFFFF',
-        fontSize:     13,
-        fontWeight:   500,
-        cursor:       'pointer',
-        fontFamily:   "'Inter', sans-serif",
-        border:       'none',
-        transition:   'background 150ms cubic-bezier(0.16,1,0.3,1), transform 150ms',
-        whiteSpace:   'nowrap',
-      }}
-      onMouseEnter={e => { e.currentTarget.style.background = '#374151' }}
-      onMouseLeave={e => { e.currentTarget.style.background = '#111827' }}
-      onMouseDown={e  => { e.currentTarget.style.transform  = 'scale(0.98)' }}
-      onMouseUp={e    => { e.currentTarget.style.transform  = 'none' }}
-    >
-      Connect Wallet
-    </button>
+    <div>
+      <button
+        onClick={connect}
+        disabled={connecting}
+        className={`btn-primary ${sizeClasses} disabled:opacity-60 disabled:cursor-not-allowed`}
+        aria-label="Connect MetaMask wallet"
+      >
+        {connecting ? (
+          <>
+            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+            </svg>
+            Connecting...
+          </>
+        ) : (
+          <>
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a5 5 0 00-10 0v2M3 12h18M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+            </svg>
+            Connect Wallet
+          </>
+        )}
+      </button>
+      {error && (
+        <p className="text-red-500 text-xs mt-1">{error}</p>
+      )}
+    </div>
   )
 }

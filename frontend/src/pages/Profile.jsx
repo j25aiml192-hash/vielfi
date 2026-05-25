@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Medal, Lock, ClipboardList, Smartphone, CheckCircle, DollarSign } from 'lucide-react'
 import SBTCard from '../components/SBTCard.jsx'
 import ProgressBar from '../components/ProgressBar.jsx'
 import { useWallet } from '../context/WalletContext.jsx'
@@ -33,12 +32,12 @@ const LOAN_HISTORY = [
 ]
 
 const REPUTATION_TIMELINE = [
-  { date: 'Mar 2024', event: 'SBT Minted',          Icon: Medal,         colorHex: '#D4AF37' },
-  { date: 'Mar 2024', event: 'ZK Proof Generated',   Icon: Lock,          colorHex: '#7C3AED' },
-  { date: 'Mar 2024', event: 'GST Data Linked',       Icon: ClipboardList, colorHex: '#10B981' },
-  { date: 'Feb 2024', event: 'UPI History Verified',  Icon: Smartphone,    colorHex: '#10B981' },
-  { date: 'Jan 2024', event: 'Loan #1 Repaid Early',  Icon: CheckCircle,   colorHex: '#10B981' },
-  { date: 'Jul 2023', event: 'Loan #2 Funded',        Icon: DollarSign,    colorHex: '#D4AF37' },
+  { date: 'Mar 2024', event: 'SBT Minted',          icon: '≡ƒÅà', color: 'text-primary' },
+  { date: 'Mar 2024', event: 'ZK Proof Generated',   icon: '≡ƒöÉ', color: 'text-block-lilac' },
+  { date: 'Mar 2024', event: 'GST Data Linked',       icon: '≡ƒôï', color: 'text-semantic-success' },
+  { date: 'Feb 2024', event: 'UPI History Verified',  icon: '≡ƒô▒', color: 'text-semantic-success' },
+  { date: 'Jan 2024', event: 'Loan #1 Repaid Early',  icon: 'Γ£ô',  color: 'text-semantic-success' },
+  { date: 'Jul 2023', event: 'Loan #2 Funded',        icon: '≡ƒÆ░', color: 'text-primary' },
 ]
 
 const readScore = (data, camelKey, snakeKey) =>
@@ -219,7 +218,7 @@ export default function Profile() {
               {[
                 { label: 'Loans Taken',   value: '3' },
                 { label: 'On-Time Repay', value: '100%' },
-                { label: 'Total Borrowed', value: '₹2.25L' },
+                { label: 'Total Borrowed', value: 'Γé╣2.25L' },
                 { label: 'Current Score',  value: profile.score },
               ].map(({ label, value }) => (
                 <div key={label} className="text-center">
@@ -306,7 +305,7 @@ export default function Profile() {
                               </span>
                             </div>
                             <div className="text-xs text-secondary">
-                              Started {loan.startDate} · {loan.duration}M term
+                              Started {loan.startDate} ┬╖ {loan.duration}M term
                             </div>
                           </div>
                           <div className="text-right flex-shrink-0">
