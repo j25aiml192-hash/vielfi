@@ -90,10 +90,11 @@ export default function Landing() {
       <section style={{ maxWidth: 1280, margin: '0 auto', padding: '80px 64px 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <h1 style={{ fontSize: 'clamp(40px,5vw,64px)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.05, margin: 0 }}>
-            Institutional grade credit, simplified.
+            Your financial behavior should matter.<br />
+            <span style={{ background: 'linear-gradient(135deg,#7a5000,#c9952a,#e8c05a,#c9952a,#7a5000)', backgroundSize: '200% 100%', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>VeilFi</span>
           </h1>
           <p style={{ fontSize: 18, color: C.secondary, lineHeight: 1.6, maxWidth: 440, margin: 0 }}>
-            VeilFi connects sophisticated lenders with high-yield asset-backed opportunities through a transparent, institutional-grade marketplace.
+            VeilFi converts everyday transactions into a decentralized credit passport, helping millions access fair loans without traditional credit scores.
           </p>
           <div style={{ marginTop: 8 }}>
             <button
