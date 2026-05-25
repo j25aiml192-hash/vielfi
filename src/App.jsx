@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { WalletProvider } from './context/WalletContext.jsx'
 import { useWallet } from './context/WalletContext.jsx'
 import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
+import AppSidebar from './components/AppSidebar.jsx'
 import Landing from './pages/Landing.jsx'
 import Onboarding from './pages/Onboarding.jsx'
 import Verify from './pages/Verify.jsx'
@@ -13,16 +14,11 @@ import Dashboard from './pages/Dashboard.jsx'
 import LoanDetail from './pages/LoanDetail.jsx'
 import Circles from './pages/Circles.jsx'
 
+/* ── Pages that should NOT have the sidebar ── */
+const NO_SIDEBAR = ['/', '/onboarding']
+
 /**
- * RoleWatcher — rendered INSIDE BrowserRouter so useNavigate works.
- *
- * Watches the justConnected signal from WalletContext.
- * When a fresh wallet connection happens:
- *   • no role set  → redirect to /onboarding
- *   • role exists  → redirect to /dashboard
- *
- * This is the ONLY correct way to navigate from a wallet connect event,
- * because WalletProvider wraps BrowserRouter and cannot call useNavigate.
+ * RoleWatcher — inside BrowserRouter so useNavigate works.
  */
 function RoleWatcher() {
   const { justConnected, clearJustConnected, userRole } = useWallet()
@@ -30,38 +26,30 @@ function RoleWatcher() {
 
   useEffect(() => {
     if (!justConnected) return
-
-    // Consume the signal immediately so it only fires once
     clearJustConnected()
-
     if (!userRole) {
       navigate('/onboarding', { replace: true })
     } else {
-      // Role already set — go straight to the right place
       const dest = userRole === 'lender' ? '/feed' : '/dashboard'
       navigate(dest, { replace: true })
     }
   }, [justConnected])
 
-  return null // renders nothing — pure side-effect component
+  return null
 }
 
-/* ── Role-aware guard for borrower-only pages ── */
+/* ── Borrower guard ── */
 function BorrowerGuard({ children }) {
   const { isConnected, userRole, isBorrower } = useWallet()
+  const navigate = useNavigate()
 
-  // Not connected or no role → let them through (page handles it)
   if (!isConnected || !userRole) return children
-
-  // Lender-only tries to visit borrower route → soft-block, not hard redirect
   if (!isBorrower) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="card max-w-md text-center border border-amber-500/30 bg-amber-500/5">
           <div className="text-4xl mb-4">🏦</div>
-          <h2 className="font-display font-bold text-white text-xl mb-3">
-            Borrower Mode Required
-          </h2>
+          <h2 className="font-display font-bold text-white text-xl mb-3">Borrower Mode Required</h2>
           <p className="text-grey text-sm mb-6">
             You're currently set as a <strong className="text-teal">Lender</strong>.
             Switch to Borrower mode to get verified and list loans.
@@ -74,7 +62,6 @@ function BorrowerGuard({ children }) {
       </div>
     )
   }
-
   return children
 }
 
@@ -82,10 +69,7 @@ function SwitchRoleBtn({ to, label }) {
   const { setRole } = useWallet()
   const navigate    = useNavigate()
   return (
-    <button
-      onClick={() => { setRole(to); navigate('/verify') }}
-      className="btn-primary flex-1 justify-center"
-    >
+    <button onClick={() => { setRole(to); navigate('/verify') }} className="btn-primary flex-1 justify-center">
       {label}
     </button>
   )
@@ -93,10 +77,28 @@ function SwitchRoleBtn({ to, label }) {
 
 function BackBtn() {
   const navigate = useNavigate()
+  return <button onClick={() => navigate(-1)} className="btn-secondary flex-1 justify-center">Go Back</button>
+}
+
+/* ── Layout that conditionally shows the sidebar ── */
+function AppLayout({ children }) {
+  const location = useLocation()
+  const showSidebar = !NO_SIDEBAR.includes(location.pathname)
+
   return (
-    <button onClick={() => navigate(-1)} className="btn-secondary flex-1 justify-center">
-      Go Back
-    </button>
+    <div style={{ display:'flex', minHeight:'100vh' }}>
+      {/* NitiSetu-style sidebar — hidden on Landing & Onboarding */}
+      {showSidebar && <AppSidebar />}
+
+      {/* Main content column */}
+      <div style={{ flex:1, display:'flex', flexDirection:'column', minWidth:0 }}>
+        <Navbar />
+        <main style={{ flex:1 }}>
+          {children}
+        </main>
+        <Footer />
+      </div>
+    </div>
   )
 }
 
@@ -104,28 +106,27 @@ export default function App() {
   return (
     <WalletProvider>
       <BrowserRouter>
-        <div className="min-h-screen flex flex-col bg-canvas text-primary">
-          <Navbar />
-          <main className="flex-1">
-            <Routes>
-              {/* Public */}
-              <Route path="/"           element={<Landing />} />
-              <Route path="/onboarding" element={<Onboarding />} />
-              <Route path="/feed"       element={<Feed />} />
-              <Route path="/loan/:id"   element={<LoanDetail />} />
-              <Route path="/profile"    element={<Profile />} />
-              <Route path="/circles"    element={<Circles />} />
-              <Route path="/dashboard"  element={<Dashboard />} />
+        <RoleWatcher />
+        <AppLayout>
+          <Routes>
+            {/* Public — no sidebar */}
+            <Route path="/"           element={<Landing />} />
+            <Route path="/onboarding" element={<Onboarding />} />
 
-              {/* Borrower-guided */}
-              <Route path="/verify"     element={<BorrowerGuard><Verify /></BorrowerGuard>} />
+            {/* App pages — with sidebar */}
+            <Route path="/feed"       element={<Feed />} />
+            <Route path="/loan/:id"   element={<LoanDetail />} />
+            <Route path="/profile"    element={<Profile />} />
+            <Route path="/circles"    element={<Circles />} />
+            <Route path="/dashboard"  element={<Dashboard />} />
 
-              {/* Catch-all */}
-              <Route path="*"           element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
+            {/* Borrower-guided */}
+            <Route path="/verify"     element={<BorrowerGuard><Verify /></BorrowerGuard>} />
+
+            {/* Catch-all */}
+            <Route path="*"           element={<Navigate to="/" replace />} />
+          </Routes>
+        </AppLayout>
       </BrowserRouter>
     </WalletProvider>
   )

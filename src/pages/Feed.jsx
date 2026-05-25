@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getMarketplaceFeed, fundLoan } from '../api/index.js'
 import { useNavigate } from 'react-router-dom'
-import { useWallet } from '../context/WalletContext.jsx'
+
 
 /* ══════════════════════════════════════════════════════
    DESIGN TOKENS — Mutual colour system
@@ -447,104 +447,6 @@ function LoanCard({ loan, onFund, fundedId }) {
 /* ═══════════════════════
    LEFT SIDEBAR
 ═══════════════════════ */
-function LeftSidebar() {
-  const navigate = useNavigate()
-  const { isConnected, shortAddress, connect, connecting, userRole } = useWallet()
-  const ini = isConnected ? (shortAddress?.slice(2,4)||'WL').toUpperCase() : 'KT'
-
-  return (
-    <aside style={{ width:258, flexShrink:0, position:'sticky', top:72, display:'flex', flexDirection:'column', gap:12, fontFamily:'Inter, sans-serif' }}>
-      <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:14, overflow:'hidden' }}>
-        {/* Banner */}
-        <div style={{ height:58, background: isConnected ? 'linear-gradient(135deg,#1f1d3d,#4338ca,#c5b0f4)' : 'linear-gradient(135deg,#dceeb1,#c8e6cd)' }} />
-        <div style={{ padding:'0 18px 18px', marginTop:-26 }}>
-          <div style={{
-            width:52, height:52, borderRadius:'50%',
-            background: isConnected ? '#4338ca' : '#e5e7eb',
-            border:`3px solid ${C.surface}`,
-            display:'flex', alignItems:'center', justifyContent:'center',
-            fontWeight:800, fontSize:16, color: isConnected ? '#fff' : C.text,
-            marginBottom:10,
-          }}>{ini}</div>
-
-          <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
-            <span style={{ fontWeight:700, fontSize:'0.92rem', color:C.text }}>
-              {isConnected ? 'Wallet Connected' : 'Kartik Thakur'}
-            </span>
-            {isConnected && (
-              <svg width={13} height={13} fill={C.green} viewBox="0 0 24 24">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            )}
-          </div>
-
-          {isConnected ? (
-            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:10 }}>
-              <span style={{ fontSize:11, color:C.muted, fontFamily:'JetBrains Mono, monospace', wordBreak:'break-all' }}>{shortAddress}</span>
-              {userRole && (
-                <span style={{ fontSize:9, fontWeight:700, color:'#4338ca', background:'#eef2ff', border:'1px solid #c7d2fe', padding:'2px 7px', borderRadius:4, textTransform:'uppercase', letterSpacing:'0.06em' }}>{userRole}</span>
-              )}
-            </div>
-          ) : null}
-
-          {/* Stats */}
-          <div style={{ borderTop:`1px solid ${C.border}`, paddingTop:10, marginBottom:10 }}>
-            {[
-              { label:'PROFILE VIEWERS',  value: isConnected ? 142 : 108 },
-              { label:'POST IMPRESSIONS', value: isConnected ? 47  : 30  },
-            ].map(({ label, value }) => (
-              <div key={label} style={{ display:'flex', justifyContent:'space-between', padding:'4px 0' }}>
-                <span style={{ fontSize:9, color:C.faint, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'JetBrains Mono, monospace' }}>{label}</span>
-                <span style={{ fontWeight:700, fontSize:13, color:C.text }}>{value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Nav / CTA */}
-        {isConnected ? (
-          <div style={{ borderTop:`1px solid ${C.border}`, padding:'10px 10px' }}>
-            {[
-              { icon:'💼', label:'My Portfolio',    path:'/dashboard' },
-              { icon:'📈', label:'My Investments',  path:'/dashboard' },
-              { icon:'🔐', label:'Verify Identity', path:'/verify'   },
-              { icon:'👥', label:'My Circles',      path:'/circles'  },
-            ].map(({ icon, label, path }) => (
-              <button key={label} onClick={()=>navigate(path)} style={{
-                display:'flex', alignItems:'center', gap:10, width:'100%',
-                padding:'9px 10px', borderRadius:8, background:'none', border:'none',
-                cursor:'pointer', fontSize:13, color:C.mid, textAlign:'left', transition:'background 0.14s, color 0.14s',
-              }}
-              onMouseEnter={e=>{ e.currentTarget.style.background='#f0ede8'; e.currentTarget.style.color=C.text }}
-              onMouseLeave={e=>{ e.currentTarget.style.background='none'; e.currentTarget.style.color=C.mid }}
-              ><span style={{fontSize:16}}>{icon}</span>{label}</button>
-            ))}
-          </div>
-        ) : (
-          <div style={{ borderTop:`1px solid ${C.border}`, padding:'14px 18px' }}>
-            <p style={{ fontSize:12, color:C.muted, marginBottom:10, lineHeight:1.55 }}>
-              Connect your wallet to track investments, verify identity, and join credit circles.
-            </p>
-            <button onClick={connect} disabled={connecting} style={{
-              width:'100%', padding:'11px', borderRadius:999,
-              background: connecting ? '#aaa' : C.text, color:'#fff',
-              fontWeight:700, fontSize:13, border:'none', cursor:'pointer',
-              display:'flex', alignItems:'center', justifyContent:'center', gap:8, transition:'opacity 0.2s',
-            }}
-            onMouseEnter={e=>e.currentTarget.style.opacity='0.85'}
-            onMouseLeave={e=>e.currentTarget.style.opacity='1'}
-            >
-              <svg width={14} height={14} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-              </svg>
-              {connecting ? 'Connecting…' : 'Connect Wallet'}
-            </button>
-          </div>
-        )}
-      </div>
-    </aside>
-  )
-}
 
 /* ═══════════════════════
    SKELETON
@@ -619,7 +521,6 @@ export default function Feed() {
         @keyframes fadeIn { from{opacity:0}to{opacity:1} }
         .pfil { transition:background .14s,color .14s; }
         .pfil:hover { background:#e8e6e2 !important; }
-        @media(max-width:820px){ .feed-sb{display:none!important} }
       `}</style>
 
       <div style={{ minHeight:'100vh', background:C.bg, fontFamily:'Inter, sans-serif' }}>
@@ -695,9 +596,8 @@ export default function Feed() {
         </div>
 
         {/* MAIN LAYOUT */}
-        <div style={{ maxWidth:1100, margin:'0 auto', padding:'20px 24px 80px', display:'flex', gap:20, alignItems:'flex-start' }}>
-          <div className="feed-sb"><LeftSidebar /></div>
-          <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', gap:14 }}>
+        <div style={{ maxWidth:900, margin:'0 auto', padding:'20px 24px 80px' }}>
+          <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
             {loading
               ? Array.from({length:3}).map((_,i)=><Skeleton key={i}/>)
               : filtered.length===0
