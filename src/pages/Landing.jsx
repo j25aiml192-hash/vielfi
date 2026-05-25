@@ -176,24 +176,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer style={{
-        maxWidth: 1280, margin: '0 auto', padding: '40px 64px',
-        borderTop: `1px solid ${C.border}`, marginTop: 80,
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        flexWrap: 'wrap', gap: 16,
-      }}>
-        <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em' }}>VeilFi</div>
-        <div style={{ display: 'flex', gap: 24 }}>
-          {['Privacy Policy','Terms of Service','Risk Disclosures','Contact'].map(l => (
-            <a key={l} href="#" style={{ fontSize: 13, color: C.secondary, textDecoration: 'none', fontWeight: 600, letterSpacing: '0.02em' }}
-              onMouseEnter={e => e.currentTarget.style.color = C.teal}
-              onMouseLeave={e => e.currentTarget.style.color = C.secondary}
-            >{l}</a>
-          ))}
-        </div>
-        <div style={{ fontSize: 13, color: C.secondary, fontWeight: 600, letterSpacing: '0.02em' }}>© 2024 VeilFi Institutional. All rights reserved.</div>
-      </footer>
     </div>
   )
 }
