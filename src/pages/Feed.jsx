@@ -409,7 +409,6 @@ const SkeletonCard = ({ height = 280 }) => (
 ───────────────────────────────────────────────────────────── */
 export default function Feed() {
   const location = useLocation()
-  const [drawerOpen,    setDrawerOpen]    = useState(location.state?.openDrawer === true)
   const [loans,         setLoans]         = useState(MOCK_LOANS)
   const [loading,       setLoading]       = useState(false)
   const [tierFilter,    setTier]          = useState('All')
@@ -423,7 +422,6 @@ export default function Feed() {
   useEffect(() => {
     const prev = document.body.style.backgroundColor
     document.body.style.backgroundColor = C.bg
-    if (location.state?.openDrawer) window.history.replaceState({}, document.title)
     return () => { document.body.style.backgroundColor = prev }
   }, [])
 
@@ -481,28 +479,16 @@ export default function Feed() {
         *{box-sizing:border-box;}
       `}</style>
 
-      <NavDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
-
-      <div style={{ minHeight: '100vh', background: C.bg, fontFamily: "'Inter', -apple-system, sans-serif", color: C.text, paddingTop: 72 }}>
+      <div style={{ minHeight: '100vh', background: C.bg, fontFamily: "'Inter', -apple-system, sans-serif", color: C.text, paddingTop: 24 }}>
 
         {/* HEADER */}
         <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}` }}>
-          <div style={{ maxWidth: 1320, margin: '0 auto', padding: '48px 32px 0' }}>
+          <div style={{ maxWidth: 1320, margin: '0 auto', padding: '32px 32px 0' }}>
 
             {/* Breadcrumb */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
-              {/* Hamburger to re-open drawer */}
-              <button
-                onClick={() => setDrawerOpen(true)}
-                title="Open navigation"
-                style={{ width:36, height:36, borderRadius:9, border:`1px solid ${C.border}`, background:C.surfaceAlt, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', flexShrink:0, transition:'background 0.2s, box-shadow 0.2s' }}
-                onMouseEnter={e => { e.currentTarget.style.background='#fdf5e0'; e.currentTarget.style.boxShadow='0 2px 12px rgba(200,160,40,0.15)' }}
-                onMouseLeave={e => { e.currentTarget.style.background=C.surfaceAlt; e.currentTarget.style.boxShadow='none' }}
-              >
-                <svg width={15} height={15} fill="none" viewBox="0 0 24 24" stroke="#c9952a" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
-              </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
               <div style={{ fontSize: 12, color: C.textFaint, fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase', display:'flex', alignItems:'center', gap:8 }}>
-                <span>Vielfi</span><span style={{ opacity: 0.4 }}>/</span><span style={{ color: C.text }}>Marketplace</span>
+                <span>VeilFi</span><span style={{ opacity: 0.4 }}>/</span><span style={{ color: C.text }}>Marketplace</span>
               </div>
             </div>
 
