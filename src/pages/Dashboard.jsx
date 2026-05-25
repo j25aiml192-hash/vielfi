@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import ProgressBar from '../components/ProgressBar.jsx'
 import TierBadge from '../components/TierBadge.jsx'
 import { useWallet } from '../context/WalletContext.jsx'
-import { getMarketplaceFeed } from '../api/index.js'
+import { getLoansByAddress, getFundingsByAddress } from '../api/index.js'
 
 /* ── helpers ── */
 const formatINR = (n = 0) =>
@@ -180,11 +180,10 @@ function LenderDashboard({ fundedLoans, loading }) {
   const navigate = useNavigate()
   if (loading) return <Skeleton />
 
-  const totalDeployed = fundedLoans.reduce((s, l) => s + l.fundedAmount, 0)
+  const totalDeployed = fundedLoans.reduce((s, l) => s + parseFloat(l.amount_eth || l.fundedAmount || 0), 0)
   const activeCount   = fundedLoans.filter(l => l.status !== 'repaid').length
-  const totalReturns  = fundedLoans.reduce((s, l) => s + Math.round(l.fundedAmount * (l.interestRate / 100)), 0)
   const avgReturn     = fundedLoans.length
-    ? (fundedLoans.reduce((s, l) => s + l.interestRate, 0) / fundedLoans.length).toFixed(1)
+    ? (fundedLoans.reduce((s, l) => s + parseFloat(l.apr || l.interestRate || 10), 0) / fundedLoans.length).toFixed(1)
     : '0.0'
 
   return (
@@ -192,10 +191,10 @@ function LenderDashboard({ fundedLoans, loading }) {
       {/* Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Deployed', value: formatINR(totalDeployed), color: 'text-primary' },
-          { label: 'Active Loans',   value: activeCount,              color: 'text-on-surface' },
-          { label: 'Total Returns',  value: formatINR(totalReturns),  color: 'text-semantic-success' },
-          { label: 'Avg APR',        value: `${avgReturn}%`,          color: 'text-block-lilac' },
+          { label: 'Total ETH Funded', value: `${totalDeployed.toFixed(4)} ETH`, color: 'text-primary' },
+          { label: 'Active Loans',     value: activeCount,                         color: 'text-on-surface' },
+          { label: 'Avg APR',          value: `${avgReturn}%`,                     color: 'text-semantic-success' },
+          { label: 'Total Funded',     value: fundedLoans.length,                  color: 'text-block-lilac' },
         ].map(({ label, value, color }) => (
           <div key={label} className="card text-center">
             <div className={`font-display font-bold text-2xl ${color}`}>{value}</div>
@@ -213,7 +212,7 @@ function LenderDashboard({ fundedLoans, loading }) {
           <div>
             <h3 className="font-display font-bold text-primary text-lg">Your Social Impact</h3>
             <p className="text-secondary text-sm mt-1">
-              You've helped <span className="text-semantic-success font-semibold">{fundedLoans.length} Indians</span> access fair credit — bypassing traditional gatekeepers.
+              You've helped <span className="text-semantic-success font-semibold">{fundedLoans.length} people</span> access fair credit on Sepolia testnet.
             </p>
           </div>
         </div>
@@ -222,37 +221,49 @@ function LenderDashboard({ fundedLoans, loading }) {
       {/* Portfolio table */}
       <div className="card">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="font-display font-bold text-primary">Portfolio</h2>
+          <h2 className="font-display font-bold text-primary">Your Fundings</h2>
           <button onClick={() => navigate('/feed')} className="btn-primary text-xs px-4 py-2">Fund More</button>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-hairline text-xs text-secondary text-left">
-                <th className="pb-3 font-medium">Borrower</th>
-                <th className="pb-3 font-medium">Tier</th>
-                <th className="pb-3 font-medium text-right">Funded</th>
-                <th className="pb-3 font-medium text-right">APR</th>
-                <th className="pb-3 font-medium text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-hairline">
-              {fundedLoans.map((loan) => (
-                <tr key={loan.id} className="hover:bg-primary/5 transition-colors">
-                  <td className="py-3 font-medium text-primary">{loan.borrowerName}</td>
-                  <td className="py-3"><TierBadge tier={loan.tier} size="sm" /></td>
-                  <td className="py-3 text-right text-secondary">{formatINR(loan.fundedAmount)}</td>
-                  <td className="py-3 text-right text-semantic-success font-semibold">{loan.interestRate}%</td>
-                  <td className="py-3 text-right">
-                    <span className={`badge text-xs ${loan.status === 'repaid' ? 'badge-grey' : 'badge-teal'}`}>
-                      {loan.status === 'repaid' ? 'Repaid' : 'Funded'}
-                    </span>
-                  </td>
+        {fundedLoans.length === 0 ? (
+          <div style={{ textAlign:'center', padding:'40px 0', color:'#888', fontSize:14 }}>
+            No fundings yet. Go to <button onClick={()=>navigate('/feed')} style={{ color:'#c9952a', fontWeight:700, background:'none', border:'none', cursor:'pointer' }}>Marketplace</button> to fund a loan.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-hairline text-xs text-secondary text-left">
+                  <th className="pb-3 font-medium">Borrower</th>
+                  <th className="pb-3 font-medium">Purpose</th>
+                  <th className="pb-3 font-medium text-right">ETH Sent</th>
+                  <th className="pb-3 font-medium text-right">APR</th>
+                  <th className="pb-3 font-medium text-right">TX Hash</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-hairline">
+                {fundedLoans.map((f) => (
+                  <tr key={f.id} className="hover:bg-primary/5 transition-colors">
+                    <td className="py-3 font-medium text-primary">{f.borrower_name || 'Unknown'}</td>
+                    <td className="py-3 text-secondary">{f.purpose || '—'}</td>
+                    <td className="py-3 text-right font-mono text-primary font-semibold">{parseFloat(f.amount_eth||0).toFixed(4)} ETH</td>
+                    <td className="py-3 text-right text-semantic-success font-semibold">{f.apr || f.interestRate || '?'}%</td>
+                    <td className="py-3 text-right">
+                      {f.tx_hash ? (
+                        <a
+                          href={`https://sepolia.etherscan.io/tx/${f.tx_hash}`}
+                          target="_blank" rel="noopener noreferrer"
+                          style={{ fontSize:11, color:'#2563eb', fontFamily:'JetBrains Mono, monospace', textDecoration:'none' }}
+                        >
+                          {f.tx_hash.slice(0,8)}… ↗
+                        </a>
+                      ) : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -264,10 +275,12 @@ function LenderDashboard({ fundedLoans, loading }) {
 export default function Dashboard() {
   const { address, isConnected, isBorrower, isLender } = useWallet()
   const navigate  = useNavigate()
-  const [loans,    setLoans]    = useState([])
-  const [loading,  setLoading]  = useState(true)
-  const [apiError, setApiError] = useState('')
-  const [tab,      setTab]      = useState('borrower')
+  const [loans,        setLoans]        = useState([])
+  const [borrowerRaw,  setBorrowerRaw]  = useState([])
+  const [lenderRaw,    setLenderRaw]    = useState([])
+  const [loading,      setLoading]      = useState(true)
+  const [apiError,     setApiError]     = useState('')
+  const [tab,          setTab]          = useState('borrower')
 
   /* Sync tab with wallet role */
   useEffect(() => {
@@ -275,33 +288,47 @@ export default function Dashboard() {
     if (!isBorrower && isLender)  setTab('lender')
   }, [isBorrower, isLender])
 
-  /* Fetch loans */
+  /* Fetch real data from Supabase-backed endpoints */
   useEffect(() => {
     let alive = true
+    if (!address) {
+      setLoading(false)
+      return
+    }
     setLoading(true)
-    getMarketplaceFeed()
-      .then(data => { if (alive) { setLoans(Array.isArray(data) ? data.map(adaptLoan) : []); setApiError('') } })
-      .catch(err => { if (alive) { setLoans([]); setApiError(err.message || 'Network error') } })
-      .finally(() => { if (alive) setLoading(false) })
+
+    Promise.all([
+      getLoansByAddress(address).catch(() => ({ loans: [] })),
+      getFundingsByAddress(address).catch(() => ({ fundings: [] })),
+    ]).then(([borrowerData, lenderData]) => {
+      if (!alive) return
+      const bLoans = borrowerData?.loans || []
+      const lFunds = lenderData?.fundings || []
+      setLoans([...bLoans, ...lFunds]) // store both for derived state
+      setBorrowerRaw(bLoans)
+      setLenderRaw(lFunds)
+      setApiError('')
+    }).catch(err => {
+      if (alive) setApiError(err.message || 'Network error')
+    }).finally(() => {
+      if (alive) setLoading(false)
+    })
+
     return () => { alive = false }
-  }, [])
+  }, [address])
 
+  // Real data: borrower's loans from Supabase
   const borrowerLoans = useMemo(() => {
-    const matched = loans.filter(l => loanMatchesBorrower(l, address))
-    if (matched.length > 0) return matched
-    const rahul = loans.find(l =>
-      normalizeKey(l.borrower).includes('rahul') || normalizeKey(l.borrowerName).includes('rahul')
-    )
-    return [rahul || DEMO_BORROWER_LOAN]
-  }, [address, loans])
+    if (borrowerRaw.length > 0) return borrowerRaw
+    // Fallback to demo if no wallet or backend offline
+    return [DEMO_BORROWER_LOAN]
+  }, [borrowerRaw])
 
+  // Real data: lender's fundings from Supabase
   const fundedLoans = useMemo(() => {
-    const matched = loans.filter(l => loanMatchesLender(l, address))
-    if (matched.length > 0) return matched
-    const feedFunded = loans.filter(isFunded)
-    if (feedFunded.length > 0) return feedFunded
+    if (lenderRaw.length > 0) return lenderRaw
     return DEMO_FUNDED_LOANS
-  }, [address, loans])
+  }, [lenderRaw])
 
   return (
     <div className="min-h-screen pt-4 pb-16 px-4">

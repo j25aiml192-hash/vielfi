@@ -14,6 +14,7 @@ import Dashboard from './pages/Dashboard.jsx'
 import LoanDetail from './pages/LoanDetail.jsx'
 import Circles from './pages/Circles.jsx'
 import Settings from './pages/Settings.jsx'
+import CreateLoan from './pages/CreateLoan.jsx'
 import ChatBot from './components/ChatBot.jsx'
 
 /* ΓöÇΓöÇ Pages that should NOT have the sidebar ΓöÇΓöÇ */
@@ -122,7 +123,8 @@ export default function App() {
             <Route path="/profile"    element={<Profile />} />
             <Route path="/circles"    element={<Circles />} />
             <Route path="/dashboard"  element={<Dashboard />} />
-            <Route path="/settings"   element={<Settings />} />
+            <Route path="/settings"      element={<Settings />} />
+            <Route path="/loans/create"  element={<CreateLoan />} />
 
             {/* Borrower-guided */}
             <Route path="/verify"     element={<BorrowerGuard><Verify /></BorrowerGuard>} />

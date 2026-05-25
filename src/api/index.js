@@ -27,7 +27,15 @@ export const verifyProfile = (profileName) =>
 // ─── Marketplace ──────────────────────────────────────────────────────────
 export const getMarketplaceFeed = () => api.get('/api/marketplace/feed')
 
-// ─── Loans ────────────────────────────────────────────────────────────────
+// ─── Loans (Real Supabase) ────────────────────────────────────────────────
+export const createLoan         = (data)    => api.post('/api/loans/create', data)
+export const getMarketplace     = ()        => api.get('/api/loans/marketplace')
+export const getLoan            = (id)      => api.get(`/api/loans/${id}`)
+export const confirmFunding     = (data)    => api.post('/api/loans/fund/confirm', data)
+export const getLoansByAddress  = (address) => api.get(`/api/loans/by-address/${address}`)
+export const getFundingsByAddress = (address) => api.get(`/api/fundings/by-address/${address}`)
+
+// ─── Loans (Legacy) ───────────────────────────────────────────────────────
 export const fundLoan    = (loanId, amount) => api.post('/api/loans/fund',   { loanId, amount })
 export const repayEMI    = (loanId)         => api.post('/api/loans/repay',  { loanId })
 

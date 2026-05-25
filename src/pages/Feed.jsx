@@ -1,6 +1,7 @@
-﻿import { useState, useEffect } from 'react'
-import { getMarketplaceFeed, fundLoan } from '../api/index.js'
+import { useState, useEffect, useCallback } from 'react'
+import { getMarketplace } from '../api/index.js'
 import { useNavigate } from 'react-router-dom'
+import FundLoan from '../components/FundLoan.jsx'
 
 
 /* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
@@ -175,11 +176,14 @@ function LoanCard({ loan, onFund, fundedId }) {
   const comments  = lenders + Math.floor(Math.random() * 10) + 2
   const initials  = borrowerName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()
 
+  const isFullyFunded = (loan.funded_percentage ?? ((loan.funded||loan.fundedAmt||0)/Math.max(loan.amount,1)*100)) >= 100
+
   return (
     <article style={{
       background:C.surface, border:`1px solid ${C.border}`, borderRadius:14,
       overflow:'hidden', fontFamily:'Inter, sans-serif',
       transition:'box-shadow 0.2s, border-color 0.2s',
+      opacity: isFullyFunded ? 0.75 : 1,
     }}
     onMouseEnter={e=>{ e.currentTarget.style.boxShadow='0 4px 24px rgba(0,0,0,0.10)'; e.currentTarget.style.borderColor='#c8c5c0' }}
     onMouseLeave={e=>{ e.currentTarget.style.boxShadow='none'; e.currentTarget.style.borderColor=C.border }}
@@ -427,17 +431,18 @@ function LoanCard({ loan, onFund, fundedId }) {
 
         {/* Fund button */}
         <button
-          onClick={(e)=>{ e.stopPropagation(); onFund?.(id, 5000) }}
+          onClick={(e)=>{ e.stopPropagation(); onFund?.(loan) }}
+          disabled={isFullyFunded}
           style={{
-            background: justFunded ? C.green : C.text,
+            background: isFullyFunded ? C.green : justFunded ? C.green : C.text,
             color:'#fff', border:'none', borderRadius:999,
             padding:'10px 30px', fontSize:14, fontWeight:700,
-            cursor:'pointer', transition:'all 0.18s',
+            cursor: isFullyFunded ? 'default' : 'pointer', transition:'all 0.18s',
           }}
-          onMouseEnter={e=>e.currentTarget.style.opacity='0.85'}
-          onMouseLeave={e=>e.currentTarget.style.opacity='1'}
+          onMouseEnter={e=>{ if(!isFullyFunded) e.currentTarget.style.opacity='0.85' }}
+          onMouseLeave={e=>{ e.currentTarget.style.opacity='1' }}
         >
-          {justFunded ? '\u2713 Funded' : 'Fund'}
+          {isFullyFunded ? '✓ Fully Funded' : justFunded ? '✓ Funded' : 'Fund'}
         </button>
       </div>
     </article>
@@ -475,7 +480,7 @@ const Skeleton = () => (
 ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 export default function Feed() {
   const [loans,         setLoans]         = useState(MOCK_LOANS)
-  const [loading,       setLoading]       = useState(false)
+  const [loading,       setLoading]       = useState(true)
   const [tierFilter,    setTier]          = useState('All')
   const [purposeFilter, setPurpose]       = useState('All')
   const [sort,          setSort]          = useState('daysLeft')
@@ -483,19 +488,73 @@ export default function Feed() {
   const [fundedId,      setFundedId]      = useState(null)
   const [apiError,      setApiError]      = useState('')
   const [searchFocused, setSearchFocused] = useState(false)
+  const [activeLoan,    setActiveLoan]    = useState(null)  // loan to fund in modal
+  const [lastUpdated,   setLastUpdated]   = useState(null)
 
   useEffect(()=>{ const p=document.body.style.background; document.body.style.background=C.bg; return()=>{document.body.style.background=p} },[])
 
-  useEffect(()=>{
-    ;(async()=>{
-      setLoading(true)
-      try{ const d=await getMarketplaceFeed(); if(Array.isArray(d)&&d.length>0){setLoans(d.map(adaptLoan));setApiError('')} }
-      catch(e){ setApiError(e.message) }
-      finally{ setLoading(false) }
-    })()
-  },[])
+  const fetchLoans = useCallback(async () => {
+    setLoading(true)
+    try {
+      // Try real Supabase API first
+      const data = await getMarketplace()
+      const realLoans = data?.loans || []
+      if (Array.isArray(realLoans) && realLoans.length > 0) {
+        setLoans(realLoans.map(l => ({
+          ...adaptLoan(l),
+          // real fields from Supabase
+          id:             l.id,
+          borrowerName:   l.borrower_name || l.borrowerName || 'Borrower',
+          borrower_address: l.borrower_address || '',
+          amount:         parseFloat(l.amount_eth || 0) * 250000, // ETH → INR
+          amount_eth:     parseFloat(l.amount_eth || 0),
+          funded:         parseFloat(l.funded_amount_eth || 0) * 250000,
+          funded_amount_eth: parseFloat(l.funded_amount_eth || 0),
+          funded_percentage: parseFloat(l.funded_percentage || 0),
+          funder_count:   parseInt(l.funder_count || 0),
+          lenders:        parseInt(l.funder_count || 0),
+          apr:            parseFloat(l.apr || 12),
+          interestRate:   parseFloat(l.apr || 12),
+          duration:       parseInt(l.duration_months || 12),
+          duration_months: parseInt(l.duration_months || 12),
+          purpose:        l.purpose || 'Personal',
+          story:          l.story || '',
+          tier:           l.credit_tier || 'Silver',
+          creditScore:    l.credit_score || 650,
+          status:         l.status || 'active',
+          postedAgo:      'Recently',
+          tags:           [],
+          city:           'India',
+          daysLeft:       30,
+        })))
+        setApiError('')
+        setLastUpdated(new Date())
+      } else {
+        setApiError('No real loans yet — showing demo data')
+      }
+    } catch(e) {
+      setApiError('Backend offline — showing demo data')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
-  const handleFund = async(id,amt)=>{ try{await fundLoan(id,amt)}catch{} ; setFundedId(id); setTimeout(()=>setFundedId(null),3000) }
+  // Initial fetch + 30s auto-refresh
+  useEffect(()=>{
+    fetchLoans()
+    const interval = setInterval(fetchLoans, 30000)
+    return () => clearInterval(interval)
+  }, [fetchLoans])
+
+  const handleFund = (loan) => setActiveLoan(loan)
+
+  const handleFundSuccess = ({ txHash, amountEth }) => {
+    setFundedId(activeLoan?.id)
+    setActiveLoan(null)
+    // Refresh after 2s to show updated funding %
+    setTimeout(fetchLoans, 2000)
+    setTimeout(() => setFundedId(null), 5000)
+  }
 
   const filtered = loans.filter(l=>{
     if(tierFilter!=='All'&&l.tier!==tierFilter) return false
@@ -586,6 +645,11 @@ export default function Feed() {
                 </button>
               ))}
               <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:10 }}>
+                {lastUpdated && (
+                  <span style={{ fontSize:10, color:C.faint, fontFamily:'JetBrains Mono, monospace' }}>
+                    Updated {Math.floor((Date.now()-lastUpdated)/1000)}s ago
+                  </span>
+                )}
                 <span style={{ fontSize:10, color:C.faint, fontFamily:'JetBrains Mono, monospace', letterSpacing:'0.1em', textTransform:'uppercase' }}>{filtered.length} RESULTS</span>
                 <select value={sort} onChange={e=>setSort(e.target.value)} style={{ border:'none', background:'transparent', fontSize:12, color:C.mid, cursor:'pointer', fontFamily:'inherit', outline:'none' }}>
                   {SORTS.map(({label,value})=><option key={value} value={value}>{label}</option>)}
@@ -622,10 +686,19 @@ export default function Feed() {
         <div style={{ position:'fixed', bottom:28, right:28, zIndex:9999, background:C.surface, border:`1px solid ${C.border}`, borderLeft:`3px solid ${C.green}`, borderRadius:12, padding:'14px 20px', boxShadow:'0 8px 32px rgba(0,0,0,0.12)', display:'flex', alignItems:'center', gap:12, maxWidth:280 }}>
           <div style={{ width:28, height:28, borderRadius:8, background:'#f0fdf4', display:'flex', alignItems:'center', justifyContent:'center', color:C.green, fontWeight:700, fontSize:14 }}>&#10003;</div>
           <div>
-            <div style={{ fontWeight:700, fontSize:13, color:C.text }}>Funding submitted</div>
-            <div style={{ fontSize:11, color:C.muted, marginTop:2 }}>Transaction sent to Ethereum Sepolia</div>
+            <div style={{ fontWeight:700, fontSize:13, color:C.text }}>Funding confirmed!</div>
+            <div style={{ fontSize:11, color:C.muted, marginTop:2 }}>Real ETH sent on Sepolia. Marketplace updating…</div>
           </div>
         </div>
+      )}
+
+      {/* FundLoan modal */}
+      {activeLoan && (
+        <FundLoan
+          loan={activeLoan}
+          onClose={() => setActiveLoan(null)}
+          onSuccess={handleFundSuccess}
+        />
       )}
     </>
   )

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import WalletButton from './WalletButton.jsx'
+import { useWallet } from '../context/WalletContext.jsx'
 
 /* ΓöÇΓöÇ Nav items for the slide-in drawer ΓöÇΓöÇ */
 const NAV_ITEMS = [
@@ -157,6 +158,8 @@ function NotificationBell() {
 export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
+  const { isConnected } = useWallet()
 
   useEffect(() => setDrawerOpen(false), [location])
 
@@ -187,10 +190,33 @@ export default function Navbar() {
             </NavLink>
           </div>
 
-          {/* Right: Notifications + Profile + Wallet */}
+          {/* Right: List a Loan + Notifications + Profile + Wallet */}
           <div style={{ display:'flex',alignItems:'center',gap:14 }}>
 
-            {/* ≡ƒöö Notification bell */}
+            {/* + List a Loan — visible when wallet connected */}
+            {isConnected && (
+              <button
+                id="navbar-list-loan-btn"
+                onClick={() => navigate('/loans/create')}
+                style={{
+                  display:'flex', alignItems:'center', gap:6,
+                  padding:'7px 16px', borderRadius:999,
+                  background:'linear-gradient(135deg,#c9952a,#e8c05a)',
+                  border:'none', color:'#fff', fontSize:13, fontWeight:700,
+                  cursor:'pointer', transition:'opacity 0.18s',
+                  whiteSpace:'nowrap',
+                }}
+                onMouseEnter={e=>e.currentTarget.style.opacity='0.88'}
+                onMouseLeave={e=>e.currentTarget.style.opacity='1'}
+              >
+                <svg width={13} height={13} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                List a Loan
+              </button>
+            )}
+
+            {/* 🔔 Notification bell */}
             <NotificationBell />
 
             <NavLink to="/profile"
