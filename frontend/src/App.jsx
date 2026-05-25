@@ -5,6 +5,7 @@ import { WalletProvider } from './context/WalletContext.jsx'
 import { useWallet } from './context/WalletContext.jsx'
 import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
+import ChatBot from './components/ChatBot.jsx'
 import Landing from './pages/Landing.jsx'
 import Onboarding from './pages/Onboarding.jsx'
 import Verify from './pages/Verify.jsx'
@@ -127,6 +128,7 @@ export default function App() {
             </Routes>
           </main>
           <Footer />
+          <ChatBot />
         </div>
       </BrowserRouter>
     </WalletProvider>

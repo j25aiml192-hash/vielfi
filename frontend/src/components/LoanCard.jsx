@@ -15,6 +15,7 @@ import { Check, Users, Clock, Calendar } from 'lucide-react'
 import Avatar from './Avatar.jsx'
 import TierBadge from './TierBadge.jsx'
 import ProgressBar from './ProgressBar.jsx'
+import StarRating from './StarRating.jsx'
 
 const PURPOSE_COLORS = {
   'Business':       { bg: '#EEF2FF', color: '#4338CA' },
@@ -105,6 +106,11 @@ export default function LoanCard({ loan = {}, onFund }) {
           <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: '#9CA3AF' }}>
             {role} · {city}
           </div>
+          {rating != null && (
+            <div style={{ marginTop: 3 }}>
+              <StarRating rating={rating} count={null} size="sm" />
+            </div>
+          )}
         </div>
         <div style={{ textAlign: 'right', flexShrink: 0 }}>
           <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 15, color: '#111827', letterSpacing: '-0.02em' }}>
