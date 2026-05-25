@@ -120,6 +120,12 @@ export default function Feed() {
 
   return (
     <div style={{ fontFamily: 'Inter, sans-serif', background: C.canvas, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <style>{`
+        @keyframes floatOrb1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-6px,8px) scale(1.08)} }
+        @keyframes floatOrb2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(8px,-6px) scale(1.12)} }
+        @keyframes floatOrb3 { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-8px) scale(0.9)} }
+      `}</style>
+
 
       {/* ── layout: sidebar + main ── */}
       <div style={{ flex: 1, maxWidth: 1280, margin: '0 auto', width: '100%', display: 'flex', position: 'relative' }}>
@@ -157,19 +163,55 @@ export default function Feed() {
             </button>
           ))}
 
-          <div style={{ marginTop: 'auto', paddingTop: 16 }}>
-            <button
+          {/* ── Apply for Loan Banner ── */}
+          <div style={{ marginTop: 'auto', paddingTop: 20 }}>
+            <div
               onClick={() => navigate('/loans/create')}
               style={{
-                width: '100%', background: C.ink, color: C.white,
-                border: 'none', borderRadius: 12, padding: '12px 0',
-                fontSize: 13, fontWeight: 700, letterSpacing: '0.02em',
-                cursor: 'pointer', transition: 'opacity 0.15s',
+                position: 'relative', overflow: 'hidden',
+                borderRadius: 18,
+                background: 'linear-gradient(135deg, #0a0a0a 0%, #1c1c1c 100%)',
+                border: '1px solid rgba(201,149,42,0.3)',
+                padding: '18px 16px 16px',
+                cursor: 'pointer',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.18), 0 0 0 1px rgba(201,149,42,0.1)',
+                transition: 'transform 0.2s, box-shadow 0.2s',
               }}
-              onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
-              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-            >Apply for Loan</button>
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 14px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(201,149,42,0.25)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18), 0 0 0 1px rgba(201,149,42,0.1)'
+              }}
+            >
+              {/* Bubble orbs */}
+              <div style={{ position:'absolute', top:-18, right:-18, width:70, height:70, borderRadius:'50%', background:'rgba(201,149,42,0.18)', filter:'blur(2px)', animation:'floatOrb1 4s ease-in-out infinite' }} />
+              <div style={{ position:'absolute', bottom:-12, left:-10, width:48, height:48, borderRadius:'50%', background:'rgba(201,149,42,0.12)', filter:'blur(1px)', animation:'floatOrb2 5s ease-in-out infinite' }} />
+              <div style={{ position:'absolute', top:'50%', right:14, width:22, height:22, borderRadius:'50%', background:'rgba(255,255,255,0.07)', animation:'floatOrb3 3.5s ease-in-out infinite' }} />
+
+              {/* Content */}
+              <div style={{ position:'relative', zIndex:1 }}>
+                <div style={{ fontSize:10, fontWeight:700, letterSpacing:'0.12em', color:'rgba(201,149,42,0.9)', textTransform:'uppercase', marginBottom:6 }}>✦ Quick Apply</div>
+                <div style={{ fontSize:15, fontWeight:800, color:'#fff', letterSpacing:'-0.02em', lineHeight:1.25, marginBottom:4 }}>Apply for a Loan</div>
+                <div style={{ fontSize:11, color:'rgba(255,255,255,0.5)', marginBottom:14 }}>Get funded by the community</div>
+                <div style={{
+                  display:'inline-flex', alignItems:'center', gap:6,
+                  background:'linear-gradient(135deg,#c9952a,#e8c05a)',
+                  borderRadius:999, padding:'7px 16px',
+                  fontSize:12, fontWeight:700, color:'#fff',
+                  letterSpacing:'0.01em',
+                }}>
+                  Get Started
+                  <svg width={12} height={12} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
           </div>
+
         </aside>
 
         {/* ── Main Content ── */}
