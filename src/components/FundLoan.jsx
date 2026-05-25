@@ -116,9 +116,8 @@ export default function FundLoan({ loan, onClose, onSuccess }) {
       setStatus('confirming')
       const rec = await tx.wait(1)
       setReceipt(rec)
-      setStatus('confirmed')
 
-      // Record in Supabase
+      // Record in Supabase before declaring confirmed to user
       await confirmFunding({
         loan_id:        loan.id,
         lender_address: lenderAddress,
@@ -127,6 +126,7 @@ export default function FundLoan({ loan, onClose, onSuccess }) {
         block_number:   rec.blockNumber,
       })
 
+      setStatus('confirmed')
       onSuccess?.({ txHash: tx.hash, amountEth: finalAmount })
 
     } catch (err) {

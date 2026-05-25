@@ -28,22 +28,38 @@ const normalizeKey     = (v) => String(v || '').trim().toLowerCase().replace(/[\
 const normalizeAddress = (v) => String(v || '').trim().toLowerCase()
 
 const adaptLoan = (loan) => {
-  const amount         = Number(loan.amount || 0)
-  const fundedAmount   = Number(loan.fundedAmount ?? loan.funded ?? 0)
-  const durationMonths = Number(loan.durationMonths || loan.duration || 12)
-  const interestRate   = Number(loan.apr ?? loan.interestRate ?? 12)
+  const isETH = loan.amount_eth !== undefined;
+  
+  let amount = Number(loan.amount || 0);
+  if (isETH) {
+    amount = Number(loan.amount_inr || (loan.amount_eth * 250000));
+  }
+  
+  let fundedAmount = Number(loan.fundedAmount ?? loan.funded ?? 0);
+  if (isETH) {
+    fundedAmount = Number((loan.funded_amount_eth || 0) * 250000);
+  }
+  
+  const durationMonths = Number(loan.durationMonths || loan.duration || loan.duration_months || 12);
+  const interestRate   = Number(loan.apr ?? loan.interestRate ?? 12);
+  const creditScore    = Number(loan.credit_score || loan.cibilScore || 750);
+  const borrowerName   = loan.borrower_name || loan.borrowerName || 'Anonymous';
+  
   return {
     ...loan,
     id:             String(loan.id),
-    borrowerName:   loan.borrowerName || loan.borrower || 'Borrower',
-    borrower:       loan.borrower || loan.borrowerName || '',
-    borrowerWallet: loan.borrowerWallet || loan.borrowerAddress || loan.wallet || loan.address || '',
-    profileId:      loan.profileId || loan.profile || loan.borrowerProfile || '',
-    tier:           loan.tier || 'Silver',
-    purpose:        loan.purpose || loan.title || 'Loan',
-    amount, fundedAmount, durationMonths, interestRate,
+    borrowerName,
+    borrower:       loan.borrower || borrowerName,
+    borrowerWallet: loan.borrower_address || loan.borrowerWallet || '',
+    profileId:      loan.profileId || '',
+    tier:           loan.credit_tier || loan.tier || 'Silver',
+    purpose:        loan.purpose || 'Loan',
+    amount, 
+    fundedAmount, 
+    durationMonths, 
+    interestRate,
     emiAmount:      Number(loan.emiAmount || Math.round((amount * (1 + interestRate / 100)) / Math.max(durationMonths, 1))),
-    lenderCount:    Number(loan.lenderCount || (Array.isArray(loan.lenders) ? loan.lenders.length : 0)),
+    lenderCount:    Number(loan.funder_count || loan.lenderCount || 0),
     daysRemaining:  Number(loan.daysRemaining ?? loan.daysLeft ?? 30),
     status:         loan.status || 'active',
     lenders:        Array.isArray(loan.lenders) ? loan.lenders : [],
@@ -361,7 +377,7 @@ export default function Dashboard() {
     return () => { alive = false }
   }, [address])
 
-  const borrowerLoans = useMemo(() => borrowerRaw.length > 0 ? borrowerRaw : [DEMO_BORROWER_LOAN], [borrowerRaw])
+  const borrowerLoans = useMemo(() => borrowerRaw.length > 0 ? borrowerRaw.map(adaptLoan) : [DEMO_BORROWER_LOAN], [borrowerRaw])
   const fundedLoans   = useMemo(() => lenderRaw.length > 0 ? lenderRaw : DEMO_FUNDED_LOANS, [lenderRaw])
 
   return (

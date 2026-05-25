@@ -238,14 +238,7 @@ export default function Feed() {
 
       {/* Fund Modal */}
       {fundTarget && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999,
-        }} onClick={() => setFundTarget(null)}>
-          <div onClick={e => e.stopPropagation()} style={{ background: C.white, borderRadius: 20, padding: 0, maxWidth: 520, width: '90%', overflow: 'hidden' }}>
-            <FundLoan loan={fundTarget} onClose={() => { setFundTarget(null); loadLoans() }} />
-          </div>
-        </div>
+        <FundLoan loan={fundTarget} onClose={() => { setFundTarget(null); loadLoans() }} />
       )}
 
       {/* Footer */}

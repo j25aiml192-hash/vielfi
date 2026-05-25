@@ -20,7 +20,8 @@ export default function LoanDetail() {
   const [amount, setAmount]     = useState('')
   const [showFund, setShowFund] = useState(false)
 
-  useEffect(() => {
+  const loadLoan = () => {
+    setLoading(true)
     getMarketplace()
       .then(d => {
         const found = (d.loans || []).find(l => l.id === id)
@@ -28,6 +29,10 @@ export default function LoanDetail() {
       })
       .catch(console.error)
       .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    loadLoan()
   }, [id])
 
   if (loading) return (
@@ -196,14 +201,7 @@ export default function LoanDetail() {
 
       {/* Fund Modal */}
       {showFund && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999,
-        }} onClick={() => setShowFund(false)}>
-          <div onClick={e => e.stopPropagation()} style={{ background: C.white, borderRadius: 20, overflow: 'hidden', maxWidth: 520, width: '90%' }}>
-            <FundLoan loan={loan} onClose={() => setShowFund(false)} />
-          </div>
-        </div>
+        <FundLoan loan={loan} onClose={() => { setShowFund(false); loadLoan() }} />
       )}
     </div>
   )
