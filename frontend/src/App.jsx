@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard.jsx'
 import LoanDetail from './pages/LoanDetail.jsx'
 import Circles from './pages/Circles.jsx'
 import ChatBot from './components/ChatBot.jsx'
+import Settings from './pages/Settings.jsx'
 
 /**
  * RoleWatcher ΓÇö rendered INSIDE BrowserRouter so useNavigate works.
@@ -117,6 +118,7 @@ export default function App() {
               <Route path="/profile"    element={<Profile />} />
               <Route path="/circles"    element={<Circles />} />
               <Route path="/dashboard"  element={<Dashboard />} />
+              <Route path="/settings"   element={<Settings />} />
 
               {/* Borrower-guided */}
               <Route path="/verify"     element={<BorrowerGuard><Verify /></BorrowerGuard>} />
