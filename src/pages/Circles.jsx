@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ProgressBar from '../components/ProgressBar.jsx'
 import TierBadge from '../components/TierBadge.jsx'
-import { createCircle, joinCircle, getCircles } from '../api/index.js'
+import { createCircle, joinCircle } from '../api/index.js'
 import { useWallet } from '../context/WalletContext.jsx'
 
 const formatINR = (n) =>
@@ -219,8 +219,22 @@ function CreateCircleForm({ onCreated }) {
 
 export default function Circles() {
   const [circles, setCircles] = useState(MOCK_CIRCLES)
-  const [tab, setTab] = useState('browse')
-  const { isConnected } = useWallet()
+  const [tab, setTab]         = useState('browse')
+  const [apiOnline, setApiOnline] = useState(null) // null=checking, true, false
+  const { isConnected }       = useWallet()
+
+  // Probe backend health on mount
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/health`)
+      .then((r) => {
+        setApiOnline(r.ok)
+        console.log('[Circles] Backend health:', r.ok ? 'online' : 'offline')
+      })
+      .catch(() => {
+        setApiOnline(false)
+        console.log('[Circles] Backend offline')
+      })
+  }, [])
 
   const handleJoin = async (circleId) => {
     try {
@@ -249,6 +263,11 @@ export default function Circles() {
               <p className="text-secondary mt-2 text-lg">
                 Pool credit power with your community. Borrow bigger, together.
               </p>
+            </div>
+            <div className="text-xs flex items-center gap-2 border border-border rounded-lg px-3 py-2 bg-card">
+              {apiOnline === null && <span className="text-grey animate-pulse">Checking backend…</span>}
+              {apiOnline === true  && <><span className="w-2 h-2 rounded-full bg-teal" /><span className="text-teal">Backend online</span></>}
+              {apiOnline === false && <><span className="w-2 h-2 rounded-full bg-amber-400" /><span className="text-amber-400">Demo mode</span></>}
             </div>
           </div>
         </div>

@@ -1,15 +1,46 @@
-import { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback, useRef } from 'react'
 import { ethers } from 'ethers'
 
 const WalletContext = createContext(null)
 
+const ROLE_KEY = 'veilfi_role'
+
 export function WalletProvider({ children }) {
-  const [address, setAddress]     = useState(null)
-  const [provider, setProvider]   = useState(null)
-  const [signer, setSigner]       = useState(null)
-  const [chainId, setChainId]     = useState(null)
+  const [address, setAddress]       = useState(null)
+  const [provider, setProvider]     = useState(null)
+  const [signer, setSigner]         = useState(null)
+  const [chainId, setChainId]       = useState(null)
   const [connecting, setConnecting] = useState(false)
-  const [error, setError]         = useState(null)
+  const [error, setError]           = useState(null)
+
+  // Role: 'borrower' | 'lender' | 'both' | null
+  const [userRole, setUserRole] = useState(
+    () => localStorage.getItem(ROLE_KEY) || null
+  )
+
+  // A ref that lets App.jsx's RoleWatcher know a fresh connection just happened.
+  // It stores the address from the most recent connect() call.
+  // RoleWatcher reads this via context and acts on it.
+  const [justConnected, setJustConnected] = useState(false)
+
+  const setRole = useCallback((role) => {
+    if (role) {
+      localStorage.setItem(ROLE_KEY, role)
+    } else {
+      localStorage.removeItem(ROLE_KEY)
+    }
+    setUserRole(role)
+  }, [])
+
+  const clearRole = useCallback(() => {
+    localStorage.removeItem(ROLE_KEY)
+    setUserRole(null)
+  }, [])
+
+  // Called by RoleWatcher after it has handled the redirect
+  const clearJustConnected = useCallback(() => {
+    setJustConnected(false)
+  }, [])
 
   const connect = useCallback(async () => {
     if (typeof window.ethereum === 'undefined') {
@@ -29,6 +60,9 @@ export function WalletProvider({ children }) {
       setAddress(_address)
       setChainId(Number(network.chainId))
 
+      // Signal to RoleWatcher that a fresh connect just happened
+      setJustConnected(true)
+
       // Listen for account/chain changes
       window.ethereum.on('accountsChanged', (accounts) => {
         if (accounts.length === 0) disconnect()
@@ -47,11 +81,16 @@ export function WalletProvider({ children }) {
     setProvider(null)
     setSigner(null)
     setChainId(null)
+    // Do NOT clear role on disconnect — user preference persists
   }, [])
 
   const shortAddress = address
     ? `${address.slice(0, 6)}...${address.slice(-4)}`
     : null
+
+  // Role helpers
+  const isBorrower = userRole === 'borrower' || userRole === 'both'
+  const isLender   = userRole === 'lender'   || userRole === 'both'
 
   return (
     <WalletContext.Provider value={{
@@ -65,6 +104,15 @@ export function WalletProvider({ children }) {
       connect,
       disconnect,
       isConnected: !!address,
+      // Role
+      userRole,
+      setRole,
+      clearRole,
+      isBorrower,
+      isLender,
+      // Fresh-connect signal
+      justConnected,
+      clearJustConnected,
     }}>
       {children}
     </WalletContext.Provider>

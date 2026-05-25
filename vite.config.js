@@ -9,7 +9,7 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        // Do NOT rewrite — backend already has /api prefix on all routes
       },
     },
   },

@@ -2,6 +2,22 @@ import { useState, useEffect } from 'react'
 import LoanCard from '../components/LoanCard.jsx'
 import { getMarketplaceFeed, fundLoan } from '../api/index.js'
 
+/* ── Map backend LoanResponse → LoanCard shape ── */
+const adaptLoan = (loan) => ({
+  id:           loan.id,
+  borrowerName: loan.borrowerName || loan.borrower || 'Borrower',
+  tier:         loan.tier         || 'Silver',
+  purpose:      loan.purpose      || loan.title    || 'Loan',
+  story:        loan.story        || `${loan.borrowerName || loan.borrower} is seeking funding.`,
+  amount:       loan.amount,
+  funded:       loan.fundedAmount ?? 0,
+  duration:     loan.duration     || loan.durationMonths || 12,
+  emi:          loan.emiAmount    || Math.round((loan.amount * (1 + (loan.apr ?? loan.interestRate ?? 12) / 100)) / (loan.duration || loan.durationMonths || 12)),
+  interestRate: loan.apr          || loan.interestRate || 12,
+  lenders:      loan.lenderCount  || loan.lenders || 0,
+  daysLeft:     loan.daysRemaining ?? loan.daysLeft ?? 30,
+})
+
 /* ── Mock data (used when backend is offline) ── */
 const MOCK_LOANS = [
   {
@@ -107,15 +123,22 @@ export default function Feed() {
   const [sort, setSort]           = useState('daysLeft')
   const [search, setSearch]       = useState('')
   const [fundSuccess, setFundSuccess] = useState(null)
+  const [apiError, setApiError]   = useState('')
 
   useEffect(() => {
     const load = async () => {
       setLoading(true)
       try {
         const data = await getMarketplaceFeed()
-        if (data?.loans) setLoans(data.loans)
-      } catch {
-        // Use mock data
+        console.log('[Feed] API loans:', data)
+        if (Array.isArray(data) && data.length > 0) {
+          setLoans(data.map(adaptLoan))
+          setApiError('')
+        }
+      } catch (err) {
+        console.error('[Feed] API error:', err.message)
+        setApiError(err.message)
+        // Keep MOCK_LOANS as fallback
       } finally {
         setLoading(false)
       }
@@ -157,6 +180,11 @@ export default function Feed() {
         {/* Header */}
         <div className="mb-8">
           <p className="section-label mb-2">Live Listings</p>
+          {apiError && (
+            <div className="mb-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs px-4 py-2">
+              Backend offline — showing demo data. ({apiError})
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <h1 className="font-display font-black text-4xl text-primary">

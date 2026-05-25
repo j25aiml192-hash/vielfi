@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useWallet } from '../context/WalletContext.jsx'
 
 /* ── Scroll-reveal hook ── */
 function useScrollReveal(threshold = 0.12) {
@@ -17,7 +18,7 @@ function useScrollReveal(threshold = 0.12) {
 /* ── Animated counter ── */
 function CountUp({ end, prefix = '', suffix = '', duration = 2000 }) {
   const [val, setVal] = useState(0)
-  const ref = useRef(null)
+  const ref     = useRef(null)
   const started = useRef(false)
   useEffect(() => {
     const obs = new IntersectionObserver(([e]) => {
@@ -133,6 +134,20 @@ function NetworkViz() {
 ════════════════════════════════════════════ */
 export default function Landing() {
   const navigate = useNavigate()
+  const { isConnected, userRole, connect } = useWallet()
+
+  /* Smart CTA navigation */
+  const handleBorrowerCTA = async () => {
+    if (!isConnected) { await connect(); return }
+    if (!userRole)    { navigate('/onboarding'); return }
+    navigate('/verify')
+  }
+
+  const handleLenderCTA = async () => {
+    if (!isConnected) { await connect(); return }
+    if (!userRole)    { navigate('/onboarding'); return }
+    navigate('/feed')
+  }
 
   /* Mouse tilt for hero card */
   const heroRef = useRef(null)

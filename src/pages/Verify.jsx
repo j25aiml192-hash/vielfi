@@ -5,7 +5,7 @@ import ProgressBar from '../components/ProgressBar.jsx'
 import TierBadge from '../components/TierBadge.jsx'
 import { verifyProfile } from '../api/index.js'
 
-/* ── Demo profiles ── */
+/* ── Demo profiles (static UI only — data comes from backend) ── */
 const PROFILES = [
   {
     id: 'rahul',
@@ -57,23 +57,14 @@ const PROFILES = [
   },
 ]
 
-const SIGNALS = [
-  { key: 'upi',    label: 'UPI Transactions', icon: '📱', detail: 'Analyzing 90-day history…' },
-  { key: 'gst',    label: 'GST Filings',       icon: '📋', detail: 'Fetching GSTIN records…'  },
-  { key: 'rental', label: 'Rental History',    icon: '🏠', detail: 'Verifying payment stream…' },
-]
-
 /* ── Step indicator ── */
-const SBT_CONTRACT_URL =
-  'https://sepolia.etherscan.io/address/0xb10E4A0573145551639C69C3e8bB9B7dC7c1D4F2'
-
 function StepIndicator({ current }) {
   const steps = ['Select Profile', 'Analyze Data', 'Generate Proof', 'Reveal Identity']
   return (
     <div className="flex items-center justify-center gap-0 mb-12">
       {steps.map((label, i) => {
-        const idx   = i + 1
-        const done  = idx < current
+        const idx    = i + 1
+        const done   = idx < current
         const active = idx === current
         return (
           <div key={label} className="flex items-center">
@@ -103,10 +94,10 @@ function StepIndicator({ current }) {
 /* ── Typewriter hook ── */
 function useTypewriter(text, speed = 30, started = false) {
   const [displayed, setDisplayed] = useState('')
-  const [done, setDone] = useState(false)
+  const [done, setDone]           = useState(false)
 
   useEffect(() => {
-    if (!started) return
+    if (!started || !text) return
     setDisplayed('')
     setDone(false)
     let i = 0
@@ -120,65 +111,82 @@ function useTypewriter(text, speed = 30, started = false) {
   return { displayed, done }
 }
 
-export default function Verify() {
-  const [step, setStep] = useState(1)
-  const [selected, setSelected] = useState(null)
+/* ── Animated progress bar helper ── */
+function useAnimatedProgress(trigger) {
   const [progress, setProgress] = useState({ upi: 0, gst: 0, rental: 0 })
-  const [proofHash, setProofHash] = useState('')
-  const [scoreCount, setScoreCount] = useState(300)
-  const [apiData, setApiData] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
 
-  const PROOF_TEXT =
-    '0x7f3a9b2e1c4d8f6a5b0e3d9c7f2a4e8b1d6c3f9a2b5e8c1d4f7a0b3e6c9f2a5b8e1'
-  const { displayed: typedProof, done: proofDone } = useTypewriter(PROOF_TEXT, 40, step === 3)
-
-  /* Step 1 → 2: profile selected */
-  const selectProfile = async (profile) => {
-    setSelected(profile)
-    setStep(2)
+  useEffect(() => {
+    if (!trigger) return
     setProgress({ upi: 0, gst: 0, rental: 0 })
 
-    // Simulate analysis animation
-    const animate = (key, duration) => {
-      return new Promise((res) => {
+    const animate = (key, delay) => {
+      setTimeout(() => {
         let val = 0
         const id = setInterval(() => {
-          val = Math.min(val + Math.random() * 8, 100)
+          val = Math.min(val + Math.random() * 9 + 3, 100)
           setProgress((p) => ({ ...p, [key]: Math.round(val) }))
-          if (val >= 100) { clearInterval(id); res() }
-        }, duration / 15)
-      })
+          if (val >= 100) clearInterval(id)
+        }, 60)
+      }, delay)
     }
 
-    // Call API (fire and forget, we'll use mock if it fails)
+    animate('upi',    0)
+    animate('gst',    500)
+    animate('rental', 1000)
+  }, [trigger])
+
+  const allDone = progress.upi >= 100 && progress.gst >= 100 && progress.rental >= 100
+  return { progress, allDone }
+}
+
+export default function Verify() {
+  const [step, setStep]           = useState(1)
+  const [selected, setSelected]   = useState(null)
+  const [verifyData, setVerifyData] = useState(null)
+  const [apiError, setApiError]   = useState('')
+  const [scoreCount, setScoreCount] = useState(300)
+  const [analyzeStarted, setAnalyzeStarted] = useState(false)
+  const navigate = useNavigate()
+
+  const { progress, allDone: progressDone } = useAnimatedProgress(analyzeStarted)
+
+  // Proof hash: use real API data once available, fallback to placeholder
+  const proofText = verifyData?.proofHash || '0x7f3a9b2e1c4d8f6a5b0e3d9c7f2a4e8b1d6c3f9a2b5e8c1d4f7a0b3e6c9f2a5b8e1'
+  const { displayed: typedProof, done: proofDone } = useTypewriter(proofText, 30, step === 3)
+
+  /* Step 1 → 2: profile selected, trigger API call + animations */
+  const selectProfile = async (profile) => {
+    setSelected(profile)
+    setVerifyData(null)
+    setApiError('')
+    setStep(2)
+    setAnalyzeStarted(true)
+
     try {
-      setLoading(true)
-      const data = await verifyProfile(profile.name)
-      setApiData(data)
-    } catch {
-      // API not running — use mock data
-    } finally {
-      setLoading(false)
+      const data = await verifyProfile(profile.id)
+      console.log('[Verify] API response:', data)
+      setVerifyData(data)
+    } catch (err) {
+      console.error('[Verify] API error:', err.message)
+      setApiError(err.message)
+      // Continue with demo flow even if API fails
     }
-
-    // Stagger animations
-    await animate('upi', 2200)
-    await animate('gst', 1800)
-    await animate('rental', 2000)
-
-    setTimeout(() => setStep(3), 600)
   }
 
-  /* Step 3 → 4: proof generated */
+  /* Advance to Step 3 once progress bars finish */
   useEffect(() => {
-    if (proofDone) {
+    if (progressDone && step === 2) {
+      setTimeout(() => setStep(3), 600)
+    }
+  }, [progressDone, step])
+
+  /* Step 3 → 4: proof typed out, advance to reveal */
+  useEffect(() => {
+    if (proofDone && step === 3) {
       setTimeout(() => {
         setStep(4)
-        // Animate score counter
+        const target = verifyData?.cibilScore || 700
         let val = 300
-        const target = selected?.score || 700
         const id = setInterval(() => {
           val = Math.min(val + Math.round((target - val) * 0.12), target)
           setScoreCount(val)
@@ -186,7 +194,30 @@ export default function Verify() {
         }, 40)
       }, 800)
     }
-  }, [proofDone, selected])
+  }, [proofDone, step, verifyData])
+
+  /* Derive tier badge from API or fallback defaults */
+  const getTier = () => {
+    if (verifyData?.tier) return verifyData.tier
+    const defaults = { rahul_shopkeeper: 'Gold', priya_freelancer: 'Platinum', anita_graduate: 'Silver', vikram_gig: 'Bronze' }
+    return defaults[selected?.id] || 'Silver'
+  }
+
+  /* Derive ZK signal status from API scores */
+  const getSignals = () => {
+    if (!verifyData) return { upi: true, gst: true, rental: false }
+    return {
+      upi:    (verifyData.upiScore    || 0) > 0,
+      gst:    (verifyData.gstScore    || 0) > 0,
+      rental: (verifyData.rentalScore || 0) > 0,
+    }
+  }
+
+  const SIGNALS = [
+    { key: 'upi',    label: 'UPI Transactions', icon: '📱', detail: 'Analyzing 90-day history…' },
+    { key: 'gst',    label: 'GST Filings',       icon: '📋', detail: 'Fetching GSTIN records…'  },
+    { key: 'rental', label: 'Rental History',    icon: '🏠', detail: 'Verifying payment stream…' },
+  ]
 
   return (
     <div className="min-h-screen pt-24 pb-16 px-4">
@@ -249,6 +280,12 @@ export default function Verify() {
                 <p className="text-secondary text-sm">{selected.role}</p>
               </div>
             </div>
+
+            {apiError && (
+              <div className="mb-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs px-4 py-2">
+                API offline — running in demo mode: {apiError}
+              </div>
+            )}
 
             <div className="space-y-5">
               {SIGNALS.map(({ key, label, icon, detail }) => (
@@ -337,17 +374,41 @@ export default function Verify() {
               <p className="text-secondary text-sm mt-2">Your Soul-Bound Token is live on Ethereum Sepolia</p>
             </div>
 
+            {/* Real API data panel */}
+            {verifyData && (
+              <div className="card mb-4 grid grid-cols-3 gap-3 text-center">
+                <div>
+                  <div className="text-xs text-grey mb-1">UPI Score</div>
+                  <div className="font-bold text-indigo">{Math.round(verifyData.upiScore ?? 0)}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-grey mb-1">GST Score</div>
+                  <div className="font-bold text-gold">{Math.round(verifyData.gstScore ?? 0)}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-grey mb-1">Rental Score</div>
+                  <div className="font-bold text-teal">{Math.round(verifyData.rentalScore ?? 0)}</div>
+                </div>
+              </div>
+            )}
+
+            {verifyData?.narrative && (
+              <div className="card mb-4 border border-indigo/20 bg-indigo/5">
+                <p className="text-xs text-grey mb-1">AI Credit Narrative</p>
+                <p className="text-sm text-white/80 leading-relaxed">{verifyData.narrative}</p>
+              </div>
+            )}
+
             <SBTCard
               sbt={{
                 name:    selected.name,
-                tier:    selected.tier,
+                tier:    getTier(),
                 score:   scoreCount,
                 wallet:  '0x3f7a...9b2e',
                 tagline: selected.tagline,
-                signals: selected.signals,
+                signals: getSignals(),
               }}
               size="lg"
-              contractUrl={SBT_CONTRACT_URL}
             />
 
             <a
@@ -367,7 +428,7 @@ export default function Verify() {
                 Browse Loans →
               </button>
               <button
-                onClick={() => { setStep(1); setSelected(null) }}
+                onClick={() => { setStep(1); setSelected(null); setVerifyData(null); setAnalyzeStarted(false) }}
                 className="btn-secondary flex-1 justify-center"
               >
                 Try Another

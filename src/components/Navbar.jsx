@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import WalletButton from './WalletButton.jsx'
+import { useWallet } from '../context/WalletContext.jsx'
 
 const LINKS = [
   { to: '/feed',      label: 'Markets' },
@@ -9,9 +10,20 @@ const LINKS = [
   { to: '/dashboard', label: 'Governance' },
 ]
 
+/* ── Role badge config ── */
+const ROLE_META = {
+  borrower: { icon: '🏦', label: 'Borrower', cls: 'badge-gold' },
+  lender:   { icon: '💰', label: 'Lender',   cls: 'badge-teal' },
+  both:     { icon: '🔄', label: 'Both',      cls: 'badge-indigo' },
+}
+
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const location = useLocation()
+  const [profileOpen, setProfileOpen] = useState(false)
+  const profileRef = useRef(null)
+  const location   = useLocation()
+  const navigate   = useNavigate()
+  const { userRole, clearRole, isConnected, shortAddress } = useWallet()
 
   useEffect(() => setMobileOpen(false), [location])
 
