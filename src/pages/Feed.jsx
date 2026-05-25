@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getMarketplaceFeed, fundLoan } from '../api/index.js'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 /* ─────────────────────────────────────────────────────────────
    DESIGN SYSTEM — Premium Institutional Light
@@ -22,6 +22,62 @@ const C = {
   success:   '#16A34A',
   danger:    '#DC2626',
   amber:     '#D97706',
+}
+
+/* ─────────────────────────────────────────────────────────────
+   NAV DRAWER — Kartik's feature: slides in from left
+   Auto-opens when navigated from Landing "Start Borrowing"
+───────────────────────────────────────────────────────────── */
+const NAV_ITEMS = [
+  { to: '/feed',      label: 'Markets',    desc: 'Browse all live loan listings',          icon: <svg width={20} height={20} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}><path strokeLinecap="round" strokeLinejoin="round" d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" /></svg> },
+  { to: '/verify',    label: 'Lending',    desc: 'Verify identity & get your credit score', icon: <svg width={20} height={20} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
+  { to: '/circles',   label: 'Borrowing',  desc: 'Create loan requests & join circles',    icon: <svg width={20} height={20} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" /></svg> },
+  { to: '/dashboard', label: 'Governance', desc: 'Your portfolio & repayment dashboard',   icon: <svg width={20} height={20} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg> },
+]
+
+function NavDrawer({ open, onClose }) {
+  const navigate = useNavigate()
+  const go = (to) => { onClose(); navigate(to) }
+  return (
+    <>
+      {/* Backdrop */}
+      <div onClick={onClose} style={{ position:'fixed', inset:0, zIndex:40, background:'rgba(0,0,0,0.22)', backdropFilter:'blur(4px)', opacity: open ? 1 : 0, pointerEvents: open ? 'auto' : 'none', transition:'opacity 0.3s ease' }} />
+      {/* Panel */}
+      <div style={{ position:'fixed', top:0, left:0, bottom:0, zIndex:50, width:300, background:'#fff', boxShadow:'4px 0 40px rgba(0,0,0,0.12)', transform: open ? 'translateX(0)' : 'translateX(-100%)', transition:'transform 0.35s cubic-bezier(0.22,1,0.36,1)', display:'flex', flexDirection:'column', overflowY:'auto' }}>
+        {/* Header */}
+        <div style={{ padding:'24px 24px 20px', borderBottom:`1px solid ${C.border}`, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div>
+            <span style={{ fontFamily:"'Outfit', sans-serif", fontWeight:800, fontSize:'1.3rem', background:'linear-gradient(135deg,#7a5000,#c9952a,#e8c05a,#c9952a,#7a5000)', backgroundSize:'200% 100%', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text', animation:'goldShine 3s ease-in-out infinite' }}>VielFi</span>
+            <p style={{ fontSize:'0.62rem', color:C.textFaint, fontFamily:"'JetBrains Mono', monospace", letterSpacing:'0.14em', textTransform:'uppercase', marginTop:3 }}>Navigation</p>
+          </div>
+          <button onClick={onClose} style={{ width:32, height:32, borderRadius:'50%', border:`1px solid ${C.border}`, background:C.surfaceAlt, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:C.textMuted }}>
+            <svg width={14} height={14} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        {/* Nav items */}
+        <div style={{ padding:'16px 12px', flex:1 }}>
+          {NAV_ITEMS.map(({ to, label, desc, icon }) => (
+            <button key={to} onClick={() => go(to)}
+              style={{ width:'100%', display:'flex', alignItems:'center', gap:14, padding:'14px 16px', borderRadius:12, background:'transparent', border:'none', cursor:'pointer', textAlign:'left', marginBottom:4, transition:'background 0.18s, transform 0.18s' }}
+              onMouseEnter={e => { e.currentTarget.style.background='#fdf9f3'; e.currentTarget.style.transform='translateX(4px)' }}
+              onMouseLeave={e => { e.currentTarget.style.background='transparent'; e.currentTarget.style.transform='none' }}
+            >
+              <div style={{ width:42, height:42, borderRadius:12, flexShrink:0, background:'linear-gradient(145deg,#fdf8ec,#faf0d8)', border:'1px solid rgba(212,175,55,0.18)', display:'flex', alignItems:'center', justifyContent:'center', color:'#c9952a' }}>{icon}</div>
+              <div>
+                <div style={{ fontWeight:700, fontSize:'0.95rem', color:C.text, marginBottom:2 }}>{label}</div>
+                <div style={{ fontSize:'0.72rem', color:C.textMuted, lineHeight:1.4 }}>{desc}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+        {/* Footer */}
+        <div style={{ padding:'16px 24px', borderTop:`1px solid ${C.border}` }}>
+          <p style={{ fontFamily:"'JetBrains Mono', monospace", fontSize:'0.6rem', color:C.textFaint, letterSpacing:'0.12em', textTransform:'uppercase', textAlign:'center', margin:0 }}>Secure · Transparent · Decentralized</p>
+        </div>
+      </div>
+      <style>{`@keyframes goldShine { 0%{background-position:100% 0;} 50%{background-position:0% 0;} 100%{background-position:100% 0;} }`}</style>
+    </>
+  )
 }
 
 const PURPOSE_ACCENT = {
@@ -352,6 +408,8 @@ const SkeletonCard = ({ height = 280 }) => (
    MAIN COMPONENT
 ───────────────────────────────────────────────────────────── */
 export default function Feed() {
+  const location = useLocation()
+  const [drawerOpen,    setDrawerOpen]    = useState(location.state?.openDrawer === true)
   const [loans,         setLoans]         = useState(MOCK_LOANS)
   const [loading,       setLoading]       = useState(false)
   const [tierFilter,    setTier]          = useState('All')
@@ -365,6 +423,7 @@ export default function Feed() {
   useEffect(() => {
     const prev = document.body.style.backgroundColor
     document.body.style.backgroundColor = C.bg
+    if (location.state?.openDrawer) window.history.replaceState({}, document.title)
     return () => { document.body.style.backgroundColor = prev }
   }, [])
 
@@ -418,8 +477,11 @@ export default function Feed() {
         @keyframes skeletonPulse { 0%,100%{opacity:1;} 50%{opacity:0.45;} }
         @keyframes toastSlide { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
         @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+        @keyframes goldShine { 0%{background-position:100% 0;} 50%{background-position:0% 0;} 100%{background-position:100% 0;} }
         *{box-sizing:border-box;}
       `}</style>
+
+      <NavDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
       <div style={{ minHeight: '100vh', background: C.bg, fontFamily: "'Inter', -apple-system, sans-serif", color: C.text, paddingTop: 72 }}>
 
@@ -428,10 +490,20 @@ export default function Feed() {
           <div style={{ maxWidth: 1320, margin: '0 auto', padding: '48px 32px 0' }}>
 
             {/* Breadcrumb */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28, fontSize: 12, color: C.textFaint, fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-              <span>Vielfi</span>
-              <span style={{ opacity: 0.4 }}>/</span>
-              <span style={{ color: C.text }}>Marketplace</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
+              {/* Hamburger to re-open drawer */}
+              <button
+                onClick={() => setDrawerOpen(true)}
+                title="Open navigation"
+                style={{ width:36, height:36, borderRadius:9, border:`1px solid ${C.border}`, background:C.surfaceAlt, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', flexShrink:0, transition:'background 0.2s, box-shadow 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.background='#fdf5e0'; e.currentTarget.style.boxShadow='0 2px 12px rgba(200,160,40,0.15)' }}
+                onMouseLeave={e => { e.currentTarget.style.background=C.surfaceAlt; e.currentTarget.style.boxShadow='none' }}
+              >
+                <svg width={15} height={15} fill="none" viewBox="0 0 24 24" stroke="#c9952a" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+              </button>
+              <div style={{ fontSize: 12, color: C.textFaint, fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase', display:'flex', alignItems:'center', gap:8 }}>
+                <span>Vielfi</span><span style={{ opacity: 0.4 }}>/</span><span style={{ color: C.text }}>Marketplace</span>
+              </div>
             </div>
 
             {/* Headline + stats */}
