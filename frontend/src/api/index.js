@@ -1,7 +1,21 @@
 import axios from 'axios'
 
+const getBaseURL = () => {
+  let url = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  url = url.trim();
+  url = url.replace(/\/+$/, '');
+  if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+    if (url.includes('localhost') || url.includes('127.0.0.1')) {
+      url = 'http://' + url;
+    } else {
+      url = 'https://' + url;
+    }
+  }
+  return url;
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  baseURL: getBaseURL(),
   headers: { 'Content-Type': 'application/json' },
   timeout: 30000,
 })
