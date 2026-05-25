@@ -146,6 +146,7 @@ export default function ChatBot({ address }) {
           display: 'flex', flexDirection: 'column', overflow: 'hidden',
           border: '1px solid rgba(201,149,42,0.25)',
           animation: 'chatSlideIn 0.3s cubic-bezier(0.16,1,0.3,1)',
+          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
         }}>
 
 
@@ -156,15 +157,16 @@ export default function ChatBot({ address }) {
             display: 'flex', alignItems: 'center', gap: 12,
             borderBottom: '1px solid rgba(201,149,42,0.2)',
           }}>
-            {/* V logo */}
+            {/* V logo — black with white border */}
             <div style={{
               width: 40, height: 40, borderRadius: 12, flexShrink: 0,
-              background: 'linear-gradient(135deg, #c9952a, #e8c05a)',
+              background: '#0a0a0a',
+              border: '2px solid rgba(255,255,255,0.85)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(201,149,42,0.45)',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.5)',
             }}>
               <span style={{
-                fontFamily: 'Inter, sans-serif', fontWeight: 900,
+                fontFamily: "'Inter', sans-serif", fontWeight: 900,
                 fontSize: 20, color: '#fff', letterSpacing: '-0.04em',
                 lineHeight: 1, userSelect: 'none',
               }}>V</span>
