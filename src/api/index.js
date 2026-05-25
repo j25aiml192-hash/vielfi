@@ -38,6 +38,9 @@ api.interceptors.response.use(
 export const verifyProfile = (profileName) =>
   api.post('/api/credit/verify', { profileName })
 
+export const verifyCreditCustom = (data) =>
+  api.post('/api/credit/verify', data)
+
 // ─── Marketplace ──────────────────────────────────────────────────────────
 export const getMarketplaceFeed = () => api.get('/api/marketplace/feed')
 
@@ -56,11 +59,13 @@ export const repayEMI    = (loanId)         => api.post('/api/loans/repay',  { l
 // ─── Circles ──────────────────────────────────────────────────────────────
 export const getCircleById = (id)     => api.get(`/api/circles/${id}`)
 export const createCircle  = (data)   => api.post('/api/circles/create', {
-  name: data.name, description: data.description,
-  targetAmount: Number(data.targetPool) || 0,
+  name: data.name,
+  description: data.description,
+  targetAmount: Number(data.targetAmount) || 0,
 })
-export const joinCircle = (circleId) => api.post('/api/circles/contribute', { circleId, amount: 0 })
-export const getCircles = ()          => Promise.resolve([])
+export const joinCircle = (circleId, amount, lenderAddress) => 
+  api.post('/api/circles/contribute', { circleId, amount: Number(amount), lenderAddress })
+export const getCircles = ()          => api.get('/api/circles')
 export const getNarrative = (profileName) => api.post(`/api/narrative/${profileName}`)
 
 // ─── Feature 1: Ratings ───────────────────────────────────────────────────
