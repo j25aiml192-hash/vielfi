@@ -1,99 +1,98 @@
 import axios from 'axios'
 
-const BASE = 'http://localhost:8000'
-
 const api = axios.create({
-  baseURL: BASE,
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
   headers: { 'Content-Type': 'application/json' },
   timeout: 30000,
 })
 
-// Request interceptor – attach auth if needed
-api.interceptors.request.use((config) => config)
+// Request interceptor
+api.interceptors.request.use((config) => {
+  console.log(`[API] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`, config.data || '')
+  return config
+})
 
-// Response interceptor – normalize errors
+// Response interceptor – unwrap .data and normalize errors
 api.interceptors.response.use(
-  (res) => res.data,
+  (res) => {
+    console.log(`[API] Response:`, res.data)
+    return res.data
+  },
   (err) => {
     const msg = err.response?.data?.detail || err.message || 'Network error'
+    console.error(`[API] Error:`, msg)
     return Promise.reject(new Error(msg))
   }
 )
 
-// ─── Auth / Identity ─────────────────────────────────────────
+// ─── Credit Verification ──────────────────────────────────────
 
-/** Verify a borrower profile and trigger ZK proof generation */
-export const verifyProfile = (name) =>
-  api.post('/verify', { name })
-
-/** Get ZK proof status for a profile */
-export const getProofStatus = (name) =>
-  api.get(`/proof/${name}`)
-
-/** Get borrower narrative */
-export const getNarrative = (name) =>
-  api.get(`/narrative/${name}`)
+/**
+ * Verify a borrower profile and get ZK credit scores.
+ * POST /api/credit/verify  { profileName }
+ * Returns: { upiScore, gstScore, rentalScore, weightedScore,
+ *            tier, cibilScore, proofHash, narrative }
+ */
+export const verifyProfile = (profileName) =>
+  api.post('/api/credit/verify', { profileName })
 
 // ─── Marketplace ─────────────────────────────────────────────
 
-/** Fetch all live loan listings */
-export const getMarketplaceFeed = (params = {}) =>
-  api.get('/marketplace', { params })
+/**
+ * Fetch all live loan listings.
+ * GET /api/marketplace/feed
+ * Returns: [{ id, title, borrower, amount, interestRate,
+ *             durationMonths, fundedAmount, status, tier }]
+ */
+export const getMarketplaceFeed = () =>
+  api.get('/api/marketplace/feed')
 
-/** Fetch a single loan by ID */
-export const getLoanById = (loanId) =>
-  api.get(`/loan/${loanId}`)
+// ─── Loans ───────────────────────────────────────────────────
 
-/** Get lenders list for a loan */
-export const getLoanLenders = (loanId) =>
-  api.get(`/loan/${loanId}/lenders`)
-
-// ─── Lending / Repayment ─────────────────────────────────────
-
-/** Fund a loan listing */
+/**
+ * Fund a loan listing.
+ * POST /api/loans/fund  { loanId, amount }
+ */
 export const fundLoan = (loanId, amount) =>
-  api.post('/fund', { loan_id: loanId, amount })
+  api.post('/api/loans/fund', { loanId, amount })
 
-/** Repay an EMI for a loan */
+/**
+ * Repay an EMI for a loan.
+ * POST /api/loans/repay  { loanId }
+ */
 export const repayEMI = (loanId) =>
-  api.post('/repay', { loan_id: loanId })
-
-// ─── User / Profile ──────────────────────────────────────────
-
-/** Get borrower profile by wallet or name */
-export const getBorrowerProfile = (identifier) =>
-  api.get(`/profile/${identifier}`)
-
-/** Get credit score history */
-export const getScoreHistory = (name) =>
-  api.get(`/score-history/${name}`)
-
-/** Get loan history for a user */
-export const getLoanHistory = (name) =>
-  api.get(`/loan-history/${name}`)
-
-// ─── Dashboard ───────────────────────────────────────────────
-
-/** Get borrower dashboard data */
-export const getBorrowerDashboard = (address) =>
-  api.get(`/dashboard/borrower/${address}`)
-
-/** Get lender dashboard data */
-export const getLenderDashboard = (address) =>
-  api.get(`/dashboard/lender/${address}`)
+  api.post('/api/loans/repay', { loanId })
 
 // ─── Circles ─────────────────────────────────────────────────
 
-/** Get all active circles */
-export const getCircles = () =>
-  api.get('/circles')
+/**
+ * Get a specific circle by ID.
+ * GET /api/circles/{circle_id}
+ */
+export const getCircleById = (circleId) =>
+  api.get(`/api/circles/${circleId}`)
 
-/** Create a new credit circle */
+/**
+ * Create a new credit circle.
+ * POST /api/circles/create  { name, description, targetAmount }
+ */
 export const createCircle = (data) =>
-  api.post('/circles', data)
+  api.post('/api/circles/create', {
+    name:         data.name,
+    description:  data.description,
+    targetAmount: Number(data.targetPool) || 0,
+  })
 
-/** Join a circle */
-export const joinCircle = (circleId, address) =>
-  api.post(`/circles/${circleId}/join`, { address })
+/**
+ * Contribute to (join) a circle.
+ * POST /api/circles/contribute  { circleId, amount }
+ */
+export const joinCircle = (circleId, _address) =>
+  api.post('/api/circles/contribute', { circleId, amount: 0 })
+
+// Keep for backward compat (Feed.jsx, Circles.jsx imports)
+export const getCircles = () => Promise.resolve([])
+export const getNarrative = (profileName) =>
+  api.post(`/api/narrative/${profileName}`)
 
 export default api
