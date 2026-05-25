@@ -83,11 +83,11 @@ function NavDrawer({ open, onClose }) {
    NOTIFICATION BELL
 ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */
 const NOTIFS = [
-  { id:1, icon:'≡ƒÆ░', title:'New lender funded your loan', sub:'Rahul Sharma received \u20b95,000',   time:'2m ago', unread:true  },
-  { id:2, icon:'Γ£à', title:'KYC Verification complete',   sub:'Your SBT has been minted',           time:'1h ago', unread:true  },
-  { id:3, icon:'ΓÜí', title:'Loan closing soon',           sub:'Farida Shaikh \u2014 3 days left',   time:'3h ago', unread:true  },
-  { id:4, icon:'≡ƒôê', title:'Repayment received',          sub:'+\u20b918,500 credited to wallet',   time:'1d ago', unread:false },
-  { id:5, icon:'≡ƒæÑ', title:'Circle invite',               sub:'You were added to Circle #12',       time:'2d ago', unread:false },
+  { id:1, icon:'💰', title:'New lender funded your loan', sub:'Rahul Sharma received \u20b95,000',   time:'2m ago', unread:true  },
+  { id:2, icon:'✅', title:'KYC Verification complete',   sub:'Your SBT has been minted',           time:'1h ago', unread:true  },
+  { id:3, icon:'⚡', title:'Loan closing soon',           sub:'Farida Shaikh \u2014 3 days left',   time:'3h ago', unread:true  },
+  { id:4, icon:'📊', title:'Repayment received',          sub:'+\u20b918,500 credited to wallet',   time:'1d ago', unread:false },
+  { id:5, icon:'👥', title:'Circle invite',               sub:'You were added to Circle #12',       time:'2d ago', unread:false },
 ]
 
 function NotificationBell() {
