@@ -70,8 +70,15 @@ export default {
         /* ── Hairline / Border ── */
         'hairline':      '#e6e6e6',
         'hairline-soft': '#f1f1f1',
-        'outline':       '#7e7576',
-        'outline-variant':'#cfc4c5',
+        'outline':       '#747878',
+        'outline-variant':'#c4c7c7',
+
+        /* ── Feature / Redesign Colors ── */
+        'feature-pink': '#ff3399',
+        'feature-teal': '#008080',
+        'feature-lavender': '#9966ff',
+        'feature-peach': '#ff9966',
+        'feature-ochre': '#cc9900',
 
         /* ── Color Blocks ── */
         'block-lime':  '#dceeb1',

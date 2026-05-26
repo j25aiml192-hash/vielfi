@@ -1,8 +1,3 @@
-/* ─────────────────────────────────────────────────────────────────
-   MyLoans.jsx — Full borrower loan view (Light Theme)
-   Shows: all loans taken, EMI amounts, amortization schedule,
-          lender distribution, payment progress, summary stats.
-───────────────────────────────────────────────────────────────── */
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWallet } from '../context/WalletContext.jsx'
@@ -17,83 +12,22 @@ const loadRazorpay = () => new Promise((resolve) => {
   document.body.appendChild(script)
 })
 
-/* ── Design Tokens ── */
-const C = {
-  canvas: '#fffaf0', ink: '#0a0a0a', secondary: '#615e57',
-  teal: '#008080', lavender: '#9966ff', peach: '#ff9966', ochre: '#cc9900',
-  surface: '#f4f4ef', surface0: '#ffffff', border: '#cac6c3',
-  white: '#ffffff', pink: '#ff3399', error: '#ba1a1a', green: '#2d6a4f',
-  blue: '#3b82f6', purple: '#8b5cf6',
-}
-
 const INR = (n = 0) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
 
 const short = (addr = '') => addr ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : '—'
 
-/* ── Status colors ── */
-const STATUS_MAP = {
-  active:   { bg: '#dcfce7', color: '#166534',  label: 'Active'  },
-  funded:   { bg: '#dbeafe', color: '#1e40af',  label: 'Funded'  },
-  repaid:   { bg: '#f3e8ff', color: '#6b21a8',  label: 'Repaid'  },
-  defaulted:{ bg: '#fee2e2', color: '#991b1b',  label: 'Default' },
-}
-
 const INSTALL_MAP = {
-  paid:     { bg: '#dcfce7', color: '#166534',  label: '✓ Paid'    },
-  due_soon: { bg: '#fef3c7', color: '#92400e',  label: '⚡ Due Soon' },
-  upcoming: { bg: C.surface, color: C.secondary,  label: '○ Upcoming' },
-}
-
-/* ── Sub-components ── */
-
-function SummaryCard({ label, value, sub, accent }) {
-  return (
-    <div style={{
-      background: C.surface0, border: `1px solid rgba(196,199,199,0.3)`,
-      borderRadius: 16, padding: '22px 24px',
-      display: 'flex', flexDirection: 'column', gap: 4,
-      boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
-    }}>
-      <div style={{ fontSize: 24, fontWeight: 800, color: accent || C.ink, letterSpacing: '-0.03em' }}>
-        {value}
-      </div>
-      <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: C.secondary }}>
-        {label}
-      </div>
-      {sub && <div style={{ fontSize: 12, color: C.secondary, marginTop: 2 }}>{sub}</div>}
-    </div>
-  )
-}
-
-function StatusBadge({ status }) {
-  const s = STATUS_MAP[status] || { bg: C.surface, color: C.secondary, label: status }
-  return (
-    <span style={{
-      fontSize: 11, fontWeight: 700, padding: '4px 12px',
-      borderRadius: 999, background: s.bg, color: s.color, letterSpacing: '0.05em',
-      textTransform: 'uppercase'
-    }}>{s.label}</span>
-  )
-}
-
-function ProgressBar({ pct, color = C.ochre }) {
-  return (
-    <div style={{ height: 6, background: 'rgba(196,199,199,0.3)', borderRadius: 99, overflow: 'hidden' }}>
-      <div style={{
-        height: '100%', width: `${Math.min(pct, 100)}%`,
-        background: color,
-        borderRadius: 99, transition: 'width 0.6s ease',
-      }} />
-    </div>
-  )
+  paid:     { bg: 'bg-emerald-100', color: 'text-emerald-800',  label: '✓ Paid'    },
+  due_soon: { bg: 'bg-amber-100', color: 'text-amber-800',  label: '⚡ Due Soon' },
+  upcoming: { bg: 'bg-surface-container', color: 'text-secondary',  label: '○ Upcoming' },
 }
 
 /* ── Lender Distribution Panel ── */
 function DistributionPanel({ distribution, emi_inr }) {
   if (!distribution || distribution.length === 0) {
     return (
-      <div style={{ color: C.secondary, fontSize: 14, textAlign: 'center', padding: '30px 0' }}>
+      <div className="text-secondary text-sm text-center py-8">
         No lenders yet — this loan hasn't been funded.
       </div>
     )
@@ -101,43 +35,46 @@ function DistributionPanel({ distribution, emi_inr }) {
 
   return (
     <div>
-      <div style={{ fontSize: 14, color: C.secondary, marginBottom: 20 }}>
+      <h4 className="font-headline-md text-lg font-bold text-ink mb-2">Lender Distribution</h4>
+      <div className="text-sm text-secondary mb-5">
         Each lender receives a proportional share of your monthly EMI of {' '}
-        <strong style={{ color: C.ink, fontWeight: 800 }}>{INR(emi_inr)}</strong>
+        <strong className="text-ink font-extrabold">{INR(emi_inr)}</strong>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {distribution.map((d, i) => (
-          <div key={i} style={{
-            background: C.surface, border: `1px solid rgba(196,199,199,0.25)`,
-            borderRadius: 16, padding: '16px 20px',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: '50%',
-                  background: [C.teal, C.lavender, C.peach, C.ochre, C.pink][i % 5],
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 14, fontWeight: 700, color: C.white, flexShrink: 0,
-                }}>{i + 1}</div>
-                <div>
-                  <div style={{ fontFamily: 'monospace', fontSize: 14, color: C.ink, fontWeight: 700 }}>
-                    {d.lender_short}
+      <div className="flex flex-col gap-3">
+        {distribution.map((d, i) => {
+          const colors = ['bg-feature-teal', 'bg-feature-lavender', 'bg-feature-peach', 'bg-feature-ochre', 'bg-feature-pink']
+          const colorClass = colors[i % 5]
+          
+          return (
+            <div key={i} className="bg-surface border border-secondary-container/50 rounded-2xl p-4">
+              <div className="flex justify-between items-center mb-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-full ${colorClass} flex items-center justify-center text-sm font-bold text-white shrink-0`}>
+                    {i + 1}
                   </div>
-                  <div style={{ fontSize: 12, color: C.secondary, marginTop: 2 }}>
-                    {d.payment_method === 'UPI' ? '💳 UPI' : '🔷 ETH'} • {d.eth_contributed.toFixed(4)} ETH
+                  <div>
+                    <div className="font-mono text-sm text-ink font-bold">
+                      {d.lender_short}
+                    </div>
+                    <div className="text-xs text-secondary mt-0.5">
+                      {d.payment_method === 'UPI' ? '💳 UPI' : '🔷 ETH'} • {d.eth_contributed.toFixed(4)} ETH
+                    </div>
                   </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg font-extrabold text-emerald-600">
+                    {INR(d.monthly_emi_share_inr)}<span className="text-xs text-secondary font-medium">/mo</span>
+                  </div>
+                  <div className="text-xs text-secondary font-semibold mt-0.5">{d.share_pct}% share</div>
                 </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 18, fontWeight: 800, color: C.green }}>
-                  {INR(d.monthly_emi_share_inr)}<span style={{ fontSize: 12, color: C.secondary, fontWeight: 500 }}>/mo</span>
-                </div>
-                <div style={{ fontSize: 12, color: C.secondary, fontWeight: 600, marginTop: 2 }}>{d.share_pct}% share</div>
+              {/* Progress bar */}
+              <div className="h-1.5 bg-secondary-container/50 rounded-full overflow-hidden">
+                <div className={`h-full ${colorClass} rounded-full transition-all duration-500`} style={{ width: `${Math.min(d.share_pct, 100)}%` }} />
               </div>
             </div>
-            <ProgressBar pct={d.share_pct} color={[C.teal, C.lavender, C.peach, C.ochre, C.pink][i % 5]} />
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
@@ -149,7 +86,7 @@ function SchedulePanel({ loan, schedule, onRefresh }) {
   const [paying, setPaying] = useState(null)
 
   if (!schedule || schedule.length === 0) {
-    return <div style={{ color: C.secondary, fontSize: 14, textAlign: 'center', padding: '30px 0' }}>No schedule — loan not yet funded.</div>
+    return <div className="text-secondary text-sm text-center py-8">No schedule — loan not yet funded.</div>
   }
   const shown = expanded ? schedule : schedule.slice(0, 4)
 
@@ -194,7 +131,7 @@ function SchedulePanel({ loan, schedule, onRefresh }) {
           }
         },
         prefill: { name: 'Borrower', email: 'borrower@veilfi.io', contact: '9999999999' },
-        theme: { color: C.teal }
+        theme: { color: '#008080' } // feature-teal
       }
 
       const rzp = new window.Razorpay(options)
@@ -209,49 +146,42 @@ function SchedulePanel({ loan, schedule, onRefresh }) {
 
   return (
     <div>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+      <h4 className="font-headline-md text-lg font-bold text-ink mb-2">Amortization Schedule</h4>
+      <div className="text-sm text-secondary mb-5">
+        Track your EMI payments, principal breakdown, and interest.
+      </div>
+      <div className="overflow-x-auto bg-surface border border-secondary-container/50 rounded-2xl">
+        <table className="w-full text-left border-collapse text-sm">
           <thead>
-            <tr style={{ borderBottom: `2px solid rgba(196,199,199,0.3)` }}>
-              {['#', 'Due Date', 'EMI', 'Principal', 'Interest', 'Balance', 'Status', 'Action'].map(h => (
-                <th key={h} style={{
-                  padding: '12px 16px', textAlign: h === '#' || h === 'Status' ? 'center' : (h === 'Action' ? 'center' : 'right'),
-                  fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: C.secondary,
-                  ...(h === 'Due Date' ? { textAlign: 'left' } : {})
-                }}>{h}</th>
+            <tr className="border-b border-secondary-container">
+              {['#', 'Due Date', 'EMI', 'Principal', 'Interest', 'Status', 'Action'].map(h => (
+                <th key={h} className={`py-4 px-4 font-label-sm text-xs text-secondary uppercase tracking-widest ${h === '#' || h === 'Status' || h === 'Action' ? 'text-center' : (h !== 'Due Date' ? 'text-right' : 'text-left')}`}>
+                  {h}
+                </th>
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-secondary-container/30">
             {shown.map((s) => {
               const si = INSTALL_MAP[s.status] || INSTALL_MAP.upcoming
               return (
-                <tr key={s.installment} style={{ borderBottom: `1px solid rgba(196,199,199,0.2)` }}>
-                  <td style={{ padding: '16px 16px', textAlign: 'center', color: C.secondary, fontWeight: 700 }}>{s.installment}</td>
-                  <td style={{ padding: '16px 16px', color: C.ink, fontWeight: 600 }}>{s.due_date}</td>
-                  <td style={{ padding: '16px 16px', textAlign: 'right', fontWeight: 800, color: C.ink }}>{INR(s.emi_inr)}</td>
-                  <td style={{ padding: '16px 16px', textAlign: 'right', color: C.teal, fontWeight: 500 }}>{INR(s.principal_inr)}</td>
-                  <td style={{ padding: '16px 16px', textAlign: 'right', color: C.error, fontWeight: 500 }}>{INR(s.interest_inr)}</td>
-                  <td style={{ padding: '16px 16px', textAlign: 'right', fontFamily: 'monospace', color: C.secondary, fontSize: 13, fontWeight: 600 }}>
-                    {INR(s.balance_inr)}
+                <tr key={s.installment} className="hover:bg-white transition-colors">
+                  <td className="py-4 px-4 text-center text-secondary font-bold">{s.installment}</td>
+                  <td className="py-4 px-4 text-ink font-semibold">{s.due_date}</td>
+                  <td className="py-4 px-4 text-right font-extrabold text-ink">{INR(s.emi_inr)}</td>
+                  <td className="py-4 px-4 text-right text-feature-teal font-medium">{INR(s.principal_inr)}</td>
+                  <td className="py-4 px-4 text-right text-error font-medium">{INR(s.interest_inr)}</td>
+                  <td className="py-4 px-4 text-center">
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${si.bg} ${si.color}`}>
+                      {si.label}
+                    </span>
                   </td>
-                  <td style={{ padding: '16px 16px', textAlign: 'center' }}>
-                    <span style={{
-                      fontSize: 11, fontWeight: 700, padding: '4px 10px',
-                      borderRadius: 999, background: si.bg, color: si.color, textTransform: 'uppercase'
-                    }}>{si.label}</span>
-                  </td>
-                  <td style={{ padding: '16px 16px', textAlign: 'center' }}>
+                  <td className="py-4 px-4 text-center">
                     {s.status !== 'paid' && ['active', 'funded'].includes(loan.status) && (
                       <button 
                         onClick={() => handlePayEMI(s)}
                         disabled={paying === s.installment}
-                        style={{
-                          padding: '6px 12px', background: C.teal, color: C.white,
-                          border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 700,
-                          cursor: paying === s.installment ? 'not-allowed' : 'pointer',
-                          opacity: paying === s.installment ? 0.7 : 1
-                        }}>
+                        className="px-3 py-1.5 bg-feature-teal text-white rounded-lg text-xs font-bold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity">
                         {paying === s.installment ? 'Wait...' : 'Pay EMI 💳'}
                       </button>
                     )}
@@ -263,15 +193,7 @@ function SchedulePanel({ loan, schedule, onRefresh }) {
         </table>
       </div>
       {schedule.length > 4 && (
-        <button onClick={() => setExpanded(x => !x)} style={{
-          width: '100%', marginTop: 16, padding: '12px',
-          background: C.surface, border: `1px solid rgba(196,199,199,0.3)`,
-          borderRadius: 12, color: C.ink, fontSize: 14, fontWeight: 700,
-          cursor: 'pointer', transition: 'background 0.15s',
-        }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(196,199,199,0.2)'}
-          onMouseLeave={e => e.currentTarget.style.background = C.surface}
-        >
+        <button onClick={() => setExpanded(x => !x)} className="w-full mt-4 py-3 bg-surface border border-secondary-container/50 rounded-xl text-ink text-sm font-bold hover:bg-surface-container-low transition-colors">
           {expanded ? '▲ Show less' : `▼ Show all ${schedule.length} installments`}
         </button>
       )}
@@ -279,299 +201,226 @@ function SchedulePanel({ loan, schedule, onRefresh }) {
   )
 }
 
-/* ── Loan Card ── */
-function LoanCard({ loan, onRefresh }) {
-  const [tab, setTab] = useState('overview')  // overview | schedule | distribution
+/* ── Loan Row ── */
+function LoanRow({ loan, onRefresh }) {
+  const [expanded, setExpanded] = useState(false)
+  
+  // get next payment
+  let nextPayment = 'N/A'
+  if (loan.schedule && loan.schedule.length > 0) {
+     const next = loan.schedule.find(s => s.status === 'upcoming' || s.status === 'due_soon')
+     if (next) nextPayment = next.due_date
+  }
 
-  const fundedPct = loan.funded_percentage || 0
-  const repaidPct = loan.total_repayable_inr > 0
-    ? Math.min(Math.round((loan.repaid_inr / loan.total_repayable_inr) * 100), 100)
-    : 0
+  const apy = loan.apr ? `${loan.apr.toFixed(2)}%` : '12.00%'
 
-  const tabs = [
-    { key: 'overview',     label: '📊 Overview' },
-    { key: 'schedule',     label: '📅 Schedule' },
-    { key: 'distribution', label: '🏦 Lenders' },
-  ]
+  const statusStyles = {
+    active: 'bg-feature-teal/10 text-feature-teal',
+    funded: 'bg-feature-lavender/10 text-feature-lavender',
+    repaid: 'bg-feature-pink/10 text-feature-pink',
+    defaulted: 'bg-error/10 text-error',
+  }
+  const statusClass = statusStyles[loan.status] || 'bg-surface-container text-secondary'
+
+  const initials = loan.purpose ? loan.purpose.charAt(0).toUpperCase() : 'L'
+  const iconColor = ['bg-feature-pink', 'bg-feature-peach', 'bg-feature-lavender', 'bg-feature-teal', 'bg-feature-ochre'][loan.id.charCodeAt(0) % 5] || 'bg-ink'
 
   return (
-    <div style={{
-      background: C.surface0, border: `1px solid rgba(196,199,199,0.3)`,
-      borderRadius: 24, overflow: 'hidden', position: 'relative',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
-      transition: 'transform 0.25s',
-    }}
-    onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-    onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-    >
-      {/* Top accent bar */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 6, background: C.teal }} />
-      
-      {/* Card Header */}
-      <div style={{ padding: '32px 32px 24px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
-          <div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: C.ink, marginBottom: 6, letterSpacing: '-0.02em' }}>
-              {loan.purpose || 'Loan'}
-            </div>
-            <div style={{ fontSize: 14, color: C.secondary, fontWeight: 500 }}>
-              {loan.duration_months} months • {loan.apr}% APR • {loan.credit_tier} tier
-            </div>
+    <>
+      <tr className="hover:bg-white transition-colors group">
+        <td className="px-8 py-6">
+          <div className="flex items-center gap-3">
+             <div className={`w-10 h-10 rounded-lg ${iconColor} flex items-center justify-center text-white font-bold`}>{initials}</div>
+             <span className="font-headline-md text-lg font-bold text-ink">{loan.purpose || 'Business Loan'}</span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
-            <StatusBadge status={loan.status} />
-            {loan.next_due_date && loan.status === 'active' && (
-              <div style={{ fontSize: 12, color: C.ochre, fontWeight: 700 }}>
-                Next EMI: {loan.next_due_date}
-              </div>
-            )}
+        </td>
+        <td className="px-6 py-6">
+          <span className="font-body-md text-body-md font-bold text-feature-teal">{apy}</span>
+        </td>
+        <td className="px-6 py-6">
+          <span className="font-body-md text-body-md text-ink">{INR(loan.remaining_inr)}</span>
+        </td>
+        <td className="px-6 py-6">
+          <div className="flex flex-col">
+             <span className="font-body-md text-body-md text-ink">{nextPayment}</span>
+             <span className="font-label-sm text-[11px] text-secondary">EMI: {INR(loan.emi_inr)}</span>
           </div>
-        </div>
-
-        {/* Key numbers row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 24, padding: '20px', background: C.surface, borderRadius: 16 }}>
-          {[
-            { label: 'Loan Amount',  value: INR(loan.amount_inr),   color: C.ink },
-            { label: 'Monthly EMI',  value: INR(loan.emi_inr),      color: C.teal },
-            { label: 'Remaining',    value: INR(loan.remaining_inr), color: C.error },
-          ].map(m => (
-            <div key={m.label} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 22, fontWeight: 800, color: m.color, letterSpacing: '-0.02em' }}>{m.value}</div>
-              <div style={{ fontSize: 12, color: C.secondary, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', marginTop: 4 }}>{m.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Progress Bars */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
-          {/* Funding progress */}
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 600, color: C.secondary, marginBottom: 8 }}>
-              <span>Funded by {loan.funder_count} lenders</span>
-              <span style={{ color: C.ink, fontWeight: 800 }}>{fundedPct}%</span>
-            </div>
-            <ProgressBar pct={fundedPct} color={C.ochre} />
-          </div>
-
-          {/* Repayment progress */}
-          {loan.total_repayable_inr > 0 ? (
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 600, color: C.secondary, marginBottom: 8 }}>
-                <span>Repaid {loan.paid_installments}/{loan.duration_months} EMIs</span>
-                <span style={{ color: C.green, fontWeight: 800 }}>{repaidPct}%</span>
-              </div>
-              <ProgressBar pct={repaidPct} color={C.green} />
-            </div>
-          ) : <div />}
-        </div>
-      </div>
-
-      {/* Tab nav */}
-      <div style={{
-        display: 'flex', borderBottom: `1px solid rgba(196,199,199,0.3)`, borderTop: `1px solid rgba(196,199,199,0.3)`,
-        background: C.surface,
-      }}>
-        {tabs.map(t => (
-          <button key={t.key} onClick={() => setTab(t.key)} style={{
-            flex: 1, padding: '16px 8px', border: 'none', cursor: 'pointer',
-            background: tab === t.key ? C.surface0 : 'transparent', fontSize: 14, fontWeight: 700,
-            color: tab === t.key ? C.ink : C.secondary,
-            borderBottom: tab === t.key ? `2px solid ${C.ink}` : '2px solid transparent',
-            transition: 'all 0.15s',
-          }}>{t.label}</button>
-        ))}
-      </div>
-
-      {/* Tab body */}
-      <div style={{ padding: '32px' }}>
-        {tab === 'overview' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {[
-              { label: 'Total Borrowed',      value: INR(loan.amount_inr) },
-              { label: 'Total Funded So Far', value: INR(loan.funded_inr) },
-              { label: 'Monthly EMI',         value: INR(loan.emi_inr), accent: C.teal },
-              { label: 'Total Repayable',     value: INR(loan.total_repayable_inr) },
-              { label: 'Total Interest',      value: INR(loan.total_interest_inr), accent: C.error },
-              { label: 'Already Repaid',      value: INR(loan.repaid_inr), accent: C.green },
-              { label: 'Balance Remaining',   value: INR(loan.remaining_inr), accent: C.ink },
-              { label: 'Lenders',             value: loan.funder_count + ' funders' },
-              { label: 'Duration',            value: `${loan.duration_months} months (${loan.paid_installments} paid)` },
-              { label: 'Interest Rate',       value: `${loan.apr}% per annum` },
-            ].map((row, i) => (
-              <div key={row.label} style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '14px 0', borderBottom: i < 9 ? `1px solid rgba(196,199,199,0.2)` : 'none',
-              }}>
-                <span style={{ fontSize: 14, color: C.secondary, fontWeight: 500 }}>{row.label}</span>
-                <span style={{ fontSize: 15, fontWeight: 700, color: row.accent || C.ink }}>{row.value}</span>
-              </div>
-            ))}
-
-            {/* Story */}
-            {loan.story && (
-              <div style={{ marginTop: 24, padding: '20px', background: C.surface, borderRadius: 16, border: `1px solid rgba(196,199,199,0.3)` }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: C.secondary, letterSpacing: '0.1em', marginBottom: 8, textTransform: 'uppercase' }}>YOUR LOAN STORY</div>
-                <div style={{ fontSize: 14, color: C.ink, lineHeight: 1.6 }}>{loan.story}</div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {tab === 'schedule' && (
-          <SchedulePanel loan={loan} schedule={loan.schedule} onRefresh={onRefresh} />
-        )}
-
-        {tab === 'distribution' && (
-          <DistributionPanel distribution={loan.distribution} emi_inr={loan.emi_inr} />
-        )}
-      </div>
-    </div>
+        </td>
+        <td className="px-6 py-6">
+          <span className="font-body-md text-body-md text-secondary">{loan.duration_months} months</span>
+        </td>
+        <td className="px-6 py-6 text-center">
+          <span className={`px-3 py-1 rounded-full font-label-sm text-[12px] uppercase tracking-wide ${statusClass}`}>{loan.status}</span>
+        </td>
+        <td className="px-8 py-6 text-right">
+          <button 
+             onClick={() => setExpanded(!expanded)}
+             className={`px-4 py-2 rounded-xl bg-ink text-white font-label-sm text-sm font-semibold transition-opacity hover:scale-105 ${expanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+             {expanded ? 'Hide Detail' : 'View Detail'}
+          </button>
+        </td>
+      </tr>
+      {expanded && (
+        <tr>
+           <td colSpan="7" className="px-8 py-8 bg-surface-container-lowest border-b border-secondary-container">
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+               <SchedulePanel loan={loan} schedule={loan.schedule} onRefresh={onRefresh} />
+               <DistributionPanel distribution={loan.distribution} emi_inr={loan.emi_inr} />
+             </div>
+           </td>
+        </tr>
+      )}
+    </>
   )
 }
 
-/* ── Skeleton ── */
-function Skeleton() {
-  const p = { background: `linear-gradient(90deg,${C.surface0} 25%,${C.surface} 50%,${C.surface0} 75%)`, backgroundSize: '200% 100%', animation: 'shimmer 1.5s ease-in-out infinite', borderRadius: 16 }
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16 }}>
-        {[0,1,2,3].map(i => <div key={i} style={{ ...p, height: 104 }} />)}
-      </div>
-      {[0,1].map(i => <div key={i} style={{ ...p, height: 400, borderRadius: 24 }} />)}
-      <style>{`@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
-    </div>
-  )
-}
-
-/* ════════════════════════════════════════
-   MAIN EXPORT
-════════════════════════════════════════ */
+/* ── Main Page Component ── */
 export default function MyLoans() {
   const { address, isConnected } = useWallet()
   const navigate = useNavigate()
-
-  const [loans,   setLoans]   = useState([])
-  const [summary, setSummary] = useState(null)
+  
+  const [loans, setLoans] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState('')
+  const [stats, setStats] = useState({ borrowed: 0, emi: 0, funded: 0, remaining: 0, active: 0 })
 
   const load = useCallback(async () => {
-    if (!address) { setLoading(false); return }
-    setLoading(true)
-    setError('')
+    if (!address) return
     try {
+      setLoading(true)
       const res = await getMyLoans(address)
-      const data = res.data || res
-      setLoans(data.loans || [])
-      setSummary(data.summary || null)
-    } catch (e) {
-      setError(e.message || 'Failed to load loans')
+      if (res.data) {
+        setLoans(res.data)
+        // Aggregate stats
+        let borrowed = 0, emi = 0, funded = 0, remaining = 0
+        let active = 0
+        res.data.forEach(l => {
+          borrowed += l.principal_inr || 0
+          emi += l.emi_inr || 0
+          funded += l.funded_inr || 0
+          remaining += l.remaining_inr || 0
+          if (l.status === 'active' || l.status === 'funded') active++
+        })
+        setStats({ borrowed, emi, funded, remaining, active })
+      }
+    } catch (err) {
+      console.error(err)
     } finally {
       setLoading(false)
     }
   }, [address])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    if (isConnected && address) {
+      load()
+    } else {
+      setLoading(false)
+    }
+  }, [isConnected, address, load])
 
   return (
-    <div style={{
-      fontFamily: 'Inter, sans-serif', background: C.canvas, color: C.ink,
-      minHeight: '100vh', paddingBottom: 80,
-    }}>
-      <div style={{ maxWidth: 1080, margin: '0 auto', padding: '48px 32px 0' }}>
-
-        {/* ── Header ── */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 40 }}>
+    <div className="min-h-screen bg-canvas p-margin-desktop font-sans">
+      <div className="max-w-[1280px] mx-auto space-y-12">
+        
+        {/* Header */}
+        <header className="flex justify-between items-end">
           <div>
-            <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: C.secondary, marginBottom: 8 }}>
-              Borrower Portal
-            </div>
-            <h1 style={{ fontSize: 'clamp(32px,5vw,48px)', fontWeight: 800, color: C.ink, margin: 0, letterSpacing: '-0.04em', lineHeight: 1.1 }}>
-              My Loans
-            </h1>
+            <h2 className="font-display-lg text-4xl font-bold text-ink tracking-tight">My Portfolio</h2>
+            <p className="text-secondary mt-2">Manage your active loans and upcoming EMI payments.</p>
           </div>
-          <div style={{ display: 'flex', gap: 16 }}>
-            <button onClick={load} style={{
-              padding: '12px 24px', background: C.surface, border: `1px solid rgba(196,199,199,0.3)`,
-              borderRadius: 12, color: C.ink, fontSize: 14, fontWeight: 700, cursor: 'pointer',
-              transition: 'background 0.15s'
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(196,199,199,0.2)'}
-            onMouseLeave={e => e.currentTarget.style.background = C.surface}
-            >↻ Refresh</button>
-            <button onClick={() => navigate('/verify')} style={{
-              padding: '12px 24px', background: C.ink, border: 'none',
-              borderRadius: 12, color: C.white, fontSize: 14, fontWeight: 700, cursor: 'pointer',
-              transition: 'opacity 0.15s'
-            }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
-            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-            >+ New Loan</button>
-          </div>
-        </div>
+          <button onClick={load} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors">
+            <span className="material-symbols-outlined text-ink">refresh</span>
+          </button>
+        </header>
 
-        {/* ── Not connected ── */}
         {!isConnected && (
-          <div style={{
-            textAlign: 'center', padding: '100px 32px',
-            background: C.surface0, borderRadius: 24, border: `1px solid rgba(196,199,199,0.3)`,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
-          }}>
-            <div style={{ fontSize: 56, marginBottom: 24 }}>🔗</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: C.ink, marginBottom: 12 }}>Connect Your Wallet</div>
-            <div style={{ fontSize: 16, color: C.secondary }}>Connect MetaMask to view your loan history and EMI schedule.</div>
+          <div className="text-center py-20 bg-surface-container-low rounded-3xl border border-secondary-container">
+            <h2 className="text-2xl font-bold text-ink">Connect Wallet</h2>
+            <p className="text-secondary mt-2 mb-6">Please connect your wallet to view your loans.</p>
           </div>
         )}
 
-        {/* ── Error ── */}
-        {isConnected && error && (
-          <div style={{ padding: '16px 24px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 16, fontSize: 14, color: '#991b1b', marginBottom: 32, fontWeight: 500 }}>
-            ⚠ {error}
+        {isConnected && loading && (
+          <div className="text-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ink mx-auto"></div>
+            <p className="text-secondary mt-4 font-medium tracking-widest uppercase text-sm">Loading Portfolio...</p>
           </div>
         )}
 
-        {/* ── Loading ── */}
-        {isConnected && loading && <Skeleton />}
-
-        {/* ── No loans ── */}
-        {isConnected && !loading && loans.length === 0 && !error && (
-          <div style={{ textAlign: 'center', padding: '100px 32px', background: C.surface0, borderRadius: 24, border: `1px solid rgba(196,199,199,0.3)`, boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
-            <div style={{ fontSize: 56, marginBottom: 24 }}>📋</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: C.ink, marginBottom: 12 }}>No Loans Yet</div>
-            <div style={{ fontSize: 16, color: C.secondary, marginBottom: 32 }}>
-              You haven't taken any loans yet. Get verified and list your first loan.
-            </div>
-            <button onClick={() => navigate('/verify')} style={{
-              padding: '14px 36px', background: C.ink, border: 'none',
-              borderRadius: 12, color: C.white, fontSize: 15, fontWeight: 700, cursor: 'pointer',
-              transition: 'opacity 0.15s'
-            }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
-            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-            >Get Verified & Borrow →</button>
+        {isConnected && !loading && loans.length === 0 && (
+          <div className="text-center py-20 bg-surface-container-low rounded-3xl border border-secondary-container">
+            <h2 className="text-2xl font-bold text-ink">No Loans Yet</h2>
+            <p className="text-secondary mt-2 mb-6">You haven't applied for any loans.</p>
+            <button onClick={() => navigate('/create-loan')} className="px-6 py-3 bg-ink text-white font-bold rounded-xl hover:scale-105 transition-transform">
+              Apply for a Loan
+            </button>
           </div>
         )}
 
-        {/* ── Summary stats ── */}
-        {isConnected && !loading && summary && loans.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16, marginBottom: 40 }}>
-            <SummaryCard label="Total Loans"     value={summary.total_loans}               accent={C.ink} />
-            <SummaryCard label="Active Loans"    value={summary.active_loans}              accent={C.teal} />
-            <SummaryCard label="Total Borrowed"  value={INR(summary.total_borrowed_inr)}   accent={C.ink} />
-            <SummaryCard label="Total Funded"    value={INR(summary.total_funded_inr)}     accent={C.blue} />
-            <SummaryCard label="Monthly EMI"     value={INR(summary.total_emi_inr)}        accent={C.pink}
-              sub="across all active loans" />
-            <SummaryCard label="Balance Remaining" value={INR(summary.total_remaining_inr)} accent={C.lavender} />
-          </div>
-        )}
-
-        {/* ── Loan cards ── */}
         {isConnected && !loading && loans.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-            {loans.map(loan => (
-              <LoanCard key={loan.id} loan={loan} onRefresh={load} />
-            ))}
-          </div>
+          <>
+            {/* Portfolio Overview Bento */}
+            <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="institution-card p-8 bg-feature-teal rounded-[24px] text-white flex flex-col justify-between h-56 transition-transform hover:-translate-y-1">
+                <div>
+                  <span className="material-symbols-outlined text-4xl mb-4">account_balance</span>
+                  <p className="font-label-sm text-xs uppercase tracking-widest opacity-80">Principal Outstanding</p>
+                </div>
+                <h3 className="font-display-lg text-4xl font-bold tracking-tight">{INR(stats.remaining)}</h3>
+              </div>
+              <div className="institution-card p-8 bg-feature-lavender rounded-[24px] text-white flex flex-col justify-between h-56 transition-transform hover:-translate-y-1">
+                <div>
+                  <span className="material-symbols-outlined text-4xl mb-4">payments</span>
+                  <p className="font-label-sm text-xs uppercase tracking-widest opacity-80">Total Borrowed</p>
+                </div>
+                <div className="flex items-baseline gap-4">
+                  <h3 className="font-display-lg text-4xl font-bold tracking-tight">{INR(stats.borrowed)}</h3>
+                </div>
+              </div>
+              <div className="institution-card p-8 bg-feature-peach rounded-[24px] text-white flex flex-col justify-between h-56 transition-transform hover:-translate-y-1">
+                <div>
+                  <span className="material-symbols-outlined text-4xl mb-4">timer</span>
+                  <p className="font-label-sm text-xs uppercase tracking-widest opacity-80">Total Active Loans</p>
+                </div>
+                <h3 className="font-display-lg text-4xl font-bold tracking-tight">{stats.active} Positions</h3>
+              </div>
+            </section>
+
+            {/* Loan List Table */}
+            <section className="space-y-6">
+              <div className="flex justify-between items-end">
+                <div>
+                  <h4 className="font-headline-md text-2xl font-bold text-ink">Active Loans</h4>
+                  <p className="font-body-md text-secondary mt-1">Detailed overview of your current credit deployments.</p>
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={() => navigate('/create-loan')} className="px-4 py-2 border-[1.5px] border-secondary-container rounded-xl font-label-sm text-sm font-semibold hover:bg-surface-container-low transition-colors">
+                    + New Loan
+                  </button>
+                </div>
+              </div>
+              
+              <div className="bg-surface-container-low rounded-[24px] overflow-hidden border border-secondary-container/50">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-secondary-container">
+                      <th className="px-8 py-5 font-label-sm text-xs text-secondary uppercase tracking-widest font-semibold">Loan Name</th>
+                      <th className="px-6 py-5 font-label-sm text-xs text-secondary uppercase tracking-widest font-semibold">APY</th>
+                      <th className="px-6 py-5 font-label-sm text-xs text-secondary uppercase tracking-widest font-semibold">Remaining</th>
+                      <th className="px-6 py-5 font-label-sm text-xs text-secondary uppercase tracking-widest font-semibold">Next Payment</th>
+                      <th className="px-6 py-5 font-label-sm text-xs text-secondary uppercase tracking-widest font-semibold">Maturity</th>
+                      <th className="px-6 py-5 font-label-sm text-xs text-secondary uppercase tracking-widest font-semibold text-center">Status</th>
+                      <th className="px-8 py-5"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-secondary-container/30">
+                    {loans.map(loan => (
+                      <LoanRow key={loan.id} loan={loan} onRefresh={load} />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </>
         )}
       </div>
     </div>
