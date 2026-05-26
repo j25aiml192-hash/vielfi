@@ -238,7 +238,7 @@ function SchedulePanel({ loan, schedule, onRefresh }) {
                     }}>{si.label}</span>
                   </td>
                   <td style={{ padding: '16px 16px', textAlign: 'center' }}>
-                    {s.status !== 'paid' && loan.status === 'active' && (
+                    {s.status !== 'paid' && ['active', 'funded'].includes(loan.status) && (
                       <button 
                         onClick={() => handlePayEMI(s)}
                         disabled={paying === s.installment}
