@@ -1,30 +1,28 @@
-﻿import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useWallet } from '../context/WalletContext.jsx'
 
-/* ΓöÇΓöÇ Role config ΓöÇΓöÇ */
+/* ── Role config ── */
 const ROLES = [
   {
     id:    'borrower',
-    icon:  '≡ƒÅª',
+    icon:  '💼',
     title: 'I want to Borrow',
     desc:  'Get a credit identity from your UPI, GST, and rental history. List loan requests and get funded by the community.',
     benefits: [
       'No CIBIL required',
       'UPI history is enough',
-      '12ΓÇô30% APR',
+      '12–30% APR',
     ],
     cta:      'Start as Borrower',
     redirect: '/verify',
-    gradient: 'from-yellow-900/30 to-card',
-    border:   'border-gold/40',
-    btnClass: 'btn-primary',
-    badge:    'badge-gold',
+    cardStyle: 'bg-feature-peach text-white',
+    btnStyle: 'bg-white text-feature-peach hover:bg-white/90',
   },
   {
     id:    'lender',
-    icon:  '≡ƒÆ░',
+    icon:  '🏦',
     title: 'I want to Lend',
-    desc:  'Browse verified borrowers and fund their loans directly. Earn returns of 12ΓÇô30% APR. Track your portfolio.',
+    desc:  'Browse verified borrowers and fund their loans directly. Earn returns of 12–30% APR. Track your portfolio.',
     benefits: [
       'All borrowers ZK verified',
       'Direct wallet to wallet',
@@ -32,15 +30,13 @@ const ROLES = [
     ],
     cta:      'Start as Lender',
     redirect: '/feed',
-    gradient: 'from-teal-900/30 to-card',
-    border:   'border-teal/40',
-    btnClass: 'btn-teal',
-    badge:    'badge-teal',
+    cardStyle: 'bg-feature-teal text-white',
+    btnStyle: 'bg-white text-feature-teal hover:bg-white/90',
   },
 ]
 
 export default function Onboarding() {
-  const navigate            = useNavigate()
+  const navigate = useNavigate()
   const { setRole, isConnected, connect } = useWallet()
 
   const handleSelect = async (roleId, redirect) => {
@@ -58,76 +54,66 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-24 relative">
-
-      {/* Background glow */}
-      <div className="absolute inset-0 bg-indigo-glow pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-gradient-radial from-gold/5 to-transparent pointer-events-none" />
-
-      <div className="relative max-w-4xl w-full">
+    <div className="min-h-screen bg-canvas font-sans flex flex-col items-center justify-center px-4 py-24">
+      <div className="max-w-[1080px] w-full">
 
         {/* Header */}
-        <div className="text-center mb-12 animate-fade-in">
-          <div className="flex items-center justify-center mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-gold to-yellow-500 flex items-center justify-center shadow-gold">
-              <span className="text-bg font-display font-bold text-2xl">V</span>
-            </div>
-          </div>
-          <h1 className="font-display font-black text-4xl md:text-5xl text-white mb-4">
-            How will you use{' '}
-            <span className="text-gradient-gold">VeilFi?</span>
+        <div className="text-center mb-16 animate-fade-in">
+          <h1 className="font-display-lg text-5xl md:text-6xl font-bold text-ink mb-4 tracking-tight">
+            How will you use VeilFi?
           </h1>
-          <p className="text-grey text-lg">
+          <p className="font-body-lg text-secondary text-xl font-medium">
             You can always change this later
           </p>
         </div>
 
         {/* Role cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-slide-up">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-slide-up">
           {ROLES.map((role, i) => (
             <div
               key={role.id}
-              className={`card border ${role.border} bg-gradient-to-br ${role.gradient}
-                hover:scale-[1.02] hover:shadow-gold transition-all duration-300 flex flex-col`}
-              style={{ animationDelay: `${i * 100}ms` }}
+              className={`rounded-[32px] p-10 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-2 cursor-default ${role.cardStyle} shadow-soft`}
+              style={{ minHeight: '440px', animationDelay: `${i * 100}ms` }}
             >
-              {/* Icon + title */}
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 rounded-2xl bg-card border border-border flex items-center justify-center text-4xl flex-shrink-0">
-                  {role.icon}
-                </div>
-                <div>
-                  <span className={`badge ${role.badge} text-xs mb-2 inline-block`}>
-                    {role.id.toUpperCase()}
-                  </span>
-                  <h2 className="font-display font-bold text-white text-xl leading-tight">
-                    {role.title}
-                  </h2>
-                </div>
-              </div>
-
-              {/* Description */}
-              <p className="text-grey text-sm leading-relaxed mb-5">
-                {role.desc}
-              </p>
-
-              {/* Benefits */}
-              <ul className="space-y-2 mb-6 flex-1">
-                {role.benefits.map((b) => (
-                  <li key={b} className="flex items-center gap-2 text-sm text-white/80">
-                    <span className="w-5 h-5 rounded-full bg-teal/20 border border-teal/40 flex items-center justify-center text-teal text-xs flex-shrink-0">
-                      Γ£ô
+              <div>
+                {/* Icon + title */}
+                <div className="flex items-center gap-5 mb-8">
+                  <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-4xl shadow-inner shrink-0">
+                    {role.icon}
+                  </div>
+                  <div>
+                    <span className="px-3 py-1 bg-white/20 rounded-full text-[11px] font-bold uppercase tracking-widest mb-2 inline-block">
+                      {role.id}
                     </span>
-                    {b}
-                  </li>
-                ))}
-              </ul>
+                    <h2 className="font-headline-md text-3xl font-bold leading-tight tracking-tight">
+                      {role.title}
+                    </h2>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p className="text-white/90 text-[17px] leading-relaxed mb-8 font-medium">
+                  {role.desc}
+                </p>
+
+                {/* Benefits */}
+                <ul className="space-y-4 mb-8">
+                  {role.benefits.map((b) => (
+                    <li key={b} className="flex items-center gap-3 text-base font-bold text-white">
+                      <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-sm shrink-0">
+                        ✓
+                      </span>
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
               {/* CTA */}
               <button
                 id={`onboarding-${role.id}-btn`}
                 onClick={() => handleSelect(role.id, role.redirect)}
-                className={`${role.btnClass} w-full justify-center py-3.5 text-base font-semibold`}
+                className={`w-full py-4 rounded-xl font-bold text-lg transition-colors ${role.btnStyle}`}
               >
                 {role.cta}
               </button>
@@ -136,18 +122,18 @@ export default function Onboarding() {
         </div>
 
         {/* Both option */}
-        <div className="text-center mt-8 animate-fade-in">
+        <div className="text-center mt-12 animate-fade-in">
           <button
             id="onboarding-both-btn"
             onClick={handleBoth}
-            className="text-grey hover:text-white text-sm transition-colors underline underline-offset-4 decoration-grey/40 hover:decoration-white/60"
+            className="text-secondary hover:text-ink font-bold text-lg transition-colors border-b-2 border-transparent hover:border-ink pb-1"
           >
-            I want to do Both ΓåÆ
+            I want to do Both →
           </button>
         </div>
 
         {/* Footer note */}
-        <p className="text-center text-grey/50 text-xs mt-6">
+        <p className="text-center text-secondary/60 text-sm mt-8 font-medium">
           Your role is stored locally. No account creation needed.
         </p>
       </div>
