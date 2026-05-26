@@ -15,7 +15,8 @@ import LoanDetail from './pages/LoanDetail.jsx'
 import Circles from './pages/Circles.jsx'
 import Settings from './pages/Settings.jsx'
 import CreateLoan from './pages/CreateLoan.jsx'
-import MyLoans from './pages/MyLoans.jsx'
+import MyLoans       from './pages/MyLoans.jsx'
+import Notifications from './pages/Notifications.jsx'
 import ChatBot from './components/ChatBot.jsx'
 
 /* ΓöÇΓöÇ Pages that should NOT have the sidebar ΓöÇΓöÇ */
@@ -135,6 +136,8 @@ export default function App() {
             <Route path="/settings"      element={<Settings />} />
             <Route path="/loans/create"  element={<CreateLoan />} />
             <Route path="/my-loans"      element={<MyLoans />} />
+            <Route path="/notifications" element={<Notifications />} />
+
 
             {/* Borrower-guided */}
             <Route path="/verify"     element={<BorrowerGuard><Verify /></BorrowerGuard>} />

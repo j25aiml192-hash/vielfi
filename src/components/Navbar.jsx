@@ -94,6 +94,7 @@ function NotificationBell() {
   const [open,   setOpen]   = useState(false)
   const [notifs, setNotifs] = useState(NOTIFS)
   const unread = notifs.filter(n => n.unread).length
+  const navigate = useNavigate()
 
   return (
     <div style={{ position:'relative' }}>
@@ -139,7 +140,12 @@ function NotificationBell() {
               ))}
             </div>
             <div style={{ padding:'10px 16px',borderTop:'1px solid #f0ede8',textAlign:'center' }}>
-              <span style={{ fontSize:12,color:'#c9952a',fontWeight:600,cursor:'pointer' }}>View all notifications</span>
+              <span
+                onClick={() => { setOpen(false); navigate('/notifications') }}
+                style={{ fontSize:12,color:'#c9952a',fontWeight:600,cursor:'pointer', transition:'opacity 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.opacity='0.7'}
+                onMouseLeave={e => e.currentTarget.style.opacity='1'}
+              >View all notifications →</span>
             </div>
           </div>
         </>
