@@ -119,9 +119,9 @@ export const markAllNotificationsRead = (address) =>
 
 // ─── Feature 6: Payments (Razorpay/UPI) ───────────────────────────────────
 export const createPaymentOrder = (data) =>
-  api.post('/api/payments/order', data)
+  api.post('/api/payments/create-order', data)
 
 export const verifyPayment = (data) =>
-  api.post('/api/payments/verify', data)
+  api.post('/api/payments/verify-upi', data)
 
 export default api

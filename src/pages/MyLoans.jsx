@@ -161,8 +161,9 @@ function SchedulePanel({ loan, schedule, onRefresh }) {
 
       const orderRes = await createPaymentOrder({
         loan_id: loan.id,
+        borrower_address: loan.borrower_address,
         amount_inr: s.emi_inr,
-        purpose: `EMI Payment ${s.installment}/${loan.duration_months}`
+        payment_type: 'emi'
       })
       
       const { id: order_id, amount, currency } = orderRes.data || orderRes
@@ -177,10 +178,13 @@ function SchedulePanel({ loan, schedule, onRefresh }) {
         handler: async (response) => {
           try {
             await verifyPayment({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
               loan_id: loan.id,
+              borrower_address: loan.borrower_address,
+              order_id: response.razorpay_order_id,
+              payment_id: response.razorpay_payment_id,
+              signature: response.razorpay_signature,
+              amount_inr: s.emi_inr,
+              payment_type: 'emi',
               lender_address: 'EMI_REPAYMENT'
             })
             alert('EMI paid successfully!')
