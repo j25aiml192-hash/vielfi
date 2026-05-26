@@ -15,79 +15,299 @@ const CARD_COLORS = [C.pink, C.teal, C.lavender, C.peach, C.ochre, '#2d6a4f']
 const CATEGORIES = ['All Markets', 'Asset-Backed', 'Unsecured', 'Real Estate', 'Agriculture', 'Technology']
 const CAT_ICONS = ['☰', '🏦', '🔓', '🏠', '🌾', '💻']
 
+/* ── Star rating helper ── */
+function Stars({ rating, color }) {
+  return (
+    <div style={{ display:'flex', gap:2 }}>
+      {[1,2,3,4,5].map(i => (
+        <svg key={i} width={14} height={14} viewBox="0 0 20 20" fill={i <= rating ? '#fff' : 'rgba(255,255,255,0.3)'}>
+          <path d="M10 1l2.39 4.84 5.34.78-3.86 3.76.91 5.32L10 13.27l-4.78 2.51.91-5.32L2.27 6.62l5.34-.78z"/>
+        </svg>
+      ))}
+    </div>
+  )
+}
+
+/* ── Loan Detail Modal ── */
+function LoanDetailModal({ loan, color, onClose, onFund }) {
+  const fundedPct = loan.amount_eth > 0 ? Math.min(100, Math.round((loan.funded_amount_eth / loan.amount_eth) * 100)) : 0
+  const inr = (loan.amount_eth * 250000).toLocaleString('en-IN')
+  const daysLeft = loan.duration_months ? loan.duration_months * 30 : 90
+  const rating = Math.min(5, Math.max(1, Math.round(fundedPct / 20) + (loan.apr < 15 ? 1 : 0)))
+
+  const stats = [
+    { label: 'Loan Amount',    value: `₹${inr}` },
+    { label: 'ETH Equivalent', value: `${loan.amount_eth} ETH` },
+    { label: 'Interest Rate',  value: `${loan.apr || 12}% APR` },
+    { label: 'Duration',       value: `${loan.duration_months || 3} Months` },
+    { label: 'Funded',         value: `${fundedPct}%` },
+    { label: 'Days Left',      value: `${daysLeft} days` },
+    { label: 'Purpose',        value: loan.purpose || 'General' },
+    { label: 'Risk Level',     value: fundedPct > 70 ? 'Low' : fundedPct > 40 ? 'Medium' : 'High' },
+  ]
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div onClick={onClose} style={{
+        position:'fixed', inset:0, zIndex:10000,
+        background:'rgba(10,10,10,0.55)',
+        backdropFilter:'blur(14px)',
+        WebkitBackdropFilter:'blur(14px)',
+        animation:'fadeIn 0.2s ease',
+      }} />
+
+      {/* Modal */}
+      <div style={{
+        position:'fixed', top:'50%', left:'50%', zIndex:10001,
+        transform:'translate(-50%,-50%)',
+        width:'min(560px, 94vw)', maxHeight:'88vh',
+        background:'rgba(255,252,245,0.92)',
+        backdropFilter:'blur(28px)',
+        WebkitBackdropFilter:'blur(28px)',
+        borderRadius:28,
+        border:'1px solid rgba(201,149,42,0.22)',
+        boxShadow:'0 40px 100px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.8)',
+        overflow:'hidden',
+        animation:'slideUp 0.28s cubic-bezier(0.16,1,0.3,1)',
+        display:'flex', flexDirection:'column',
+        fontFamily:"'Inter', sans-serif",
+      }}>
+        {/* Color header strip */}
+        <div style={{
+          background:`linear-gradient(135deg, ${color}, ${color}cc)`,
+          padding:'28px 28px 24px',
+          position:'relative', overflow:'hidden',
+        }}>
+          {/* Ghost emoji */}
+          <div style={{ position:'absolute', right:20, top:0, fontSize:100, opacity:0.12, lineHeight:1 }}>
+            {loan.purpose === 'Business' ? '💼' : loan.purpose === 'Education' ? '📚' : loan.purpose === 'Medical' ? '🏥' : '💡'}
+          </div>
+
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+              <div style={{
+                width:52, height:52, borderRadius:'50%',
+                background:'rgba(255,255,255,0.25)',
+                border:'2px solid rgba(255,255,255,0.6)',
+                display:'flex', alignItems:'center', justifyContent:'center',
+                fontSize:18, fontWeight:800, color:'#fff',
+              }}>
+                {(loan.borrower_name || 'A').slice(0,2).toUpperCase()}
+              </div>
+              <div>
+                <div style={{ fontSize:20, fontWeight:800, color:'#fff', letterSpacing:'-0.02em' }}>{loan.borrower_name || 'Anonymous'}</div>
+                <div style={{ fontSize:12, color:'rgba(255,255,255,0.8)', fontWeight:600 }}>{loan.purpose || 'General'}</div>
+                <Stars rating={rating} />
+              </div>
+            </div>
+            <button onClick={onClose} style={{
+              width:32, height:32, borderRadius:'50%',
+              background:'rgba(255,255,255,0.2)',
+              border:'1px solid rgba(255,255,255,0.3)',
+              color:'#fff', fontSize:16, cursor:'pointer',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              fontWeight:700, lineHeight:1,
+            }}>×</button>
+          </div>
+
+          <div style={{ marginTop:20 }}>
+            <div style={{ fontSize:11, color:'rgba(255,255,255,0.7)', fontWeight:700, letterSpacing:'0.08em', marginBottom:4 }}>LOAN AMOUNT</div>
+            <div style={{ fontSize:38, fontWeight:900, color:'#fff', letterSpacing:'-0.04em', lineHeight:1 }}>₹{inr}</div>
+            <div style={{ fontSize:12, color:'rgba(255,255,255,0.75)', marginTop:4 }}>{loan.amount_eth} ETH</div>
+          </div>
+        </div>
+
+        {/* Scrollable body */}
+        <div style={{ overflowY:'auto', padding:'24px 28px', flex:1 }}>
+
+          {/* Stats grid */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:24 }}>
+            {stats.map(s => (
+              <div key={s.label} style={{
+                background:'rgba(255,255,255,0.7)',
+                border:'1px solid rgba(201,149,42,0.15)',
+                borderRadius:14, padding:'14px 16px',
+                backdropFilter:'blur(8px)',
+              }}>
+                <div style={{ fontSize:10, fontWeight:700, letterSpacing:'0.1em', color:'#9a8a70', textTransform:'uppercase', marginBottom:4 }}>{s.label}</div>
+                <div style={{ fontSize:15, fontWeight:800, color:'#0a0a0a', letterSpacing:'-0.01em' }}>{s.value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Funding progress */}
+          <div style={{ marginBottom:24 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8, fontSize:13, fontWeight:700, color:'#0a0a0a' }}>
+              <span>Funding Progress</span>
+              <span style={{ color: color }}>{fundedPct}%</span>
+            </div>
+            <div style={{ background:'#e8e8e0', borderRadius:999, height:10, overflow:'hidden' }}>
+              <div style={{ width:`${fundedPct}%`, height:'100%', background:`linear-gradient(90deg, ${color}, ${color}99)`, borderRadius:999, transition:'width 0.6s ease' }} />
+            </div>
+          </div>
+
+          {/* Credit timeline */}
+          <div style={{ marginBottom:24 }}>
+            <div style={{ fontSize:12, fontWeight:700, letterSpacing:'0.08em', color:'#9a8a70', textTransform:'uppercase', marginBottom:14 }}>Credit Timeline</div>
+            {['Application Submitted','KYC Verified','Credit Score Assessed','Listed on Marketplace'].map((step, i) => (
+              <div key={i} style={{ display:'flex', gap:12, alignItems:'flex-start', marginBottom: i < 3 ? 12 : 0 }}>
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', flexShrink:0 }}>
+                  <div style={{
+                    width:22, height:22, borderRadius:'50%',
+                    background: i <= 2 ? '#0a0a0a' : 'rgba(201,149,42,0.2)',
+                    border: i <= 2 ? 'none' : '2px solid rgba(201,149,42,0.4)',
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    fontSize:10, fontWeight:800, color:'#fff',
+                  }}>{i <= 2 ? '✓' : '○'}</div>
+                  {i < 3 && <div style={{ width:2, height:16, background: i < 2 ? '#0a0a0a' : 'rgba(201,149,42,0.3)', marginTop:2 }} />}
+                </div>
+                <div style={{ paddingTop:2, fontSize:13, fontWeight: i <= 2 ? 600 : 400, color: i <= 2 ? '#0a0a0a' : '#9a8a70' }}>{step}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Action buttons */}
+          <div style={{ display:'flex', gap:12 }}>
+            <button
+              onClick={() => { onFund(loan); onClose() }}
+              style={{
+                flex:1, background: color, color:'#fff',
+                border:'none', borderRadius:14, padding:'14px 0',
+                fontSize:14, fontWeight:800, cursor:'pointer',
+                boxShadow:`0 4px 20px ${color}55`,
+                transition:'opacity 0.15s, transform 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.opacity='0.88'; e.currentTarget.style.transform='scale(1.02)' }}
+              onMouseLeave={e => { e.currentTarget.style.opacity='1'; e.currentTarget.style.transform='scale(1)' }}
+            >Fund This Loan</button>
+            <button
+              onClick={onClose}
+              style={{
+                flex:1, background:'rgba(255,255,255,0.7)', color:'#0a0a0a',
+                border:'1px solid rgba(201,149,42,0.25)', borderRadius:14, padding:'14px 0',
+                fontSize:14, fontWeight:700, cursor:'pointer',
+                transition:'background 0.15s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.95)'}
+              onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.7)'}
+            >Close</button>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+        @keyframes slideUp { from{opacity:0;transform:translate(-50%,-44%) scale(0.96)} to{opacity:1;transform:translate(-50%,-50%) scale(1)} }
+      `}</style>
+    </>
+  )
+}
+
+/* ── Loan Card ── */
 function LoanCard({ loan, idx, onFund }) {
+  const [showDetail, setShowDetail] = useState(false)
   const color = CARD_COLORS[idx % CARD_COLORS.length]
   const fundedPct = loan.amount_eth > 0 ? Math.min(100, Math.round((loan.funded_amount_eth / loan.amount_eth) * 100)) : 0
   const inr = (loan.amount_eth * 250000).toLocaleString('en-IN')
   const daysLeft = loan.duration_months ? loan.duration_months * 30 : 90
+  const rating = Math.min(5, Math.max(1, Math.round(fundedPct / 20) + (loan.apr < 15 ? 1 : 0)))
 
   return (
-    <div style={{
-      background: color, borderRadius: 24, padding: 32, color: C.white,
-      display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-      minHeight: 400, position: 'relative', overflow: 'hidden',
-      transition: 'transform 0.25s', cursor: 'default',
-    }}
-    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-    >
-      {/* Ghost icon */}
-      <div style={{ position: 'absolute', top: 0, right: 0, padding: 24, opacity: 0.15, fontSize: 120, lineHeight: 1 }}>
-        {loan.purpose === 'Business' ? '💼' : loan.purpose === 'Education' ? '📚' : loan.purpose === 'Medical' ? '🏥' : '💡'}
-      </div>
+    <>
+      {showDetail && (
+        <LoanDetailModal loan={loan} color={color} onClose={() => setShowDetail(false)} onFund={onFund} />
+      )}
 
-      {/* Top: borrower info */}
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: '50%', background: 'rgba(255,255,255,0.25)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 20, fontWeight: 800, border: '2px solid rgba(255,255,255,0.6)',
-          }}>
-            {(loan.borrower_name || 'A').slice(0, 2).toUpperCase()}
+      <div style={{
+        background: color, borderRadius: 24, padding: 32, color: C.white,
+        display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+        minHeight: 400, position: 'relative', overflow: 'hidden',
+        transition: 'transform 0.25s', cursor: 'default',
+      }}
+      onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+      onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+      >
+        {/* Ghost icon */}
+        <div style={{ position: 'absolute', top: 0, right: 0, padding: 24, opacity: 0.15, fontSize: 120, lineHeight: 1 }}>
+          {loan.purpose === 'Business' ? '💼' : loan.purpose === 'Education' ? '📚' : loan.purpose === 'Medical' ? '🏥' : '💡'}
+        </div>
+
+        {/* Top: borrower info */}
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
+            <div style={{
+              width: 56, height: 56, borderRadius: '50%', background: 'rgba(255,255,255,0.25)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 20, fontWeight: 800, border: '2px solid rgba(255,255,255,0.6)',
+            }}>
+              {(loan.borrower_name || 'A').slice(0, 2).toUpperCase()}
+            </div>
+            <div>
+              <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em' }}>{loan.borrower_name || 'Anonymous'}</div>
+              <div style={{ fontSize: 12, opacity: 0.85, fontWeight: 600, letterSpacing: '0.02em' }}>{loan.purpose || 'General'}</div>
+            </div>
           </div>
+
+          {/* ★ Star rating */}
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:20 }}>
+            <Stars rating={rating} />
+            <span style={{ fontSize:11, color:'rgba(255,255,255,0.75)', fontWeight:600 }}>{rating}.0 / 5.0 Credit Score</span>
+          </div>
+
           <div>
-            <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em' }}>{loan.borrower_name || 'Anonymous'}</div>
-            <div style={{ fontSize: 12, opacity: 0.85, fontWeight: 600, letterSpacing: '0.02em' }}>{loan.purpose || 'General'}</div>
+            <div style={{ fontSize: 12, opacity: 0.75, fontWeight: 600, letterSpacing: '0.04em', marginBottom: 4 }}>LOAN AMOUNT</div>
+            <div style={{ fontSize: 40, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.1 }}>₹{inr}</div>
+            <div style={{ fontSize: 11, opacity: 0.85, marginTop: 2 }}>{loan.amount_eth} ETH</div>
+            <div style={{
+              display: 'inline-block', marginTop: 10, padding: '4px 14px',
+              background: 'rgba(255,255,255,0.2)', borderRadius: 999,
+              fontSize: 12, fontWeight: 600,
+            }}>{loan.apr || 12}% Interest Rate</div>
           </div>
         </div>
 
-        <div>
-          <div style={{ fontSize: 12, opacity: 0.75, fontWeight: 600, letterSpacing: '0.04em', marginBottom: 4 }}>LOAN AMOUNT</div>
-          <div style={{ fontSize: 40, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.1 }}>₹{inr}</div>
-          <div style={{ fontSize: 11, opacity: 0.85, marginTop: 2 }}>{loan.amount_eth} ETH</div>
-          <div style={{
-            display: 'inline-block', marginTop: 10, padding: '4px 14px',
-            background: 'rgba(255,255,255,0.2)', borderRadius: 999,
-            fontSize: 12, fontWeight: 600,
-          }}>{loan.apr || 12}% Interest Rate</div>
-        </div>
-      </div>
+        {/* Bottom: progress + buttons */}
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ width: '100%', background: 'rgba(255,255,255,0.3)', borderRadius: 999, height: 6, marginBottom: 8 }}>
+            <div style={{ width: `${fundedPct}%`, background: C.white, height: 6, borderRadius: 999 }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 600, marginBottom: 14, opacity: 0.9 }}>
+            <span>{fundedPct}% Funded</span>
+            <span>{daysLeft} Days Left</span>
+          </div>
 
-      {/* Bottom: progress + fund button */}
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        <div style={{ width: '100%', background: 'rgba(255,255,255,0.3)', borderRadius: 999, height: 6, marginBottom: 8 }}>
-          <div style={{ width: `${fundedPct}%`, background: C.white, height: 6, borderRadius: 999 }} />
+          {/* Two action buttons */}
+          <div style={{ display:'flex', gap:10 }}>
+            <button
+              onClick={() => setShowDetail(true)}
+              style={{
+                flex:1, background:'rgba(255,255,255,0.18)', color: C.white,
+                border:'1px solid rgba(255,255,255,0.4)', borderRadius:12, padding:'12px 0',
+                fontSize:13, fontWeight:700, cursor:'pointer',
+                backdropFilter:'blur(8px)', transition:'background 0.15s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.28)'}
+              onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.18)'}
+            >Details</button>
+            <button
+              onClick={() => onFund(loan)}
+              style={{
+                flex:1, background: C.white, color: color,
+                border: 'none', borderRadius: 12, padding: '12px 0',
+                fontSize: 13, fontWeight: 800, letterSpacing: '0.02em',
+                cursor: 'pointer', transition: 'opacity 0.15s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
+              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+            >Fund</button>
+          </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 600, marginBottom: 20, opacity: 0.9 }}>
-          <span>{fundedPct}% Funded</span>
-          <span>{daysLeft} Days Left</span>
-        </div>
-        <button
-          onClick={() => onFund(loan)}
-          style={{
-            width: '100%', background: C.white, color: color,
-            border: 'none', borderRadius: 12, padding: '14px 0',
-            fontSize: 13, fontWeight: 800, letterSpacing: '0.02em',
-            cursor: 'pointer', transition: 'opacity 0.15s',
-          }}
-          onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
-          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-        >Fund</button>
       </div>
-    </div>
+    </>
   )
 }
+
 
 export default function Feed() {
   const [loans, setLoans]           = useState([])
