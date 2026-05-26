@@ -255,7 +255,7 @@ export default function Feed() {
             border: `1px solid ${C.border}`,
           }}>
             {[
-              { label: 'Capital Deployed', value: `$${(loans.reduce((s, l) => s + (l.funded_amount_eth || 0), 0) * 250000 / 1e6).toFixed(1)}M` || '$24.5M' },
+              { label: 'Capital Deployed', value: `₹${(loans.reduce((s, l) => s + (l.funded_amount_eth || 0), 0) * 250000 / 1e6).toFixed(1)}M` || '₹24.5M' },
               { label: 'Avg. Return',      value: loans.length ? `${(loans.reduce((s,l) => s+(l.apr||12),0)/loans.length).toFixed(1)}%` : '12.4%', color: C.teal },
               { label: 'Active Lenders',   value: String(loans.length || 0) },
             ].map(s => (

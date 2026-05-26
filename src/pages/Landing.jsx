@@ -186,7 +186,7 @@ export default function Landing() {
 
       {/* ── STATS BAND ── */}
       <section style={{ maxWidth: 1280, margin: '0 auto', padding: '80px 64px 0', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 24 }}>
-        <Stat value="$24.5M"  label="Capital Deployed" />
+        <Stat value="₹24.5M"  label="Capital Deployed" />
         <Stat value="12.4%"   label="Avg. Return"       color={C.teal} />
         <Stat value="1,492"   label="Active Lenders"    color={C.lavender} />
       </section>
