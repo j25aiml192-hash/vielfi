@@ -28,12 +28,24 @@ function Stars({ rating, color }) {
   )
 }
 
-/* ── Loan Detail Modal ── */
+/* ── Loan Detail Modal — Golden Ratio φ=1.618 ── */
+const φ = 1.618
 function LoanDetailModal({ loan, color, onClose, onFund }) {
   const fundedPct = loan.amount_eth > 0 ? Math.min(100, Math.round((loan.funded_amount_eth / loan.amount_eth) * 100)) : 0
   const inr = (loan.amount_eth * 250000).toLocaleString('en-IN')
   const daysLeft = loan.duration_months ? loan.duration_months * 30 : 90
   const rating = Math.min(5, Math.max(1, Math.round(fundedPct / 20) + (loan.apr < 15 ? 1 : 0)))
+
+  /* φ-scaled sizes */
+  const base        = 10                          // base unit px
+  const sm          = Math.round(base * φ)        // 16px
+  const md          = Math.round(base * φ * φ)   // 26px
+  const lg          = Math.round(base * φ * φ * φ) // 42px
+  const pad         = Math.round(base * φ * φ)   // 26px → header padding
+  const avatarSize  = Math.round(base * φ * φ * φ * 0.8) // ~34 → we'll use 52 manually but base gap on φ
+  const gap         = Math.round(base * φ)        // 16px gap
+  const radius      = Math.round(base * φ)        // 16px → card border radius
+  const modalRadius = Math.round(base * φ * φ)   // 26px → modal border radius
 
   const stats = [
     { label: 'Loan Amount',    value: `₹${inr}` },
@@ -43,7 +55,7 @@ function LoanDetailModal({ loan, color, onClose, onFund }) {
     { label: 'Funded',         value: `${fundedPct}%` },
     { label: 'Days Left',      value: `${daysLeft} days` },
     { label: 'Purpose',        value: loan.purpose || 'General' },
-    { label: 'Risk Level',     value: fundedPct > 70 ? 'Low' : fundedPct > 40 ? 'Medium' : 'High' },
+    { label: 'Risk Level',     value: fundedPct > 70 ? '🟢 Low' : fundedPct > 40 ? '🟡 Medium' : '🔴 High' },
   ]
 
   return (
@@ -52,130 +64,164 @@ function LoanDetailModal({ loan, color, onClose, onFund }) {
       <div onClick={onClose} style={{
         position:'fixed', inset:0, zIndex:10000,
         background:'rgba(10,10,10,0.55)',
-        backdropFilter:'blur(14px)',
-        WebkitBackdropFilter:'blur(14px)',
+        backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)',
         animation:'fadeIn 0.2s ease',
       }} />
 
-      {/* Modal */}
+      {/* Modal — width uses φ: ~580px wide, height split φ:1 (header:body) */}
       <div style={{
         position:'fixed', top:'50%', left:'50%', zIndex:10001,
         transform:'translate(-50%,-50%)',
-        width:'min(560px, 94vw)', maxHeight:'88vh',
-        background:'rgba(255,252,245,0.92)',
-        backdropFilter:'blur(28px)',
-        WebkitBackdropFilter:'blur(28px)',
-        borderRadius:28,
-        border:'1px solid rgba(201,149,42,0.22)',
-        boxShadow:'0 40px 100px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.8)',
+        width:`min(${Math.round(360 * φ)}px, 94vw)`,  /* 582px */
+        maxHeight:'90vh',
+        background:'rgba(255,252,245,0.93)',
+        backdropFilter:'blur(32px)', WebkitBackdropFilter:'blur(32px)',
+        borderRadius: modalRadius,
+        border:'1px solid rgba(201,149,42,0.25)',
+        boxShadow:'0 48px 120px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.85)',
         overflow:'hidden',
-        animation:'slideUp 0.28s cubic-bezier(0.16,1,0.3,1)',
+        animation:'slideUp 0.3s cubic-bezier(0.16,1,0.3,1)',
         display:'flex', flexDirection:'column',
-        fontFamily:"'Inter', sans-serif",
+        fontFamily:"'Inter', -apple-system, sans-serif",
       }}>
-        {/* Color header strip */}
+
+        {/* ── Header — φ proportion of modal ── */}
         <div style={{
-          background:`linear-gradient(135deg, ${color}, ${color}cc)`,
-          padding:'28px 28px 24px',
-          position:'relative', overflow:'hidden',
+          background:`linear-gradient(135deg, ${color} 0%, ${color}dd 100%)`,
+          padding: `${pad}px ${pad}px ${Math.round(pad/φ)}px`,
+          position:'relative', overflow:'hidden', flexShrink:0,
         }}>
-          {/* Ghost emoji */}
-          <div style={{ position:'absolute', right:20, top:0, fontSize:100, opacity:0.12, lineHeight:1 }}>
+          {/* Ghost emoji background */}
+          <div style={{ position:'absolute', right: pad, top:0, fontSize: lg * 2.5, opacity:0.10, lineHeight:1, userSelect:'none' }}>
             {loan.purpose === 'Business' ? '💼' : loan.purpose === 'Education' ? '📚' : loan.purpose === 'Medical' ? '🏥' : '💡'}
           </div>
 
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+          {/* Top row: avatar + info + close */}
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', position:'relative' }}>
+            <div style={{ display:'flex', alignItems:'center', gap: gap }}>
+              {/* Avatar — size = φ³ × base ≈ 42px */}
               <div style={{
-                width:52, height:52, borderRadius:'50%',
-                background:'rgba(255,255,255,0.25)',
-                border:'2px solid rgba(255,255,255,0.6)',
+                width: Math.round(base * φ * φ * φ * 0.98),
+                height: Math.round(base * φ * φ * φ * 0.98),
+                borderRadius:'50%',
+                background:'rgba(255,255,255,0.22)',
+                border:`${Math.round(φ)}px solid rgba(255,255,255,0.55)`,
                 display:'flex', alignItems:'center', justifyContent:'center',
-                fontSize:18, fontWeight:800, color:'#fff',
+                fontSize: sm, fontWeight:900, color:'#fff',
+                boxShadow:'0 4px 16px rgba(0,0,0,0.15)',
               }}>
                 {(loan.borrower_name || 'A').slice(0,2).toUpperCase()}
               </div>
-              <div>
-                <div style={{ fontSize:20, fontWeight:800, color:'#fff', letterSpacing:'-0.02em' }}>{loan.borrower_name || 'Anonymous'}</div>
-                <div style={{ fontSize:12, color:'rgba(255,255,255,0.8)', fontWeight:600 }}>{loan.purpose || 'General'}</div>
-                <Stars rating={rating} />
+              <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+                {/* Name — φ² × base = 26px */}
+                <div style={{ fontSize: Math.round(base * φ * 1.2), fontWeight:900, color:'#fff', letterSpacing:'-0.03em', lineHeight:1.1 }}>
+                  {loan.borrower_name || 'Anonymous'}
+                </div>
+                {/* Purpose — base × φ⁰·⁵ ≈ 13px */}
+                <div style={{ fontSize: Math.round(base * 1.27), color:'rgba(255,255,255,0.78)', fontWeight:600 }}>
+                  {loan.purpose || 'General'}
+                </div>
+                <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:2 }}>
+                  <Stars rating={rating} />
+                  <span style={{ fontSize:10, color:'rgba(255,255,255,0.65)', fontWeight:600 }}>{rating}.0 / 5.0</span>
+                </div>
               </div>
             </div>
+
+            {/* Close btn — size = φ² × base ≈ 26px */}
             <button onClick={onClose} style={{
-              width:32, height:32, borderRadius:'50%',
-              background:'rgba(255,255,255,0.2)',
-              border:'1px solid rgba(255,255,255,0.3)',
-              color:'#fff', fontSize:16, cursor:'pointer',
+              width: md, height: md, borderRadius:'50%',
+              background:'rgba(255,255,255,0.18)',
+              border:'1px solid rgba(255,255,255,0.28)',
+              color:'#fff', fontSize:14, cursor:'pointer',
               display:'flex', alignItems:'center', justifyContent:'center',
-              fontWeight:700, lineHeight:1,
-            }}>×</button>
+              fontWeight:700, flexShrink:0, lineHeight:1,
+              transition:'background 0.15s',
+            }}
+              onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.3)'}
+              onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.18)'}
+            >×</button>
           </div>
 
-          <div style={{ marginTop:20 }}>
-            <div style={{ fontSize:11, color:'rgba(255,255,255,0.7)', fontWeight:700, letterSpacing:'0.08em', marginBottom:4 }}>LOAN AMOUNT</div>
-            <div style={{ fontSize:38, fontWeight:900, color:'#fff', letterSpacing:'-0.04em', lineHeight:1 }}>₹{inr}</div>
-            <div style={{ fontSize:12, color:'rgba(255,255,255,0.75)', marginTop:4 }}>{loan.amount_eth} ETH</div>
+          {/* Amount row */}
+          <div style={{ marginTop: gap, position:'relative' }}>
+            <div style={{ fontSize: base, color:'rgba(255,255,255,0.65)', fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:4 }}>
+              Loan Amount
+            </div>
+            {/* Amount font — φ⁴ × base ≈ 68px */}
+            <div style={{ fontSize:`clamp(28px, 5vw, ${Math.round(base * φ * φ * φ * φ * 0.6)}px)`, fontWeight:900, color:'#fff', letterSpacing:'-0.04em', lineHeight:1 }}>
+              ₹{inr}
+            </div>
+            <div style={{ fontSize: Math.round(base * 1.1), color:'rgba(255,255,255,0.65)', marginTop:6 }}>
+              {loan.amount_eth} ETH · {loan.apr || 12}% APR
+            </div>
           </div>
         </div>
 
-        {/* Scrollable body */}
-        <div style={{ overflowY:'auto', padding:'24px 28px', flex:1 }}>
+        {/* ── Body — scrollable ── */}
+        <div style={{ overflowY:'auto', padding: `${gap}px ${pad}px ${pad}px`, flex:1, display:'flex', flexDirection:'column', gap: gap }}>
 
-          {/* Stats grid */}
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:24 }}>
+          {/* Stats grid — φfr : 1fr columns */}
+          <div style={{ display:'grid', gridTemplateColumns:`${φ}fr 1fr`, gap: Math.round(gap / φ) }}>
             {stats.map(s => (
               <div key={s.label} style={{
-                background:'rgba(255,255,255,0.7)',
-                border:'1px solid rgba(201,149,42,0.15)',
-                borderRadius:14, padding:'14px 16px',
-                backdropFilter:'blur(8px)',
+                background:'rgba(255,255,255,0.72)',
+                border:'1px solid rgba(201,149,42,0.14)',
+                borderRadius: radius,
+                padding:`${Math.round(gap / φ)}px ${gap}px`,
+                backdropFilter:'blur(10px)',
               }}>
-                <div style={{ fontSize:10, fontWeight:700, letterSpacing:'0.1em', color:'#9a8a70', textTransform:'uppercase', marginBottom:4 }}>{s.label}</div>
-                <div style={{ fontSize:15, fontWeight:800, color:'#0a0a0a', letterSpacing:'-0.01em' }}>{s.value}</div>
+                <div style={{ fontSize: Math.round(base * 0.9), fontWeight:700, letterSpacing:'0.1em', color:'#9a8a70', textTransform:'uppercase', marginBottom:4 }}>{s.label}</div>
+                <div style={{ fontSize: sm, fontWeight:800, color:'#0a0a0a', letterSpacing:'-0.01em', lineHeight: φ }}>{s.value}</div>
               </div>
             ))}
           </div>
 
           {/* Funding progress */}
-          <div style={{ marginBottom:24 }}>
-            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8, fontSize:13, fontWeight:700, color:'#0a0a0a' }}>
+          <div>
+            <div style={{ display:'flex', justifyContent:'space-between', marginBottom: Math.round(gap/φ), fontSize: sm - 2, fontWeight:700, color:'#0a0a0a' }}>
               <span>Funding Progress</span>
-              <span style={{ color: color }}>{fundedPct}%</span>
+              <span style={{ color }}>{fundedPct}%</span>
             </div>
-            <div style={{ background:'#e8e8e0', borderRadius:999, height:10, overflow:'hidden' }}>
-              <div style={{ width:`${fundedPct}%`, height:'100%', background:`linear-gradient(90deg, ${color}, ${color}99)`, borderRadius:999, transition:'width 0.6s ease' }} />
+            {/* Bar height = φ × base ÷ φ² = base/φ ≈ 6px → use 8px */}
+            <div style={{ background:'#e8e4dc', borderRadius:999, height: Math.round(base / φ * 1.2), overflow:'hidden' }}>
+              <div style={{ width:`${fundedPct}%`, height:'100%', background:`linear-gradient(90deg,${color},${color}88)`, borderRadius:999, transition:'width 0.7s cubic-bezier(0.16,1,0.3,1)' }} />
             </div>
           </div>
 
-          {/* Credit timeline */}
-          <div style={{ marginBottom:24 }}>
-            <div style={{ fontSize:12, fontWeight:700, letterSpacing:'0.08em', color:'#9a8a70', textTransform:'uppercase', marginBottom:14 }}>Credit Timeline</div>
+          {/* Credit Timeline */}
+          <div>
+            <div style={{ fontSize: base, fontWeight:700, letterSpacing:'0.1em', color:'#9a8a70', textTransform:'uppercase', marginBottom: gap }}>
+              Credit Timeline
+            </div>
             {['Application Submitted','KYC Verified','Credit Score Assessed','Listed on Marketplace'].map((step, i) => (
-              <div key={i} style={{ display:'flex', gap:12, alignItems:'flex-start', marginBottom: i < 3 ? 12 : 0 }}>
+              <div key={i} style={{ display:'flex', gap: gap, alignItems:'flex-start', marginBottom: i < 3 ? Math.round(gap / φ) : 0 }}>
                 <div style={{ display:'flex', flexDirection:'column', alignItems:'center', flexShrink:0 }}>
                   <div style={{
-                    width:22, height:22, borderRadius:'50%',
-                    background: i <= 2 ? '#0a0a0a' : 'rgba(201,149,42,0.2)',
-                    border: i <= 2 ? 'none' : '2px solid rgba(201,149,42,0.4)',
+                    width: Math.round(gap * φ * 0.9), height: Math.round(gap * φ * 0.9), borderRadius:'50%',
+                    background: i <= 2 ? '#0a0a0a' : 'rgba(201,149,42,0.15)',
+                    border: i <= 2 ? 'none' : '1.5px solid rgba(201,149,42,0.4)',
                     display:'flex', alignItems:'center', justifyContent:'center',
-                    fontSize:10, fontWeight:800, color:'#fff',
-                  }}>{i <= 2 ? '✓' : '○'}</div>
-                  {i < 3 && <div style={{ width:2, height:16, background: i < 2 ? '#0a0a0a' : 'rgba(201,149,42,0.3)', marginTop:2 }} />}
+                    fontSize: base - 1, fontWeight:900, color:'#fff',
+                  }}>{i <= 2 ? '✓' : '·'}</div>
+                  {i < 3 && <div style={{ width:1.5, height: Math.round(gap * φ * 0.7), background: i < 2 ? '#0a0a0a' : 'rgba(201,149,42,0.25)', marginTop:2 }} />}
                 </div>
-                <div style={{ paddingTop:2, fontSize:13, fontWeight: i <= 2 ? 600 : 400, color: i <= 2 ? '#0a0a0a' : '#9a8a70' }}>{step}</div>
+                <div style={{ paddingTop:2, fontSize: Math.round(base * 1.2), fontWeight: i <= 2 ? 600 : 400, color: i <= 2 ? '#0a0a0a' : '#9a8a70', lineHeight: φ }}>
+                  {step}
+                </div>
               </div>
             ))}
           </div>
 
-          {/* Action buttons */}
-          <div style={{ display:'flex', gap:12 }}>
+          {/* Action buttons — φ:1 width ratio */}
+          <div style={{ display:'flex', gap: Math.round(gap / φ) }}>
             <button
               onClick={() => { onFund(loan); onClose() }}
               style={{
-                flex:1, background: color, color:'#fff',
-                border:'none', borderRadius:14, padding:'14px 0',
-                fontSize:14, fontWeight:800, cursor:'pointer',
-                boxShadow:`0 4px 20px ${color}55`,
+                flex: φ, background: color, color:'#fff',   /* φ wider = primary action */
+                border:'none', borderRadius: radius, padding:`${Math.round(gap * 0.8)}px 0`,
+                fontSize: sm - 1, fontWeight:800, cursor:'pointer',
+                boxShadow:`0 ${Math.round(gap/2)}px ${gap * 2}px ${color}44`,
                 transition:'opacity 0.15s, transform 0.15s',
               }}
               onMouseEnter={e => { e.currentTarget.style.opacity='0.88'; e.currentTarget.style.transform='scale(1.02)' }}
@@ -184,15 +230,17 @@ function LoanDetailModal({ loan, color, onClose, onFund }) {
             <button
               onClick={onClose}
               style={{
-                flex:1, background:'rgba(255,255,255,0.7)', color:'#0a0a0a',
-                border:'1px solid rgba(201,149,42,0.25)', borderRadius:14, padding:'14px 0',
-                fontSize:14, fontWeight:700, cursor:'pointer',
+                flex: 1, background:'rgba(255,255,255,0.7)', color:'#0a0a0a',
+                border:'1px solid rgba(201,149,42,0.22)', borderRadius: radius,
+                padding:`${Math.round(gap * 0.8)}px 0`,
+                fontSize: sm - 1, fontWeight:700, cursor:'pointer',
                 transition:'background 0.15s',
               }}
               onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.95)'}
               onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.7)'}
             >Close</button>
           </div>
+
         </div>
       </div>
 
