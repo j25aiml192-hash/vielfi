@@ -57,6 +57,7 @@ export const getMarketplace     = ()        => api.get('/api/loans/marketplace')
 export const getLoan            = (id)      => api.get(`/api/loans/${id}`)
 export const confirmFunding     = (data)    => api.post('/api/loans/fund/confirm', data)
 export const getLoansByAddress  = (address) => api.get(`/api/loans/by-address/${address}`)
+export const getMyLoans         = (address) => api.get(`/api/loans/my-loans/${address}`)
 export const getFundingsByAddress = (address) => api.get(`/api/fundings/by-address/${address}`)
 
 // ─── Loans (Legacy) ───────────────────────────────────────────────────────
