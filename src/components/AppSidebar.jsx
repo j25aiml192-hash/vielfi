@@ -68,8 +68,8 @@ export default function AppSidebar() {
   const COLLAPSED_W = 60
 
   const ini = isConnected
-    ? (shortAddress?.replace('0x', '').slice(0, 2) || 'WL').toUpperCase()
-    : 'KT'
+    ? (shortAddress?.replace('0x', '').slice(0, 2) || 'VF').toUpperCase()
+    : 'V'
 
   const filteredSections = SECTIONS.map(sec => ({
     ...sec,
