@@ -26,6 +26,8 @@ const C = {
   blue: '#3b82f6', purple: '#8b5cf6',
 }
 
+const CARD_COLORS = [C.pink, C.teal, C.lavender, C.peach, C.ochre, '#2d6a4f']
+
 const INR = (n = 0) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
 
@@ -280,7 +282,7 @@ function SchedulePanel({ loan, schedule, onRefresh }) {
 }
 
 /* ── Loan Card ── */
-function LoanCard({ loan, onRefresh }) {
+function LoanCard({ loan, idx, onRefresh }) {
   const [tab, setTab] = useState('overview')  // overview | schedule | distribution
 
   const fundedPct = loan.funded_percentage || 0
@@ -293,35 +295,39 @@ function LoanCard({ loan, onRefresh }) {
     { key: 'schedule',     label: '📅 Schedule' },
     { key: 'distribution', label: '🏦 Lenders' },
   ]
+  const color = CARD_COLORS[idx % CARD_COLORS.length]
 
   return (
     <div style={{
-      background: C.surface0, border: `1px solid rgba(196,199,199,0.3)`,
-      borderRadius: 24, overflow: 'hidden', position: 'relative',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+      background: color, borderRadius: 24, overflow: 'hidden', position: 'relative',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.03)', color: C.white,
       transition: 'transform 0.25s',
     }}
     onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
     onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
     >
-      {/* Top accent bar */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 6, background: C.teal }} />
+      {/* Ghost icon */}
+      <div style={{ position: 'absolute', top: 0, right: 0, padding: 24, opacity: 0.15, fontSize: 120, lineHeight: 1, pointerEvents: 'none' }}>
+        {loan.purpose === 'Business' ? '💼' : loan.purpose === 'Education' ? '📚' : loan.purpose === 'Medical' ? '🏥' : '💡'}
+      </div>
       
       {/* Card Header */}
-      <div style={{ padding: '32px 32px 24px' }}>
+      <div style={{ padding: '32px 32px 24px', position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
           <div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: C.ink, marginBottom: 6, letterSpacing: '-0.02em' }}>
+            <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 6, letterSpacing: '-0.02em' }}>
               {loan.purpose || 'Loan'}
             </div>
-            <div style={{ fontSize: 14, color: C.secondary, fontWeight: 500 }}>
+            <div style={{ fontSize: 14, opacity: 0.9, fontWeight: 500 }}>
               {loan.duration_months} months • {loan.apr}% APR • {loan.credit_tier} tier
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
-            <StatusBadge status={loan.status} />
+            <span style={{ fontSize: 11, fontWeight: 800, padding: '4px 12px', borderRadius: 999, background: 'rgba(255,255,255,0.2)', textTransform: 'uppercase' }}>
+              {loan.status}
+            </span>
             {loan.next_due_date && loan.status === 'active' && (
-              <div style={{ fontSize: 12, color: C.ochre, fontWeight: 700 }}>
+              <div style={{ fontSize: 12, opacity: 0.9, fontWeight: 700 }}>
                 Next EMI: {loan.next_due_date}
               </div>
             )}
@@ -329,15 +335,15 @@ function LoanCard({ loan, onRefresh }) {
         </div>
 
         {/* Key numbers row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 24, padding: '20px', background: C.surface, borderRadius: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 24, padding: '20px', background: 'rgba(255,255,255,0.15)', borderRadius: 16 }}>
           {[
-            { label: 'Loan Amount',  value: INR(loan.amount_inr),   color: C.ink },
-            { label: 'Monthly EMI',  value: INR(loan.emi_inr),      color: C.teal },
-            { label: 'Remaining',    value: INR(loan.remaining_inr), color: C.error },
+            { label: 'Loan Amount',  value: INR(loan.amount_inr) },
+            { label: 'Monthly EMI',  value: INR(loan.emi_inr) },
+            { label: 'Remaining',    value: INR(loan.remaining_inr) },
           ].map(m => (
             <div key={m.label} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 22, fontWeight: 800, color: m.color, letterSpacing: '-0.02em' }}>{m.value}</div>
-              <div style={{ fontSize: 12, color: C.secondary, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', marginTop: 4 }}>{m.label}</div>
+              <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em' }}>{m.value}</div>
+              <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', marginTop: 4 }}>{m.label}</div>
             </div>
           ))}
         </div>
@@ -346,21 +352,25 @@ function LoanCard({ loan, onRefresh }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
           {/* Funding progress */}
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 600, color: C.secondary, marginBottom: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 600, opacity: 0.9, marginBottom: 8 }}>
               <span>Funded by {loan.funder_count} lenders</span>
-              <span style={{ color: C.ink, fontWeight: 800 }}>{fundedPct}%</span>
+              <span style={{ fontWeight: 800 }}>{fundedPct}%</span>
             </div>
-            <ProgressBar pct={fundedPct} color={C.ochre} />
+            <div style={{ height: 6, background: 'rgba(255,255,255,0.3)', borderRadius: 99, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${fundedPct}%`, background: C.white, borderRadius: 99 }} />
+            </div>
           </div>
 
           {/* Repayment progress */}
           {loan.total_repayable_inr > 0 ? (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 600, color: C.secondary, marginBottom: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 600, opacity: 0.9, marginBottom: 8 }}>
                 <span>Repaid {loan.paid_installments}/{loan.duration_months} EMIs</span>
-                <span style={{ color: C.green, fontWeight: 800 }}>{repaidPct}%</span>
+                <span style={{ fontWeight: 800 }}>{repaidPct}%</span>
               </div>
-              <ProgressBar pct={repaidPct} color={C.green} />
+              <div style={{ height: 6, background: 'rgba(255,255,255,0.3)', borderRadius: 99, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${repaidPct}%`, background: C.white, borderRadius: 99 }} />
+              </div>
             </div>
           ) : <div />}
         </div>
@@ -368,32 +378,30 @@ function LoanCard({ loan, onRefresh }) {
 
       {/* Tab nav */}
       <div style={{
-        display: 'flex', borderBottom: `1px solid rgba(196,199,199,0.3)`, borderTop: `1px solid rgba(196,199,199,0.3)`,
-        background: C.surface,
+        display: 'flex', background: 'rgba(0,0,0,0.1)', position: 'relative', zIndex: 1
       }}>
         {tabs.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
             flex: 1, padding: '16px 8px', border: 'none', cursor: 'pointer',
-            background: tab === t.key ? C.surface0 : 'transparent', fontSize: 14, fontWeight: 700,
-            color: tab === t.key ? C.ink : C.secondary,
-            borderBottom: tab === t.key ? `2px solid ${C.ink}` : '2px solid transparent',
+            background: tab === t.key ? C.surface0 : 'transparent', fontSize: 14, fontWeight: 800,
+            color: tab === t.key ? C.ink : C.white,
             transition: 'all 0.15s',
           }}>{t.label}</button>
         ))}
       </div>
 
       {/* Tab body */}
-      <div style={{ padding: '32px' }}>
+      <div style={{ padding: '32px', background: C.surface0, color: C.ink, position: 'relative', zIndex: 1 }}>
         {tab === 'overview' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {[
               { label: 'Total Borrowed',      value: INR(loan.amount_inr) },
               { label: 'Total Funded So Far', value: INR(loan.funded_inr) },
-              { label: 'Monthly EMI',         value: INR(loan.emi_inr), accent: C.teal },
+              { label: 'Monthly EMI',         value: INR(loan.emi_inr), accent: color },
               { label: 'Total Repayable',     value: INR(loan.total_repayable_inr) },
               { label: 'Total Interest',      value: INR(loan.total_interest_inr), accent: C.error },
               { label: 'Already Repaid',      value: INR(loan.repaid_inr), accent: C.green },
-              { label: 'Balance Remaining',   value: INR(loan.remaining_inr), accent: C.ink },
+              { label: 'Balance Remaining',   value: INR(loan.remaining_inr), accent: color },
               { label: 'Lenders',             value: loan.funder_count + ' funders' },
               { label: 'Duration',            value: `${loan.duration_months} months (${loan.paid_installments} paid)` },
               { label: 'Interest Rate',       value: `${loan.apr}% per annum` },
@@ -403,7 +411,7 @@ function LoanCard({ loan, onRefresh }) {
                 padding: '14px 0', borderBottom: i < 9 ? `1px solid rgba(196,199,199,0.2)` : 'none',
               }}>
                 <span style={{ fontSize: 14, color: C.secondary, fontWeight: 500 }}>{row.label}</span>
-                <span style={{ fontSize: 15, fontWeight: 700, color: row.accent || C.ink }}>{row.value}</span>
+                <span style={{ fontSize: 15, fontWeight: 800, color: row.accent || C.ink }}>{row.value}</span>
               </div>
             ))}
 
@@ -568,8 +576,8 @@ export default function MyLoans() {
         {/* ── Loan cards ── */}
         {isConnected && !loading && loans.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-            {loans.map(loan => (
-              <LoanCard key={loan.id} loan={loan} onRefresh={load} />
+            {loans.map((loan, idx) => (
+              <LoanCard key={loan.id} loan={loan} idx={idx} onRefresh={load} />
             ))}
           </div>
         )}
