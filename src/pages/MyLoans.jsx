@@ -6,7 +6,16 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWallet } from '../context/WalletContext.jsx'
-import { getMyLoans } from '../api/index.js'
+import { getMyLoans, createPaymentOrder, verifyPayment } from '../api/index.js'
+
+const loadRazorpay = () => new Promise((resolve) => {
+  if (window.Razorpay) return resolve(true)
+  const script = document.createElement('script')
+  script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+  script.onload = () => resolve(true)
+  script.onerror = () => resolve(false)
+  document.body.appendChild(script)
+})
 
 /* ── Design Tokens ── */
 const C = {
@@ -135,12 +144,64 @@ function DistributionPanel({ distribution, emi_inr }) {
 }
 
 /* ── EMI Schedule Panel ── */
-function SchedulePanel({ schedule }) {
+function SchedulePanel({ loan, schedule, onRefresh }) {
   const [expanded, setExpanded] = useState(false)
+  const [paying, setPaying] = useState(null)
+
   if (!schedule || schedule.length === 0) {
     return <div style={{ color: C.secondary, fontSize: 14, textAlign: 'center', padding: '30px 0' }}>No schedule — loan not yet funded.</div>
   }
   const shown = expanded ? schedule : schedule.slice(0, 4)
+
+  const handlePayEMI = async (s) => {
+    setPaying(s.installment)
+    try {
+      const loaded = await loadRazorpay()
+      if (!loaded) throw new Error('Razorpay SDK failed to load')
+
+      const orderRes = await createPaymentOrder({
+        loan_id: loan.id,
+        amount_inr: s.emi_inr,
+        purpose: `EMI Payment ${s.installment}/${loan.duration_months}`
+      })
+      
+      const { id: order_id, amount, currency } = orderRes.data || orderRes
+
+      const options = {
+        key: 'rzp_test_StnL6XnaTW3iLy',
+        amount: amount.toString(),
+        currency: currency,
+        name: 'VeilFi',
+        description: `EMI ${s.installment} for ${loan.purpose}`,
+        order_id: order_id,
+        handler: async (response) => {
+          try {
+            await verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              loan_id: loan.id,
+              lender_address: 'EMI_REPAYMENT'
+            })
+            alert('EMI paid successfully!')
+            if (onRefresh) onRefresh()
+          } catch (err) {
+            alert('Verification failed: ' + (err.response?.data?.detail || err.message))
+          }
+        },
+        prefill: { name: 'Borrower', email: 'borrower@veilfi.io', contact: '9999999999' },
+        theme: { color: C.teal }
+      }
+
+      const rzp = new window.Razorpay(options)
+      rzp.on('payment.failed', (resp) => { alert(resp.error.description) })
+      rzp.open()
+    } catch (e) {
+      alert(e.response?.data?.detail || e.message || 'Payment initiation failed')
+    } finally {
+      setPaying(null)
+    }
+  }
 
   return (
     <div>
@@ -148,9 +209,9 @@ function SchedulePanel({ schedule }) {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
           <thead>
             <tr style={{ borderBottom: `2px solid rgba(196,199,199,0.3)` }}>
-              {['#', 'Due Date', 'EMI', 'Principal', 'Interest', 'Balance', 'Status'].map(h => (
+              {['#', 'Due Date', 'EMI', 'Principal', 'Interest', 'Balance', 'Status', 'Action'].map(h => (
                 <th key={h} style={{
-                  padding: '12px 16px', textAlign: h === '#' || h === 'Status' ? 'center' : 'right',
+                  padding: '12px 16px', textAlign: h === '#' || h === 'Status' ? 'center' : (h === 'Action' ? 'center' : 'right'),
                   fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: C.secondary,
                   ...(h === 'Due Date' ? { textAlign: 'left' } : {})
                 }}>{h}</th>
@@ -176,6 +237,21 @@ function SchedulePanel({ schedule }) {
                       borderRadius: 999, background: si.bg, color: si.color, textTransform: 'uppercase'
                     }}>{si.label}</span>
                   </td>
+                  <td style={{ padding: '16px 16px', textAlign: 'center' }}>
+                    {s.status !== 'paid' && loan.status === 'active' && (
+                      <button 
+                        onClick={() => handlePayEMI(s)}
+                        disabled={paying === s.installment}
+                        style={{
+                          padding: '6px 12px', background: C.teal, color: C.white,
+                          border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                          cursor: paying === s.installment ? 'not-allowed' : 'pointer',
+                          opacity: paying === s.installment ? 0.7 : 1
+                        }}>
+                        {paying === s.installment ? 'Wait...' : 'Pay EMI 💳'}
+                      </button>
+                    )}
+                  </td>
                 </tr>
               )
             })}
@@ -200,7 +276,7 @@ function SchedulePanel({ schedule }) {
 }
 
 /* ── Loan Card ── */
-function LoanCard({ loan }) {
+function LoanCard({ loan, onRefresh }) {
   const [tab, setTab] = useState('overview')  // overview | schedule | distribution
 
   const fundedPct = loan.funded_percentage || 0
@@ -338,7 +414,7 @@ function LoanCard({ loan }) {
         )}
 
         {tab === 'schedule' && (
-          <SchedulePanel schedule={loan.schedule} />
+          <SchedulePanel loan={loan} schedule={loan.schedule} onRefresh={onRefresh} />
         )}
 
         {tab === 'distribution' && (
@@ -489,7 +565,7 @@ export default function MyLoans() {
         {isConnected && !loading && loans.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
             {loans.map(loan => (
-              <LoanCard key={loan.id} loan={loan} />
+              <LoanCard key={loan.id} loan={loan} onRefresh={load} />
             ))}
           </div>
         )}
