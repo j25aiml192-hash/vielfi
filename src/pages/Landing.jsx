@@ -55,27 +55,89 @@ function Pillar({ bg, icon, title, desc }) {
   )
 }
 
-function Step({ num, icon, title, desc }) {
+/* Golden ratio: φ = 1.618 — used for spacing, sizing, font scales */
+const PHI = 1.618
+function Step({ num, icon, title, desc, accent }) {
   return (
-    <div style={{
-      display: 'flex', gap: 32, alignItems: 'flex-start',
-      background: C.surface, border: `1px solid ${C.border}`,
-      borderRadius: 16, padding: '28px 32px',
-      transition: 'transform 0.2s',
-    }}
-    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.01)'}
-    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+    <div
+      className="hiw-step"
+      style={{
+        position: 'relative',
+        background: 'rgba(255,255,255,0.78)',
+        backdropFilter: 'blur(18px)',
+        WebkitBackdropFilter: 'blur(18px)',
+        border: '1px solid rgba(201,149,42,0.18)',
+        borderRadius: Math.round(16 * PHI) + 'px',  /* 26px */
+        padding: `${Math.round(20 * PHI)}px ${Math.round(20 * PHI)}px`,  /* 32px */
+        boxShadow: '0 4px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)',
+        overflow: 'hidden',
+        transition: 'transform 0.25s, box-shadow 0.25s',
+        display: 'flex', flexDirection: 'column', gap: 20,
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.transform = 'translateY(-4px)'
+        e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.1), 0 0 0 1.5px rgba(201,149,42,0.3)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.transform = 'translateY(0)'
+        e.currentTarget.style.boxShadow = '0 4px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)'
+      }}
     >
+      {/* Corner glow */}
+      <div style={{ position:'absolute', top:-30, right:-30, width:100, height:100, borderRadius:'50%', background:'radial-gradient(circle, rgba(201,149,42,0.10) 0%, transparent 70%)', pointerEvents:'none' }} />
+
+      {/* Step number — golden ratio sized */}
       <div style={{
-        width: 64, height: 64, flexShrink: 0, borderRadius: 16,
-        background: C.white, border: `1px solid ${C.border}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 26, boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-      }}>{icon}</div>
-      <div style={{ paddingTop: 6 }}>
-        <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', color: C.ink, marginBottom: 6 }}>{num}. {title}</div>
-        <div style={{ fontSize: 15, color: C.secondary, lineHeight: 1.6 }}>{desc}</div>
+        position: 'absolute', top: 18, right: 22,
+        fontSize: Math.round(13 * PHI * PHI) + 'px',  /* ~34px */
+        fontWeight: 900, lineHeight: 1,
+        color: 'rgba(201,149,42,0.12)',
+        letterSpacing: '-0.04em', userSelect: 'none',
+        fontFamily: "'Inter', sans-serif",
+      }}>{String(num).padStart(2,'0')}</div>
+
+      {/* Icon badge */}
+      <div style={{ display:'flex', alignItems:'center', gap: Math.round(8 * PHI) + 'px' }}>
+        <div style={{
+          width: Math.round(24 * PHI) + 'px',   /* ~39px */
+          height: Math.round(24 * PHI) + 'px',
+          borderRadius: Math.round(8 * PHI) + 'px',  /* ~13px */
+          background: '#0a0a0a',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 18, flexShrink: 0,
+          boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+        }}>{icon}</div>
+        <div style={{
+          fontSize: 10, fontWeight: 800, letterSpacing: '0.14em',
+          color: '#c9952a', textTransform: 'uppercase',
+          background: 'rgba(201,149,42,0.10)',
+          border: '1px solid rgba(201,149,42,0.25)',
+          borderRadius: 999, padding: '3px 10px',
+        }}>Step {num}</div>
       </div>
+
+      {/* Text */}
+      <div>
+        <div style={{
+          fontSize: Math.round(10 * PHI) + 'px',  /* ~16px */
+          fontWeight: 800, letterSpacing: '-0.02em',
+          color: '#0a0a0a', marginBottom: Math.round(4 * PHI) + 'px',
+          lineHeight: 1.25,
+        }}>{title}</div>
+        <div style={{
+          fontSize: Math.round(8 * PHI) + 'px',  /* ~13px */
+          color: '#7a6f5e', lineHeight: 1.618,  /* φ itself as line-height */
+        }}>{desc}</div>
+      </div>
+
+      {/* Gold bottom accent line */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0,
+        width: `${(num / 4) * 100}%`,
+        height: 3, borderRadius: '0 2px 0 0',
+        background: 'linear-gradient(90deg,#c9952a,#e8c05a)',
+        transition: 'width 0.4s ease',
+      }} />
     </div>
   )
 }
@@ -137,18 +199,55 @@ export default function Landing() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section style={{ maxWidth: 800, margin: '0 auto', padding: '80px 64px 0' }}>
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <h2 style={{ fontSize: 40, fontWeight: 700, letterSpacing: '-0.04em', margin: '0 0 12px' }}>How it Works</h2>
-          <p style={{ fontSize: 15, color: C.secondary }}>A streamlined process designed for institutional efficiency.</p>
+      <section style={{ maxWidth: 1100, margin: '0 auto', padding: '100px 64px 0' }}>
+        <style>{`
+          .hiw-step { cursor: default; }
+          @keyframes hiwLine { from{width:0} to{width:100%} }
+        `}</style>
+
+        {/* Header — golden ratio font scale */}
+        <div style={{ textAlign:'center', marginBottom: Math.round(32 * PHI) + 'px' }}>
+          <div style={{ fontSize:11, fontWeight:800, letterSpacing:'0.16em', color:'#c9952a', textTransform:'uppercase', marginBottom:14 }}>✦ Process</div>
+          <h2 style={{
+            fontSize: 'clamp(32px, 4vw, ' + Math.round(26 * PHI) + 'px)',  /* ~42px */
+            fontWeight: 900, letterSpacing: '-0.04em',
+            margin: '0 0 14px', color: '#0a0a0a', lineHeight: 1.1,
+          }}>How it <span style={{ background:'linear-gradient(135deg,#c9952a,#e8c05a)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>Works</span></h2>
+          <p style={{ fontSize: 15, color:'#7a6f5e', maxWidth:480, margin:'0 auto', lineHeight: PHI }}>A streamlined process designed for institutional efficiency and scale.</p>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, position: 'relative' }}>
-          {/* connector line */}
-          <div style={{ position: 'absolute', left: 48, top: 60, bottom: 60, width: 2, background: C.border }} />
-          <Step num={1} icon="👤" title="Registration"   desc="Complete our institutional KYC/AML onboarding process swiftly through our secure portal." />
-          <Step num={2} icon="✅" title="Verification"   desc="Our team reviews your profile to unlock access to appropriate credit facilities and deal rooms." />
-          <Step num={3} icon="📊" title="Allocation"     desc="Deploy capital into carefully vetted opportunities that match your risk-return requirements." />
-          <Step num={4} icon="📈" title="Monitoring"     desc="Track performance, receive distributions, and monitor covenant compliance in real-time." />
+
+        {/* 2×2 golden-ratio grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: `${PHI}fr 1fr`,   /* 1.618 : 1 ratio */
+          gridTemplateRows: 'auto auto',
+          gap: 20,
+        }}>
+          <Step num={1} icon="👤" title="Registration"  desc="Complete our institutional KYC/AML onboarding process swiftly through our secure portal." />
+          <Step num={2} icon="✅" title="Verification"  desc="Our team reviews your profile to unlock access to appropriate credit facilities and deal rooms." />
+          <Step num={3} icon="📊" title="Allocation"    desc="Deploy capital into carefully vetted opportunities that match your risk-return requirements." />
+          <Step num={4} icon="📈" title="Monitoring"    desc="Track performance, receive distributions, and monitor covenant compliance in real-time." />
+        </div>
+
+        {/* Connecting progress bar */}
+        <div style={{ marginTop:36, display:'flex', alignItems:'center', gap:0, position:'relative' }}>
+          {[1,2,3,4].map((n,i) => (
+            <>
+              <div key={n} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, flex:'none' }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius:'50%',
+                  background: '#0a0a0a',
+                  border: '2px solid rgba(201,149,42,0.5)',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  fontSize:12, fontWeight:800, color:'#fff',
+                  boxShadow:'0 2px 8px rgba(0,0,0,0.15)',
+                }}>{n}</div>
+              </div>
+              {i < 3 && (
+                <div key={`line-${n}`} style={{ flex:1, height:2, background:'linear-gradient(90deg,rgba(201,149,42,0.6),rgba(201,149,42,0.15))' }} />
+              )}
+            </>
+          ))}
         </div>
       </section>
 
